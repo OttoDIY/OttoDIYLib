@@ -1,8 +1,8 @@
 //----------------------------------------------------------------
-//-- OTTO version 9 
+//-- OTTO mouth version 9 
 //-----------------------------------------------------------------
-#ifndef Otto9_mouths_h
-#define Otto9_mouths_h
+#ifndef Otto_mouth9_h
+#define Otto_mouth9_h
 
 const int NUMBER_OF_ELEMENTS = 31;
 const unsigned long int Mouthtable[NUMBER_OF_ELEMENTS] PROGMEM = {

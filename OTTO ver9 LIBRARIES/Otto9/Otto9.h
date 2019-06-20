@@ -11,8 +11,8 @@
 
 #include "BatReader2.h"
 #include "OTTOMatrix.h"
-#include "Otto9_mouths.h"
-#include "Otto_sounds.h"
+#include "Otto_mouth9.h"
+#include "Otto_sound9.h"
 #include "Otto_gestures9.h"
 #include "TimerFreeTone.h"
 
