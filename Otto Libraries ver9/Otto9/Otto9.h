@@ -7,14 +7,14 @@
 #include <Servo.h>
 #include <Oscillator.h>
 #include <EEPROM.h>
-#include "US.h"
+#include <US.h>
 
-#include "BatReader2.h"
-#include "OTTOMatrix.h"
+#include "BatReader9.h"
+#include "Otto_Matrix9.h"
 #include "Otto_mouth9.h"
 #include "Otto_sound9.h"
 #include "Otto_gestures9.h"
-#include "TimerFreeTone.h"
+#include <TimerFreeTone.h>
 
 //-- Constants
 #define FORWARD     1
@@ -34,7 +34,7 @@ class Otto9
 
     //-- Otto initialization
     void init(int YL, int YR, int RL, int RR, bool load_calibration, int NoiseSensor, int Buzzer, int USTrigger, int USEcho);
-
+    void initDC(int NoiseSensor, int Buzzer, int USTrigger, int USEcho);
     //-- Attach & detach functions
     void attachServos();
     void detachServos();
@@ -95,10 +95,10 @@ class Otto9
     void initBatLevel(int batteryPIN);
   private:
    
-    BatReader2 battery;
+    BatReader9 battery;
     Oscillator servo[4];
     US us;
-    OTTOMatrix ledmatrix;
+    Otto_Matrix ledmatrix;
     int servo_pins[4];
     int servo_trim[4];
     int servo_position[4];

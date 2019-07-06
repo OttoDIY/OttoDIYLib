@@ -7,9 +7,9 @@
 
 
 #include "Arduino.h"
-#include "OTTOMatrix.h"
+#include "Otto_Matrix9.h"
 
-OTTOMatrix::OTTOMatrix() 
+Otto_Matrix::Otto_Matrix() 
 {
 	//data = _data;
 	//load = _load;
@@ -19,7 +19,7 @@ OTTOMatrix::OTTOMatrix()
 		//buffer[i] = 0;
 }
 
-void OTTOMatrix::init(byte _data, byte _load, byte _clock, byte _num, int _rotation)
+void Otto_Matrix::init(byte _data, byte _load, byte _clock, byte _num, int _rotation)
 {
    data = _data;
   load = _load;
@@ -47,12 +47,12 @@ void OTTOMatrix::init(byte _data, byte _load, byte _clock, byte _num, int _rotat
 	setIntensity(0x0f);    // the first 0x0f is the value you can set
 }
 
-void OTTOMatrix::setIntensity(byte intensity)
+void Otto_Matrix::setIntensity(byte intensity)
 {
 	setCommand(max7219_reg_intensity, intensity);
 }
 
-void OTTOMatrix::clearMatrix()
+void Otto_Matrix::clearMatrix()
 {
 	for (int i=0; i<8; i++) 
 		setColumnAll(i,0);
@@ -61,7 +61,7 @@ void OTTOMatrix::clearMatrix()
 		buffer[i] = 0;
 }
 
-void OTTOMatrix::setCommand(byte command, byte value)
+void Otto_Matrix::setCommand(byte command, byte value)
 {
 	digitalWrite(load, LOW);    
 	for (int i=0; i<num; i++) 
@@ -74,7 +74,7 @@ void OTTOMatrix::setCommand(byte command, byte value)
 }
 
 
-void OTTOMatrix::setColumn(byte col, byte value)
+void Otto_Matrix::setColumn(byte col, byte value)
 {
 	int n = col / 8;
 	int c = col % 8;
@@ -98,7 +98,7 @@ void OTTOMatrix::setColumn(byte col, byte value)
 	buffer[col] = value;
 }
 
-void OTTOMatrix::setColumnAll(byte col, byte value)
+void Otto_Matrix::setColumnAll(byte col, byte value)
 {
 	digitalWrite(load, LOW);    
 	for (int i=0; i<num; i++) 
@@ -111,7 +111,7 @@ void OTTOMatrix::setColumnAll(byte col, byte value)
 	digitalWrite(load, HIGH);
 }
 
-void OTTOMatrix::setDot(byte col, byte row, byte value)
+void Otto_Matrix::setDot(byte col, byte row, byte value)
 {
     bitWrite(buffer[col], row, value);
 
@@ -223,7 +223,7 @@ void MaxMatrix::shiftDown(bool rotate)
 }
 */
 // rutina para Zowi, para meter sus caritas en la matriz de 8
-void OTTOMatrix::writeFull(unsigned long value) {
+void Otto_Matrix::writeFull(unsigned long value) {
   if (rotation == 1) {
 	for (int r=0; r<5;r++){
             for (int c=0; c<6; c++){

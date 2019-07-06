@@ -3,8 +3,8 @@
 * @author Raul de Pablos Martin
 * Adapted for OTTO
 ******************************************************************************/
-#ifndef __BATREADER2_H__
-#define __BATREADER2_H__
+#ifndef __BATREADER9_H__
+#define __BATREADER9_H__
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
@@ -23,7 +23,7 @@
 #define SLOPE	100/(BAT_MAX - BAT_MIN)
 #define OFFSET	(100*BAT_MIN)/(BAT_MAX - BAT_MIN)
 
-class BatReader2
+class BatReader9
 {
 public:
 	////////////////////////////

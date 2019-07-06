@@ -10,8 +10,8 @@
  * Adapted for OTTO version 9 use
  */
  
-#include "OTTOeyeMatrix.h"
-#include "OTTOeyeMatrix.h"
+#include "OttoEyeMATRIX.h"
+#include "OttoEyeMATRIX.h"
 #include "Otto_gestures9.h"
 
 /**

@@ -41,7 +41,22 @@ void Otto9::init(int YL, int YR, int RL, int RR, bool load_calibration, int Nois
   pinMode(Buzzer,OUTPUT);
   pinMode(NoiseSensor,INPUT);
 }
+////////////////////////////////////////////////////////////////////////////
+void Otto9::initDC(int NoiseSensor, int Buzzer, int USTrigger, int USEcho) {
 
+  isOttoResting=false;
+
+  //US sensor init with the pins:
+  us.init(USTrigger, USEcho);
+
+  //Buzzer & noise sensor pins: 
+  pinBuzzer = Buzzer;
+  pinNoiseSensor = NoiseSensor;
+
+  pinMode(Buzzer,OUTPUT);
+  pinMode(NoiseSensor,INPUT);
+}
+///////////////////////////////////////////////////////
 void Otto9::initMATRIX(int DIN, int CS, int CLK, int rotate){
 ledmatrix.init( DIN, CS, CLK, 1, rotate);   // set up Matrix display
 }

@@ -5,8 +5,8 @@
  * Adapted for OTTO version 9 use
  */
 
-#ifndef _OTTOMatrix_H_
-#define _OTTOMatrix_H_
+#ifndef _Otto_Matrix9_H_
+#define _Otto_Matrix9_H_
 
 #include "Arduino.h"
 
@@ -25,7 +25,7 @@
 #define max7219_reg_shutdown    0x0c
 #define max7219_reg_displayTest 0x0f
 
-class OTTOMatrix
+class Otto_Matrix
 {
   private:
     byte data;
@@ -37,7 +37,7 @@ class OTTOMatrix
     void reload();
 	  char rotation2;
   public:
-    OTTOMatrix();
+    Otto_Matrix();
     
     void init(byte data, byte load, byte clock, byte num, int rotation);
     void clearMatrix();

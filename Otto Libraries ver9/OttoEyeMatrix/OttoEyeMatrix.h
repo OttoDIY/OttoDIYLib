@@ -10,8 +10,8 @@
  * Adapted for OTTO version 9 use
  */
  
-#ifndef _OTTOeyeMATRIX_H_
-#define _OTTOeyeMATRIX_H_
+#ifndef _OttoEyeMATRIX_H_
+#define _OttoEyeMATRIX_H_
 
 #include <Arduino.h>
 #include <avr/interrupt.h>
