@@ -17,9 +17,9 @@ DIY | Otto9
 DIY+  | Otto9
 Humanoid  | Otto9
 Q (Quad) | Quad
-X(explorer)  | SMARS
-R (Rover)  | SMARS
-W (Wheels)  | SMARS
+X(explorer)  | Otto9
+R (Rover)  | Otto9
+W (Wheels)  | Otto9
 
 To resolve the need to maintain so many different deployments/versions here in this centralized repository, in order to maintin consistency along the Otto remixes we stablished a naming structure: 
 Otto_(followed by the component name and version) for example:
