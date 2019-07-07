@@ -15,7 +15,7 @@ Robot  | Library can use
 ------------- | -------------
 DIY | Otto9
 DIY+  | Otto9
-Humanoid  | Otto9
+Humanoid  | (in progress) Otto9
 Q (Quad) | Quad
 X(explorer)  | Otto9
 R (Rover)  | Otto9
