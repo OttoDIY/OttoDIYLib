@@ -8,21 +8,34 @@ Other ways use .zip installation through menu or even automatic updates online(i
 ﻿https://www.arduino.cc/en/Guide/Libraries﻿
  
 ## Compatibility
-Otto Core Libraries is the code to be deployed to the user's Documents\Arduino\libraries directory, including: BatReader, EnableInterrupt, LedMatrix, Oscillator, Otto, OttoSerialCommand
-Different and similar versions of Otto Core Libraries are currently included in multiple repositories and sub-projects, basic DIY, +(PLUS), Humanoid, X(explorer),R (Rover), W (Wheels), Q (Quad) To resolve the need to maintain so many different deployments/versions here in this centralized repository, in order to maintin consistency along the Otto remixes we stablished a naming structure: 
+Otto Core Libraries is the code to be deployed to the user's Documents\Arduino\libraries directory, including: BatReader, EnableInterrupt, MaxMatrix, Oscillator, Otto, OttoSerialCommand
+Different and similar versions of Otto Core Libraries are currently included in multiple repositories and sub-projects:
+
+Robot  | Library can use
+------------- | -------------
+DIY | Otto9
+DIY+  | Otto9
+Humanoid  | Otto9
+Q (Quad) | Quad
+X(explorer)  | SMARS
+R (Rover)  | SMARS
+W (Wheels)  | SMARS
+
+To resolve the need to maintain so many different deployments/versions here in this centralized repository, in order to maintin consistency along the Otto remixes we stablished a naming structure: 
 Otto_(followed by the component name and version) for example:
-Otto_9 contains all the main functions
-Otto_gestures9 contains all the gestures functions
-Otto_mouth9	contains all the mouth functions
-Otto_sound9 contains all the sound functions
-Otto_Matrix9 contains all the matrix functions
 
-Complementary libraries like Ultrasound, Interrupts and BatReader are independent of Otto(they can work with other projects) therefore are just named like they are:
-US contains the functions of the ultrasound
-Bat Reader contains the functions to meassure the battery.
-Adafruit_NeoPixel external library from Adafruit to control NeoPixel LEDs
+* Otto_9 contains all the main functions and is the version 9
+* Otto_gestures9 contains all the gestures functions
+* Otto_mouth9	contains all the mouth functions
+* Otto_sound9 contains all the sound functions
+* Otto_Matrix9 contains all the matrix functions
 
-Project Releases could include a (zipped) version of the Core Libraries that work with that release.
+Complementary libraries like Ultrasound, Interrupts and BatReader are independent of Otto(they can work with other projects) therefore are just named like they are, for example:
+* US contains the functions of the ultrasound
+* Bat Reader contains the functions to meassure the battery.
+* Adafruit_NeoPixel external library from Adafruit to control NeoPixel LEDs
+
+Project releases could include a (zipped) version of the Core Libraries that work with that release.
 If a project needs a change that should not be part of the Core Libraries, then that project repository may be a good home for those changes.
 Reference Information for Arduino Libraries:
 ﻿https://www.arduino.cc/en/Reference/APIStyleGuide﻿
@@ -34,9 +47,10 @@ Reference Information for Arduino Libraries:
  <img src="https://github.com/OttoDIY/Libraries/blob/master/OttoDIY_wirings.jpg" width="500" align="center">
  
  ## Contribute
- There are many ways you can contribute to this project:
-1. Test and if find a problem post an issue.
-2. Helps us solve bugs by making pull request of the changes.
+ There are 3 ways you can contribute to this project:
+1. Test and if find a problem then post an issue.
+2. Helps us solve the issues or other bugs by making pull request of the changes.
 3. Bring missing libraries from other Otto remixes here.
 
 Just make sure to keep consistency in the naming and make a record of the change or improvement made.
+Welcome to the Otto code development team!
