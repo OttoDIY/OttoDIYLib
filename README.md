@@ -44,7 +44,7 @@ Reference Information for Arduino Libraries:
  
  ## Wirings and Electornic diagrams:
  It vary pero Otto but we will follow these standard connections
- <img src="https://github.com/OttoDIY/Libraries/blob/master/OttoDIY_wirings.jpg" width="500" align="center">
+ <img src="https://github.com/OttoDIY/Libraries/blob/master/OttoDIY_ALLwirings.png" width="500" align="center">
  
  ## Contribute
  There are 3 ways you can contribute to this project:
