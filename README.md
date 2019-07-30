@@ -47,10 +47,12 @@ Reference Information for Arduino Libraries:
  <img src="https://github.com/OttoDIY/Libraries/blob/master/OttoDIY_ALLwirings.png" width="500" align="center">
  
  ## Contribute
- There are 3 ways you can contribute to this project:
+ Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
 1. Test and if find a problem then post an issue.
-2. Helps us solve the issues or other bugs by making pull request of the changes.
+2. Helps us solve the issues or other bugs by commenting
 3. Bring missing libraries from other Otto remixes here.
+You can do this [basically by forking](https://help.github.com/en/articles/fork-a-repo), committing modifications and then [pulling requests](https://help.github.com/en/articles/about-pull-requests). Please add a change log and your contact into file header.
 
+Thanks for your contribution.
 Just make sure to keep consistency in the naming and make a record of the change or improvement made.
 Welcome to the Otto code development team!
