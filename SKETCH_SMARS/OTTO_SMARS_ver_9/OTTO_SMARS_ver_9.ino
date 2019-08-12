@@ -12,7 +12,6 @@
 // -- ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen OCT 2018
 // -- Added PIN definitions for ease of use: Jason Snow NOV 2018
 // -- ADDED NEOPIXEL: Paul Van De Veen NOV 2018
-// -- ADDED Eye Matrix Progmem and control: Jason Snow NOV 2018
 //-------------------------------------------------------------------
 // Otto libraries Otto version 9        June 2019
 //-------------------------------------------------------------------
@@ -29,9 +28,6 @@ OttoSerialCommand SCmd;  // The SerialCommand object
 //-- Otto Library version 2
 #include <Otto9.h>
 Otto9 Otto;  //This is Otto!
-// -- library to handle eye MATRIX if installed
-#include <OttoEyeMatrix.h>
-
 //---------------------------------------------------------
 //--Configure the pins where the motor drivers are attached
 /*
@@ -69,11 +65,6 @@ boolean enableRGB = false;    // SET TO FALSE IF NOT USING THIS OPTION
 #define NeopixelRGB_PIN  12 // NEOPIXEL pin   DIGITAL PIN (12)
 #define NUMPIXELS       1   // There is only one Neopixel use in MY Otto, chnage for more than 1
 Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NEO_RGB + NEO_KHZ800);
-// EYE MATRIX PINs   /////////////////////////////////////////////////////////////////////
-boolean enableEYES = false;    // SET TO FALSE IF NOT USING THIS OPTION
-#define EYE_CLK    11   //CLK pin   
-#define EYE_DIN    10   //DIN pin   
-OTTOeyeMatrix ledMx(EYE_CLK,EYE_DIN);
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -148,10 +139,6 @@ void setup() {
   NeopixelLed.begin();
   NeopixelLed.show(); // Initialize all pixels to 'off'
   NeopixelLed.setBrightness(64); // Op Brightness 
-  }
-  if (enableEYES == true){
-  ledMx.setBrightness(2);
-  ledMx.setColorIndex(1);
   }
   //Setup callbacks for SerialCommand commands
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck

@@ -13,6 +13,7 @@
 // -- Added PIN definitions for ease of use: Jason Snow NOV 2018
 // -- ADDED NEOPIXEL: Paul Van De Veen NOV 2018
 // -- ADDED Eye Matrix Progmem and control: Jason Snow NOV 2018
+// -- REMOVED Eye Matrix Progmem and control: Jason Snow AUG 2019
 //-------------------------------------------------------------------
 // Otto libraries - Otto biped version 9        July 2019
 // some of these functions will need a good power source such as a LIPO battery
@@ -28,8 +29,6 @@ OttoSerialCommand SCmd;  // The SerialCommand object
 //-- Otto Library version 9
 #include <Otto9.h>
 Otto9 Otto;  //This is Otto!
-// -- library to handle eye MATRIX if installed
-#include <OttoEyeMatrix.h>
 
 //---------------------------------------------------------
 //-- First step: Configure the pins where the servos are attached
@@ -70,11 +69,6 @@ boolean enableRGB = false;    // SET TO FALSE IF NOT USING THIS OPTION
 #define NeopixelRGB_PIN  12 // NEOPIXEL pin   DIGITAL PIN (12)
 #define NUMPIXELS       1   // There is only one Neopixel use in MY Otto, chnage for more than 1
 Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NEO_RGB + NEO_KHZ800);
-// EYE MATRIX PINs   /////////////////////////////////////////////////////////////////////
-boolean enableEYES = false;    // SET TO FALSE IF NOT USING THIS OPTION - option to be available from OTTO website
-#define EYE_CLK    11   //CLK pin   (11)
-#define EYE_DIN    10   //DIN pin   (10)
-OTTOeyeMatrix ledMx(EYE_CLK,EYE_DIN);
 // SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
 // to help assemble Otto's feet and legs - wire link between pin 7 and GND
 #define PIN_ASSEMBLY    7   //ASSEMBLY pin (7) LOW = assembly    HIGH  = normal operation
@@ -127,10 +121,6 @@ void setup() {
   NeopixelLed.begin();
   NeopixelLed.show(); // Initialize all pixels to 'off'
   NeopixelLed.setBrightness(64); // Op Brightness 
-  }
-  if (enableEYES == true){
-  ledMx.setBrightness(2);
-  ledMx.setColorIndex(1);
   }
   //Setup callbacks for SerialCommand commands
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
@@ -322,19 +312,6 @@ void loop() {
           break;
     }
     
-    if ((MODE !=2) && (enableEYES == true)){
-      //Otto.putMouth(smile);
-    //Every 50 seconds in this mode, Tito shows time 
-        if (millis()-previousMillis>=5000){
-          ledMx.drawBitmapEYE(Bitmap_Blink);
-             delay(200);
-            previousMillis=millis();         
-        }
-        else{
-          ledMx.drawBitmapEYE(Bitmap_Happy);
-          delay(200);
-        }
-    }
 }  
 
 ///////////////////////////////////////////////////////////////////
