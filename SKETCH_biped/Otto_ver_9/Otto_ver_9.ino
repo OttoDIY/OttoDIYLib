@@ -1,24 +1,20 @@
-
-//----------------------------------------------------------------
-//-- Zowi basic firmware v2 adapted to Otto
-//-- (c) BQ. Released under a GPL licencse
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-- Otto DIY APP Firmware version 9 (V09) with standard baudrate of 9600 for Bluetooth modules.
+//-- This code will have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
+//-- Designed to work with the basic Otto or PLUS or Humanoid or other biped robots. some of these functions will need a good power source such as a LIPO battery.
+//-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
 //-----------------------------------------------------------------
-//  If you wish to use this software under Open Source Licensing, 
-//   you must contribute all your source code to the open source
-//   community in accordance with the GPL Version 2 when your application is
-//   distributed. See http://www.gnu.org/copyleft/gpl.html
-//   https://www.facebook.com/groups/ottodiy/
-//------------------------------------------------------------------
-// -- ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen OCT 2018
-// -- Added PIN definitions for ease of use: Jason Snow NOV 2018
-// -- ADDED NEOPIXEL: Paul Van De Veen NOV 2018
-// -- ADDED Eye Matrix Progmem and control: Jason Snow NOV 2018
+//-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
+//-- in accordance with the GPL Version 2 when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// -- ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen October 2018
+// -- ADDED PIN definitions for ease of use: Jason Snow November 2018
+// -- ADDED NEOPIXEL: Paul Van De Veen November 2018
+// -- ADDED Eye Matrix Progmem and control: Jason Snow November 2018
+// -- DELETED noise sense in mode 3 Jason Snow August 2019
 // -- REMOVED Eye Matrix Progmem and control: Jason Snow AUG 2019
-//-------------------------------------------------------------------
-// Otto libraries - Otto biped version 9        July 2019
-// some of these functions will need a good power source such as a LIPO battery
-//-------------------------------------------------------------------
-
+// -- ADDED Battery meassurementin in mode 3 Jason Snow August 2019
+//-------------------------------------------------------------------------
 #include <EEPROM.h>
 #include <EnableInterrupt.h>
 // Library to manage the Neopixel RGB led
@@ -61,6 +57,7 @@ RR 5==>   -----   ------  <== RL 4
 #define CLK_PIN    A1   //CLK pin (A1)
 #define LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
 // BATTERY SENSE PIN //////////////////////////////////////////////////////////////////////////
+boolean BATTcheck = true;    // SET TO FALSE IF NOT USING THIS OPTION
 #define PIN_Battery   A7  //3v7 BATTERY MONITOR   ANALOG pin (A7)
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
@@ -90,11 +87,10 @@ volatile bool buttonPushed=false;  //Variable to remember when a button has been
 //--    * MODE = 0: Otto is awaiting
 //--    * MODE = 1: Dancing mode!
 //--    * MODE = 2: Obstacle detector mode
-//--    * MODE = 3: Noise detector mode
+//--    * MODE = 3: Battery chek mode for Otto with LED matrix mouth
 //--    * MODE = 4: OttoPAD or any Teleoperation mode (listening SerialPort).
 //---------------------------------------------------------
 volatile int MODE = 0; //State of Otto in the principal state machine.
-
 unsigned long previousMillis = 0;
 int randomDance = 0;
 int randomSteps = 0;
@@ -102,6 +98,9 @@ bool obstacleDetected = false;
 int REDled = 0;
 int GREENled = 0;
 int BLUEled = 0;
+double batteryCHECK = 0;
+unsigned long int matrix;
+unsigned long timerMillis = 0;
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -191,6 +190,13 @@ void loop() {
     //MODE=4;
     Otto.putMouth(happyOpen);
   }
+  //Every 60 seconds check battery level
+   if (BATTcheck == true) {
+      if (millis() - timerMillis >= 60000) {
+        OttoLowBatteryAlarm();
+        timerMillis = millis();
+      }
+   }
   // interrupt code, here we do something if TOUCH sensor or BUTTON pressed
   if (buttonPushed){ 
     MODE = MODE +1; 
@@ -283,20 +289,32 @@ void loop() {
     //-- MODE 3 - Noise detector mode
     //---------------------------------------------------------
     case 3:
-    
-      //Serial.println(Otto.getNoise());
-      if (Otto.getNoise() >= 650) { //740
-
-        delay(50);  //Wait for the possible 'lag' of the button interruptions.
-        //Sometimes, the noise sensor detect the button before the interruption takes efect
-        Otto.putMouth(bigSurprise);
-        Otto.sing(S_OhOoh);
-        Otto.putMouth(random(10, 21));
-        randomDance = random(5, 21);
-        move(randomDance);
-        Otto.home();
-        delay(500); //Wait for possible noise of the servos while get home
-        Otto.putMouth(happyOpen);
+    // battery display as an icon on the mouth, battery icon will has three levels of power
+      if (BATTcheck == true) {
+      batteryCHECK = Otto.getBatteryLevel();
+        Otto.clearMouth();
+        if (batteryCHECK < 40)
+        {
+          matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+        if (batteryCHECK > 45)
+        {
+          matrix = 0b00001100010010010010011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+       
+        if (batteryCHECK > 65)
+        {
+          matrix = 0b00001100010010011110011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+        if (batteryCHECK > 80)
+        {
+          matrix = 0b00001100011110011110011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+        delay(1500);
       }
       break;
 
@@ -910,16 +928,30 @@ void requestMode() {
 //-- Functions with animatics
 //--------------------------------------------------------
 
+//-- Function to read battery level - if it is low then show low battery
 void OttoLowBatteryAlarm() {
-  double batteryLevel = Otto.getBatteryLevel();
-  if (batteryLevel < 45) {
+  //
+   double batteryLevel = Otto.getBatteryLevel();
+  if (batteryLevel < 35) {
     Otto.putMouth(thunder);
     Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
     delay(30);
     Otto.bendTones (2000, 880, 1.02, 8, 3);  //A5 = 880
+    delay(30);
+    Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
+    delay(30);
+    Otto.bendTones (2000, 880, 1.02, 8, 3);  //A5 = 880
     Otto.clearMouth();
-    delay(500);
-
+    matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+     Otto.putMouth(matrix, false);
+    delay(2000);
+    Otto.clearMouth();
+     delay(1000);
+    matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+    Otto.putMouth(matrix, false);
+    delay(2000);
+    Otto.clearMouth();
+    Otto.putMouth(happyOpen);
   }
 }
 
@@ -953,4 +985,7 @@ void ButtonPushed(){
         Otto.putMouth(smallSurprise);
     } 
 } 
-
+void checkBATT(void* context) 
+{
+OttoLowBatteryAlarm();
+}
