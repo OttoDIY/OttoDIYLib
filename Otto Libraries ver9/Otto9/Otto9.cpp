@@ -129,6 +129,27 @@ void Otto9::_moveServos(int time, int  servo_target[]) {
   for (int i = 0; i < 4; i++) servo_position[i] = servo_target[i];
 }
 
+void Otto9::_moveSingle(int position, int servo_number) {
+if (position > 180) position = 90;
+if (position < 0) position = 90;
+  attachServos();
+  if(getRestState()==true){
+        setRestState(false);
+  }
+int servoNumber = servo_number;
+if (servoNumber == 0){
+  servo[0].SetPosition(position);
+}
+if (servoNumber == 1){
+  servo[1].SetPosition(position);
+}
+if (servoNumber == 2){
+  servo[2].SetPosition(position);
+}
+if (servoNumber == 3){
+  servo[3].SetPosition(position);
+}
+}
 
 void Otto9::oscillateServos(int A[4], int O[4], int T, double phase_diff[4], float cycle=1){
 

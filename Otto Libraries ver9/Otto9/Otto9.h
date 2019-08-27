@@ -45,6 +45,7 @@ class Otto9
 
     //-- Predetermined Motion Functions
     void _moveServos(int time, int  servo_target[]);
+    void _moveSingle(int position,int  servo_number);
     void oscillateServos(int A[4], int O[4], int T, double phase_diff[4], float cycle);
 
     //-- HOME = Otto at rest position
