@@ -94,6 +94,7 @@ class Otto9
     void initMATRIX(int DIN, int CS, int CLK, int rotate);
     void matrixIntensity(int intensity);
     void initBatLevel(int batteryPIN);
+    void setLed(byte X, byte Y, byte value);
   private:
    
     BatReader9 battery;

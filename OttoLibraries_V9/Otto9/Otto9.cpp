@@ -645,6 +645,9 @@ double Otto9::getBatteryVoltage(){
 ///////////////////////////////////////////////////////////////////
 //-- MOUTHS & ANIMATIONS ----------------------------------------//
 ///////////////////////////////////////////////////////////////////
+void Otto9::setLed(byte X, byte Y, byte value){
+  ledmatrix.setDot( X,  Y, value);
+}
 
 
 // EXAMPLE putAnimationMouth(dreamMouth,0);
