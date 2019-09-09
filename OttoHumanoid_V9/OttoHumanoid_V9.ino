@@ -1,56 +1,54 @@
-
-//----------------------------------------------------------------
-//-- Zowi basic firmware v2 adapted to Otto
-//-- (c) BQ. Released under a GPL licencse
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-- Otto DIY Humanoid APP Firmware version 9 (V9) with standard baudrate of 9600 for Bluetooth modules.
+//-- This code will have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
+//-- Designed to work with the basic Otto or PLUS or Humanoid or other biped robots. some of these functions will need a good power source such as a LIPO battery.
+//-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
 //-----------------------------------------------------------------
-//  If you wish to use this software under Open Source Licensing, 
-//   you must contribute all your source code to the open source
-//   community in accordance with the GPL Version 2 when your application is
-//   distributed. See http://www.gnu.org/copyleft/gpl.html
-//   https://www.facebook.com/groups/ottodiy/
-//------------------------------------------------------------------
-// -- ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen OCT 2018
-// -- Added PIN definitions for ease of use: Jason Snow NOV 2018
-// -- ADDED NEOPIXEL: Paul Van De Veen NOV 2018
-// -- ADDED Eye Matrix Progmem and control: Jason Snow NOV 2018
+//-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
+//-- in accordance with the GPL Version 2 when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// -- ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen October 2018
+// -- ADDED PIN definitions for ease of use: Jason Snow November 2018
+// -- ADDED NEOPIXEL: Paul Van De Veen November 2018
+// -- ADDED Eye Matrix Progmem and control: Jason Snow November 2018
+// -- DELETED noise sense in mode 3 Jason Snow August 2019
 // -- REMOVED Eye Matrix Progmem and control: Jason Snow AUG 2019
-//-------------------------------------------------------------------
-// Otto libraries Otto version 9        June 2019
-//-------------------------------------------------------------------
-// Otto Rover version 9 sketch   July 2019 using same libraries as Otto biped
-// 
-//-------------------------------------------------------------------
+// -- ADDED Battery meassurementin in mode 3 Jason Snow August 2019
+//-------------------------------------------------------------------------
 #include <EEPROM.h>
 #include <EnableInterrupt.h>
-// Library to manage the Neopixel RGB led
-#include <Adafruit_NeoPixel.h>
-//-- Library to manage serial commands
-#include <OttoSerialCommand.h>
+#include <Adafruit_NeoPixel.h> // Library to manage the Neopixel RGB led
+#include <OttoSerialCommand.h> //-- Library to manage serial commands
 OttoSerialCommand SCmd;  // The SerialCommand object
-//-- Otto Library version 2
-#include <Otto9.h>
-Otto9 Otto;  //This is Otto!
+#include <Otto9Humanoid.h> //-- Otto Library version 9
+Otto9Humanoid Otto;  //This is Otto!
 //---------------------------------------------------------
-//--Configure the pins where the motor drivers are attached
+//-- First step: Configure the pins where the servos are attached
 /*
-          --------------- 
-         |     O   O     |
-         |---------------|
-PWM 6==>||               || <== PWM 5
-DIR 2==>| ------  ------  | <== DIR 4
-        |                 |
+         --------------- 
+        |     O   O     |
+        |---------------|
+RA 7==> |               | <== LA 6
+        |               |
+LR 3==> |               | <== LL 2
+         --------------- 
+            ||     ||
+            ||     ||
+FR 5==>   -----   ------  <== FL 4
+         |-----   ------|
 */
-#define Motor_1_PWM 6 // motor 1 speed PWM pin    (L9110 driver module mE1)
-#define Motor_2_PWM 5 // motor 2 speed PWM pin    (L9110 driver module mE2)
-#define Motor_1_DIR 2 // motor 1 direction pin    (L9110 driver module mI1)
-#define Motor_2_DIR 4 // motor 2 direction pin    (L9110 driver module mI2)
-boolean DCMotor = true;    // SET TO TRUE for DC motor Rover version or Sketch will fail to control the motors
-boolean L9110 = false;     // select this option when using the L9110 driver module
+// SERVO PINs //////////////////////////////////////////////////////////////////////////////
+#define PIN_YL 2 //servo[0]  left leg
+#define PIN_YR 3 //servo[1]  right leg
+#define PIN_RL 4 //servo[2]  left foot
+#define PIN_RR 5 //servo[3]  right foot
+#define PIN_LA 6 //servo[4]  Left arm if enabled
+#define PIN_RA 7 //servo[5]  Right arm if enabled
 // ULTRASONIC PINs /////////////////////////////////////////////////////////////////////////
 #define PIN_Trigger  8  //TRIGGER pin (8)
 #define PIN_Echo     9  //ECHO pin (9)
 // BUZZER PIN //////////////////////////////////////////////////////////////////////////////
-#define PIN_Buzzer  13  //BUZZER pin (13)
+#define PIN_Buzzer  13 //BUZZER pin (13)
 // SOUND SENSOR PIN //////////////////////////////////////////////////////////////////////////
 #define PIN_NoiseSensor A6  //SOUND SENSOR   ANALOG pin (A6)
 // LED MATRIX PINs //////////////////////////////////////////////////////////////////////////
@@ -59,42 +57,41 @@ boolean L9110 = false;     // select this option when using the L9110 driver mod
 #define CLK_PIN    A1   //CLK pin (A1)
 #define LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
 // BATTERY SENSE PIN //////////////////////////////////////////////////////////////////////////
+boolean BATTcheck = true;    // SET TO FALSE IF NOT USING THIS OPTION
 #define PIN_Battery   A7  //3v7 BATTERY MONITOR   ANALOG pin (A7)
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
 // RGB NEOPIXEL LED PIN   /////////////////////////////////////////////////////////////////////
-boolean enableRGB = false;    // SET TO FALSE IF NOT USING THIS OPTION
+boolean enableRGB = true;    // SET TO FALSE IF NOT USING THIS OPTION
 #define NeopixelRGB_PIN  12 // NEOPIXEL pin   DIGITAL PIN (12)
 #define NUMPIXELS       1   // There is only one Neopixel use in MY Otto, chnage for more than 1
 Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NEO_RGB + NEO_KHZ800);
+// SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
+// to help assemble Otto's feet and legs - wire link between pin 10 and GND
+#define PIN_ASSEMBLY    10   //ASSEMBLY pin (10) LOW = assembly    HIGH  = normal operation
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
-const char programID[] = "Otto_ROVER"; //Each program will have an ID 
-///////////////////////////////////////////////////////////////////
-bool goingforward = false; // motor direction logic
-bool goingreverse = false; // motor direction logic
-bool goingleft = false; // motor direction logic
-bool goingright = false; // motor direction logic
-bool APPleftFORWARD = false; // motor direction logic for APP mode 4
-bool APPleftREVERSE = false; // motor direction logic for APP mode 4
-bool APPrightFORWARD = false; // motor direction logic for APP mode 4
-bool APPrightREVERSE = false; // motor direction logic for APP mode 4
-int leftSPEED = 0; //  left motor speed variable
-int rightSPEED = 0; //  right motor speed variable
-int mDelay = 10; // motor delay before changing movement
-int lSpeed = 150; // motor speed (higher is faster) MAX 255 - for mode 2 speed
-int rSpeed = 150; // motor speed (higher is faster) MAX 255 - for mode 2 speed
-int APPleftSPEED = 0; //  left motor speed variable from APP mode 4
-int APPrightSPEED = 0; //  right motor speed variable from APP mode 4
-bool AUXcontrol1 = false; // logic for aux control switch 1 from APP
-bool AUXcontrol2 = false; // logic for aux control switch 2 from APP 
-///////////////////////////////////////////////////////////////////
-#define OUT1 3 // Aux output 1 - pin 3
-#define OUT2 7 // Aux output 2 - pin 7
-///////////////////////////////////////////////////////////////////
-int calibration = 0; // used if one motor is faster than the other due to mechanical differences
+
+const char programID[] = "OttoHumanoid_V9"; //Each program will have a ID
+const char name_fac = '$'; //Factory name
+const char name_fir = '#'; //First name
+//-- Movement parameters
+int T = 1000;            //Initial duration of movement
+int moveId = 0;          //Number of movement
+int modeId = 0;          //Number of mode
+int moveSize = 15;       //Asociated with the height of some movements
+volatile bool buttonPushed=false;  //Variable to remember when a button has been pushed
+//---------------------------------------------------------
+//-- Otto has 5 modes:
+//--    * MODE = 0: Otto is awaiting
+//--    * MODE = 1: Dancing mode!
+//--    * MODE = 2: Obstacle detector mode
+//--    * MODE = 3: Battery chek mode for Otto with LED matrix mouth
+//--    * MODE = 4: OttoPAD or any Teleoperation mode (listening SerialPort).
+//---------------------------------------------------------
 volatile int MODE = 0; //State of Otto in the principal state machine.
+
 unsigned long previousMillis = 0;
 int randomDance = 0;
 int randomSteps = 0;
@@ -102,38 +99,21 @@ bool obstacleDetected = false;
 int REDled = 0;
 int GREENled = 0;
 int BLUEled = 0;
-//-- Movement parameters
-int T = 1000;            //Initial duration of movement
-int moveId = 0;          //Number of movement
-int modeId = 0;          //Number of mode
-int moveSize = 15;       //Asociated with the height of some movements
-volatile bool buttonPushed=false;  //Variable to remember when a button has been pushed
-///////////////////////////////////////////////////////////////////
+double batteryCHECK = 0;
+unsigned long int matrix;
+unsigned long timerMillis = 0;
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void setup() {
-  rSpeed = (rSpeed - calibration); // make calibration adjustment to one motor speed value only
-  pinMode(Motor_1_PWM, OUTPUT);
-  pinMode(Motor_2_PWM, OUTPUT);
-  pinMode(Motor_1_DIR, OUTPUT);
-  pinMode(Motor_2_DIR, OUTPUT);
-  pinMode(OUT1, OUTPUT);
-  pinMode(OUT2, OUTPUT);
-  digitalWrite (OUT1, LOW);
-  digitalWrite (OUT2, LOW);
-  ///////////////////////////////////////////////////////////////////
   //Serial communication initialization
   Serial.begin(9600);
-  ///////////////////////////////////////////////////////////////////
-  // SELECT ONE OF THE BELOW INIT based on your Otto
-  //Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins for standard Otto biped
-  Otto.initDC(PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the ultrasonic pins for the DC motor version such as SMARS
-  ////////////////////////////////////////////////////////////////
+  Otto.initHUMANOID(PIN_YL, PIN_YR, PIN_RL, PIN_RR, PIN_LA, PIN_RA, true, PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins
   Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);   // set up Matrix display pins = DIN pin,CS pin, CLK pin, MATRIX orientation 
   Otto.matrixIntensity(1);// set up Matrix display intensity
-  Otto.initBatLevel(PIN_Battery);// set up Battery percent read pin MUST BE ANALOG PIN
+  Otto.initBatLevel(PIN_Battery);// set up Battery percent read pin - MUST BE AN ANALOG PIN
   randomSeed(analogRead(PIN_NoiseSensor));   //Set a random seed
+  pinMode(PIN_ASSEMBLY,INPUT_PULLUP); // - Easy assembly pin - LOW is assembly Mode
   pinMode(PIN_Button,INPUT); // - ensure pull-down resistors are used
   //Interrupts
   enableInterrupt(PIN_Button, ButtonPushed, RISING);
@@ -145,14 +125,8 @@ void setup() {
   //Setup callbacks for SerialCommand commands
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
   SCmd.addCommand("L", receiveLED);       //  sendAck & sendFinalAck
-  SCmd.addCommand("T", receiveAUX);     // receive aux switches
-  if (DCMotor == true){
-  SCmd.addCommand("M", receivePWM);  //  receive DC motor commands
-  }
-  else
-  {
-   SCmd.addCommand("M", receiveMovement);  //  receive servo commands for Otto biped version
-  }
+  SCmd.addCommand("T", recieveBuzzer);    //  sendAck & sendFinalAck
+  SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck
   SCmd.addCommand("H", receiveGesture);   //  sendAck & sendFinalAck
   SCmd.addCommand("K", receiveSing);      //  sendAck & sendFinalAck
   SCmd.addCommand("C", receiveTrims);     //  sendAck & sendFinalAck
@@ -182,556 +156,183 @@ void setup() {
   Otto.sing(S_happy);
   delay(200);
 
+  //If Otto's name is '#' means that Otto hasn't been baptized
+  //In this case, Otto does a longer greeting
+  //5 = EEPROM address that contains first name character
+  if (EEPROM.read(5) == name_fir) {
+    Otto.jump(1, 700);
+    delay(200);
+    Otto.shakeLeg(1, T, 1);
+    Otto.putMouth(smallSurprise);
+    Otto.swing(2, 800, 20);
+    Otto.home();
+  }
 
   Otto.putMouth(happyOpen);
   previousMillis = millis();
+// if Pin 10 is LOW then place OTTO's servos in home mode to enable easy assembly, 
+// when you have finished assembling Otto, remove the link between pin 10 and GND
+  while (digitalRead(PIN_ASSEMBLY) == LOW) {
+    Otto.home();
+    Otto.sing(S_happy_short);   // sing every 5 seconds so we know OTTO is still working
+    delay(5000);
+  }
 
 }
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
 ///////////////////////////////////////////////////////////////////
-void loop()
-{
-    if (Serial.available()>0 && MODE!=4)
-    {
+void loop() {
+  if (Serial.available() > 0 && MODE != 4) {
+    // test
+    //Disable Pin Interruptions
+    disableInterrupt(PIN_Button);
     SCmd.readSerial();
+    //MODE=4;
     Otto.putMouth(happyOpen);
+  }
+   //Every 60 seconds check battery level
+   if (BATTcheck == true) {
+      if (millis() - timerMillis >= 60000) {
+        OttoLowBatteryAlarm();
+        timerMillis = millis();
+      }
    }
- 
-    switch (MODE) 
-     {
-            //-- MODE 0 - Otto is awaiting
-      //---------------------------------------------------------
+  // interrupt code, here we do something if TOUCH sensor or BUTTON pressed
+  if (buttonPushed){ 
+    MODE = MODE +1; 
+    if (MODE == 4) MODE = 0;
+    Otto.sing(S_mode1);
+    if (MODE == 0) Otto.putMouth(zero);
+    if (MODE == 1) Otto.putMouth(one);
+    if (MODE == 2) Otto.putMouth(two);
+    if (MODE == 3) Otto.putMouth(three);
+    delay(500);
+    Otto.putMouth(happyOpen);
+    buttonPushed = false;
+  }
+  switch (MODE) {
+
+    //-- MODE 0 - Otto is awaiting
+    //---------------------------------------------------------
     case 0:
-      
-        //Every 80 seconds in this mode, Otto falls asleep as he is bored!
-        if (millis()-previousMillis>=80000)
-        {
-            OttoSleeping_withInterrupts(); //ZZzzzzz...
-            previousMillis=millis();         
-        }
+      //Every 80 seconds in this mode, Otto falls asleep
+      if (millis() - previousMillis >= 80000) {
+        OttoSleeping_withInterrupts(); //ZZzzzzz...
+        previousMillis = millis();
+      }
 
-        break;
-      
+      break;
 
-      //-- MODE 1 - Dance Mode!
-      //---------------------------------------------------------
-      case 1:
-        // THIS Otto can not dance - he has no legs, so here he displays a random mouth
-        // change this for what ever you would like Otto to do in mode 1
-        // This would be ideal for a line following mode if you can add some additional 
-        // sensors to Otto instead of the AUX outputs, you will need to make some changes to the sketch
-        // to ba able to do this.
-        Otto.putMouth(random(10,21));
-        delay(1000);
-        break;
+    //-- MODE 1 - Dance Mode!
+    //---------------------------------------------------------
+    case 1:
+      randomDance = random(5, 21); //5,20
+      if ((randomDance > 14) && (randomDance < 19)) {
+        randomSteps = 1;
+        T = 1600;
+      }
+      else {
+        randomSteps = random(3, 6); //3,5
+        T = 1000;
+      }
 
+      Otto.putMouth(random(10, 21));
+      for (int i = 0; i < randomSteps; i++) move(randomDance);
+      break;
 
-      //-- MODE 2 - Obstacle detector mode
-      //---------------------------------------------------------
-      case 2:
-        if(obstacleDetected)
-        {
-          motorstop(); // stop motors
-            Otto.sing(S_OhOoh);
-            delay(100);
-              Otto.putMouth(bigSurprise);
-              delay(500);
-              Otto.putMouth(confused);
-              delay(500);
-              Otto.sing(S_OhOoh2);
-            //Otto drives back
-            Otto.putMouth(xMouth);
-             //delay(1000);
-             motormoveBackward(); // moveBackwards
-              delay(1500); 
-              motorstop();
-              delay(500);           
-              Otto.putMouth(smile);
-              delay(1500);
-                motorturnLeft(); // turn small amount left
-                delay(300);
-                motorstop();
-                obstacleDetector();
-                delay(250);
-                
-           
-            //If there are no obstacles, Otto is happy
-            if(obstacleDetected==true){break;}           
-            
-                obstacleDetected=false;
-                Otto.putMouth(happyOpen);
-                Otto.sing(S_happy_short);
-                delay(500);
-                
-            }
-        else
-            {
-
-    //select a random number between 1 and 5
-      if (randomDance > 20)
-          {
-      randomSteps = random(1,5);
-      // display the relevant gesture for the random number selected
-      switch (randomSteps) {
-      case 1: //H 1 
-        Otto.putMouth(happyOpen);
-        Otto.sing(S_happy);
-        Otto.putMouth(happyClosed);
-        delay(500);
-        Otto.putMouth(happyOpen);
-        Otto.sing(S_superHappy);
-        Otto.putMouth(happyClosed);
-        break;
-      case 2: //H 2 
-        Otto.putMouth(smile);
+    //-- MODE 2 - Obstacle detector mode
+    //---------------------------------------------------------
+    case 2:
+      if (obstacleDetected) {
+        Otto.putMouth(bigSurprise);
+        Otto.sing(S_surprise);
+        Otto.jump(5, 500);
+        Otto.putMouth(confused);
         Otto.sing(S_cuddly);
-        break;
-      case 3: //H 3 
-        Otto.putMouth(happyClosed);
-        break;
-      case 4: //H 4 
-         Otto.putMouth(tongueOut);  
-         Otto.sing(13);  
-        break;
-      case 5: //H 5  
-        Otto.putMouth(lineMouth);
-        break;
-        
-          }
-      randomDance = 0;
-          }
-
-            //Otto Drive straight
-            motormoveForward(); // moveForward
-            obstacleDetector(); // check for obstacles
-            delay(100);
-            obstacleDetector(); // check for obstacles
-            delay(100);
-            randomDance = (randomDance + 1);
-
-      }   
-
-        break;
-        //-- MODE 3 - Noise detector mode
-      //--------------------------------------------------------- 
-        case 3:
-        if (Otto.getNoise() >= 650) { //740
-         // if we detect noise then we do something - change this for what ever you want Otto to do if there
-         // is a noise, change the value for noise levels
-          delay(50); 
-            Otto.putMouth(bigSurprise);
-            Otto.sing(S_OhOoh);
-            delay(500); //
-            Otto.putMouth(random(10,21));
-            delay(500); //
-            randomDance=random(5,21);
-            delay(500); //
-            Otto.putMouth(happyOpen);
+        //Otto takes two steps back
+        for (int i = 0; i < 3; i++) Otto.walk(1, 1300, -1);
+        delay(100);
+        obstacleDetector();
+        delay(100);
+        //If there are no obstacles and no button is pressed, Otto shows a smile
+        if (obstacleDetected == true) break;
+        else {
+          Otto.putMouth(smile);
+          delay(50);
+          obstacleDetector();
         }
-        break;
-      //-- MODE 4 - Otto APP mode (listening SerialPort) 
-      //---------------------------------------------------------
-      case 4:
 
-        SCmd.readSerial();
+        //If there are no obstacles and no button is pressed, Otto shows turns left
+        for (int i = 0; i < 3; i++) {
+          if (obstacleDetected == true) break;
+          else {
+            Otto.turn(1, 1000, 1);
+            obstacleDetector();
+          }
+        }
 
-        break;      
+        //If there are no obstacles and no button is pressed, Otto is happy
+        if (obstacleDetected == true) break;
+        else {
+          Otto.home();
+          Otto.putMouth(happyOpen);
+          Otto.sing(S_happy_short);
+          delay(200);
+        }
+      }
+      else {
+        Otto.walk(1, 1000, 1); //Otto walk straight
+        obstacleDetector();
+      }
+      break;
 
-      default:
+    //-- MODE 3 - Noise detector mode
+    //---------------------------------------------------------
+    case 3:
+    // battery display as an icon on the mouth, battery icon will has three levels of power
+      if (BATTcheck == true) {
+      batteryCHECK = Otto.getBatteryLevel();
+        Otto.clearMouth();
+        if (batteryCHECK < 40)
+        {
+          matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+        if (batteryCHECK > 45)
+        {
+          matrix = 0b00001100010010010010011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+       
+        if (batteryCHECK > 65)
+        {
+          matrix = 0b00001100010010011110011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+        if (batteryCHECK > 80)
+        {
+          matrix = 0b00001100011110011110011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+        delay(1500);
+      }
+      break;
+
+    //-- MODE 4 - OttoPAD or any Teleoperation mode (listening SerialPort)
+    //---------------------------------------------------------
+    case 4:
+      SCmd.readSerial();
+      //If Otto is moving yet
+      if (Otto.getRestState() == false) move(moveId);
+      break;
+    default:
           MODE=0;
           break;
- }
-      
-}
-
-void motormoveForward() {
-// STOP motors before direction change to help protect motor drivers
-if (L9110 == true){
-  if (goingforward == false) motorstop();
- // DIR motor
-    digitalWrite(Motor_1_DIR, LOW);//left motor direction
-    digitalWrite(Motor_2_DIR, LOW);//right motor direction
-     // PWM motor
-    analogWrite(Motor_1_PWM, lSpeed);//left motor speed
-    analogWrite(Motor_2_PWM, rSpeed);//right motor speed
-    goingreverse = false;
-    goingforward = true;
-    goingleft = false;
-    goingright = false; 
-  }
-else{
-if (goingforward == false) motorstop();
-    // DIR motor
-    digitalWrite(Motor_1_DIR, HIGH);//left motor direction
-    digitalWrite(Motor_2_DIR, HIGH);//right motor direction
-    // PWM motor
-    analogWrite( Motor_1_PWM, lSpeed);//left motor speed
-    analogWrite(Motor_2_PWM, rSpeed);//right motor speed
-    goingreverse = false;
-    goingforward = true;
-    goingleft = false;
-    goingright = false; 
-  }
-}
-/**
- * Move backward
- */
-void motormoveBackward() {
-// STOP motors before direction change to help protect motor drivers
-if (L9110 == true){
-if (goingreverse == false) motorstop();  
-    // DIR motor
-    digitalWrite(Motor_1_DIR, HIGH);//left motor direction
-    digitalWrite(Motor_2_DIR, HIGH);//right motor direction
-    // PWM motor
-    analogWrite(Motor_1_PWM, 255 - lSpeed);
-    analogWrite(Motor_2_PWM, 255 - rSpeed);
-    goingreverse = true;
-    goingforward = false;
-    goingleft = false;
-    goingright = false; 
-  }
-else
-{
-if (goingreverse == false) motorstop();  
-    // DIR motor
-    digitalWrite(Motor_1_DIR, LOW);//left motor direction
-    digitalWrite(Motor_2_DIR, LOW);//right motor direction
-     // PWM motor
-    analogWrite( Motor_1_PWM, lSpeed);//left motor speed
-    analogWrite(Motor_2_PWM, rSpeed);//right motor speed
-    goingreverse = true;
-    goingforward = false;
-    goingleft = false;
-    goingright = false; 
-  }
-}
-
-/**
- * Turn Left
- */
-void motorturnLeft() {
-// STOP motors before direction change to help protect motor drivers
-if (L9110 == true){
-  if (goingleft == false) motorstop();
-    // DIR motor   
-    digitalWrite(Motor_1_DIR, HIGH);
-    digitalWrite(Motor_2_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_1_PWM, 255 - lSpeed);
-    analogWrite(Motor_2_PWM, rSpeed);
-    goingreverse = false;
-    goingforward = false;
-    goingleft = true;
-    goingright = false; 
-}
-else
-{
- 
-if (goingleft == false) motorstop();
-    // DIR motor   
-    digitalWrite(Motor_1_DIR, LOW);
-    digitalWrite(Motor_2_DIR, HIGH);
-    // PWM motor
-    analogWrite( Motor_1_PWM, lSpeed);
-    analogWrite(Motor_2_PWM, rSpeed);
-    goingreverse = false;
-    goingforward = false;
-    goingleft = true;
-    goingright = false; 
-  }
-}
-
-/**
- * Turn Right
- */
-void motorturnRight() {
- // STOP motors before direction change to help protect motor drivers
- if (L9110 == true){
-  if (goingright == false) motorstop();   
-    // DIR motor 
-    digitalWrite(Motor_1_DIR, LOW);
-    digitalWrite(Motor_2_DIR, HIGH);
-     // PWM motor
-    analogWrite(Motor_1_PWM, lSpeed);
-    analogWrite(Motor_2_PWM, 255 - rSpeed);
-    goingreverse = false;
-    goingforward = false;
-    goingleft = false;
-    goingright = true;
- }
- else
- {
-  
-if (goingright == false) motorstop();   
-    // DIR motor 
-    digitalWrite(Motor_1_DIR, HIGH);
-    digitalWrite(Motor_2_DIR, LOW);
-     // PWM motor
-    analogWrite( Motor_1_PWM, lSpeed);
-    analogWrite(Motor_2_PWM, rSpeed);
-    goingreverse = false;
-    goingforward = false;
-    goingleft = false;
-    goingright = true;  
-  }
- }
-
-/**
- * Stop MOTORS
- */
-void motorstop() {
-    // PWM motor
-    digitalWrite(Motor_1_PWM, LOW);
-    digitalWrite(Motor_2_PWM, LOW);
-    // DIR motor 
-    digitalWrite(Motor_1_DIR, LOW);
-    digitalWrite(Motor_2_DIR, LOW);
-}
-
-
-
-//-- Function to receive motor speed and direction commands
-void receivePWM(){
-    sendAck();
-    //Otto.home();
-    //Definition of Motor Bluetooth commands
-    //M ModeID    
-    char *arg; 
-    arg = SCmd.next(); 
-    if (arg != NULL) 
-    {
-      APPleftSPEED=atoi(arg);
-      }
-      else{
-      Otto.putMouth(xMouth);
-      delay(2000);
-       Otto.clearMouth();
-      APPleftSPEED=0; //stop
     }
     
-    arg = SCmd.next(); 
-    if (arg != NULL) {APPrightSPEED=atoi(arg);}
-    else{
-      Otto.putMouth(xMouth);
-      delay(2000);
-       Otto.clearMouth();
-      APPrightSPEED=0;
-    }
-// D0 PWM motor control
-// first map the value received from the app to a value between 0 and full speed
-// the value from the app is positive for forward and negative for reverse
- if (APPleftSPEED < -1 ){
-  leftSPEED = map(APPleftSPEED, 0, -100, 0, 255);
- }
-  else
-  {
-   leftSPEED = map(APPleftSPEED, 0, 100, 0, 255);
-  }
- if (APPrightSPEED < -1 ){
-  rightSPEED = map(APPrightSPEED, 0, -100, 0, 255);
- }
- else 
- {
-  rightSPEED = map(APPrightSPEED, 0, 100, 0, 255);
- }
 
-// just a little deadband
-
-if (L9110 == true){
-  if (APPleftSPEED > 5 ){
-    if (APPleftFORWARD == false){;
-      digitalWrite(Motor_1_PWM, LOW);
-      digitalWrite(Motor_1_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_1_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_1_PWM,leftSPEED);
-    APPleftREVERSE = false;
-    APPleftFORWARD = true;
-  }
-  else  {
-  if (APPleftSPEED < -5 ){
-    if (APPleftREVERSE == false){;
-      digitalWrite(Motor_1_PWM, LOW);
-      digitalWrite(Motor_1_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_1_DIR, HIGH);
-    // PWM motor
-    analogWrite(Motor_1_PWM, 255 - leftSPEED);
-    APPleftREVERSE = true;
-    APPleftFORWARD = false;
-  }
-  else{
-  digitalWrite(Motor_1_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_1_PWM, 0);
-    goingreverse = false;
-    goingforward = true;
-  }
-}
-if (APPrightSPEED > 5 ){
-  if (APPrightFORWARD == false){;
-      digitalWrite(Motor_2_PWM, LOW);
-      digitalWrite(Motor_2_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_2_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_2_PWM,rightSPEED);
-    APPrightREVERSE = false;
-    APPrightFORWARD = true;
-  }
-  else  {
-  if (APPrightSPEED < -5 ){
-    if (APPrightREVERSE == false){;
-      digitalWrite(Motor_2_PWM, LOW);
-      digitalWrite(Motor_2_DIR, LOW);
-      delay(250);
-    }
-    digitalWrite(Motor_2_DIR, HIGH);
-    // PWM motor
-     analogWrite(Motor_2_PWM, 255 - rightSPEED);
-    APPrightREVERSE = true;
-    APPrightFORWARD = false;
-  }
-  else{
-    digitalWrite(Motor_2_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_2_PWM, 0);
-    APPrightFORWARD = false;
-    APPrightFORWARD = true;
-
-    }
-  }
-}
-else
-{
-if (APPleftSPEED > 5 ){
-    if (APPleftFORWARD == false){;
-      digitalWrite( Motor_1_PWM, LOW);
-      digitalWrite(Motor_1_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_1_DIR, LOW);
-    // PWM motor
-    analogWrite( Motor_1_PWM,leftSPEED);
-    APPleftREVERSE = false;
-    APPleftFORWARD = true;
-  }
-  else  {
-  if (APPleftSPEED < -5 ){
-    if (APPleftREVERSE == false){;
-      digitalWrite( Motor_1_PWM, LOW);
-      digitalWrite(Motor_1_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_1_DIR, HIGH);
-    // PWM motor
-    analogWrite( Motor_1_PWM,leftSPEED);
-    APPleftREVERSE = true;
-    APPleftFORWARD = false;
-  }
-  else{
-  digitalWrite(Motor_1_DIR, LOW);
-    // PWM motor
-    analogWrite( Motor_1_PWM, 0);
-    goingreverse = false;
-    goingforward = true;
-  }
-}
-if (APPrightSPEED > 5 ){
-  if (APPrightFORWARD == false){;
-      digitalWrite( Motor_1_PWM, LOW);
-      digitalWrite(Motor_1_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_2_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_2_PWM,rightSPEED);
-    APPrightREVERSE = false;
-    APPrightFORWARD = true;
-  }
-  else  {
-  if (APPrightSPEED < -5 ){
-    if (APPrightREVERSE == false){;
-      digitalWrite( Motor_1_PWM, LOW);
-      digitalWrite(Motor_1_DIR, LOW);
-      delay(250);
-    }
-    digitalWrite(Motor_2_DIR, HIGH);
-    // PWM motor
-    analogWrite(Motor_2_PWM,rightSPEED);
-    APPrightREVERSE = true;
-    APPrightFORWARD = false;
-  }
-  else{
-  digitalWrite(Motor_2_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_2_PWM, 0);
-    APPrightFORWARD = false;
-    APPrightFORWARD = true;
-      }
-    }
-  }
-}
-
-void receiveAUX()
-{
-sendAck();
-    //Definition of Mode Bluetooth commands
-    //T aux switches from app   
-    char *arg; 
-    int Aux1;
-    int Aux2;
-    arg = SCmd.next(); 
-    if (arg != NULL) 
-    {
-      Aux1=atoi(arg);
-      }
-      else{
-      Otto.putMouth(xMouth);
-      delay(2000);
-       Otto.clearMouth();
-      Aux1=0; //stop
-    }
-    
-    arg = SCmd.next(); 
-    if (arg != NULL) {Aux2=atoi(arg);}
-    else{
-      Otto.putMouth(xMouth);
-      delay(2000);
-       Otto.clearMouth();
-      Aux2=0;
-    }
-Otto.putMouth(okMouth);
-delay(750);
- Otto.clearMouth();
-if (Aux1 == 1){
-    AUXcontrol1 = true;
-  }
-  else{
-    AUXcontrol1 = false;
-  }
-if (Aux2 == 1){
-    AUXcontrol2 = true;
-  }
-  else{
-    AUXcontrol2 = false;
-  }
-    sendFinalAck();
-digitalWrite (OUT1, AUXcontrol1); // turn ON OFF Aux 1 output
-digitalWrite (OUT2, AUXcontrol2); // turn ON OFF Aux 2 output
-}
+}  
 
 ///////////////////////////////////////////////////////////////////
 //-- Functions --------------------------------------------------//
@@ -810,7 +411,7 @@ void receiveTrims() {
   //sendAck & stop if necessary
   sendAck();
   Otto.home();
-  int trim_YL, trim_YR, trim_RL, trim_RR;
+  int trim_YL, trim_YR, trim_RL, trim_RR, trim_LA, trim_RA;
 
   //Definition of Servo Bluetooth command
   //C trim_YL trim_YR trim_RL trim_RR
@@ -829,9 +430,18 @@ void receiveTrims() {
   arg = SCmd.next();
   if (arg != NULL) trim_RL = atoi(arg);  // Converts a char string to an integer
   else error = true;
+  
+   arg = SCmd.next();
+  if (arg != NULL) trim_RR = atoi(arg);  // Converts a char string to an integer
+  else error = true;
+  
+ arg = SCmd.next();
+  if (arg != NULL) trim_LA = atoi(arg);  // Converts a char string to an integer
+  else error = true;
+
 
   arg = SCmd.next();
-  if (arg != NULL) trim_RR = atoi(arg);  // Converts a char string to an integer
+  if (arg != NULL) trim_RA = atoi(arg);  // Converts a char string to an integer
   else error = true;
   if (error == true) {
     Otto.putMouth(xMouth);
@@ -839,7 +449,7 @@ void receiveTrims() {
     Otto.clearMouth();
 
   } else { //Save it on EEPROM
-    Otto.setTrims(trim_YL, trim_YR, trim_RL, trim_RR);
+    Otto.setTrims(trim_YL, trim_YR, trim_RL, trim_RR, trim_LA, trim_RA);
     Otto.saveTrimsOnEEPROM(); //Uncomment this only for one upload when you finaly set the trims.
   }
   sendFinalAck();
@@ -979,14 +589,21 @@ void move(int moveId) {
     case 20: //M 20 500 15
       Otto.ascendingTurn(1, T, moveSize);
       break;
+    case 21: //M 21
+      Otto.handsup();
+      break;
+    case 22: //M 22 right arm
+      Otto.handwave(1);
+      break;
+    case 23: //M 23 left arm
+      Otto.handwave(-1);
+      break;
     default:
       manualMode = true;
       break;
   }
   if (!manualMode) sendFinalAck();
 }
-
-
 
 //-- Function to receive gesture commands
 void receiveGesture() {
@@ -1331,16 +948,30 @@ void requestMode() {
 //-- Functions with animatics
 //--------------------------------------------------------
 
+//-- Function to read battery level - if it is low then show low battery
 void OttoLowBatteryAlarm() {
-  double batteryLevel = Otto.getBatteryLevel();
-  if (batteryLevel < 45) {
+  //
+   double batteryLevel = Otto.getBatteryLevel();
+  if (batteryLevel < 35) {
     Otto.putMouth(thunder);
     Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
     delay(30);
     Otto.bendTones (2000, 880, 1.02, 8, 3);  //A5 = 880
+    delay(30);
+    Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
+    delay(30);
+    Otto.bendTones (2000, 880, 1.02, 8, 3);  //A5 = 880
     Otto.clearMouth();
-    delay(500);
-
+    matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+     Otto.putMouth(matrix, false);
+    delay(2000);
+    Otto.clearMouth();
+     delay(1000);
+    matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+    Otto.putMouth(matrix, false);
+    delay(2000);
+    Otto.clearMouth();
+    Otto.putMouth(happyOpen);
   }
 }
 
@@ -1374,4 +1005,7 @@ void ButtonPushed(){
         Otto.putMouth(smallSurprise);
     } 
 } 
-
+void checkBATT(void* context) 
+{
+OttoLowBatteryAlarm();
+}

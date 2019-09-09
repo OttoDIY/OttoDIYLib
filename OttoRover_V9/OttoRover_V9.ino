@@ -1,32 +1,28 @@
-
-//----------------------------------------------------------------
-//-- Zowi basic firmware v2 adapted to Otto
-//-- (c) BQ. Released under a GPL licencse
 //-----------------------------------------------------------------
-//  If you wish to use this software under Open Source Licensing, 
-//   you must contribute all your source code to the open source
-//   community in accordance with the GPL Version 2 when your application is
-//   distributed. See http://www.gnu.org/copyleft/gpl.html
-//   https://www.facebook.com/groups/ottodiy/
+//-- Otto DIY Rover APP Firmware version 9 (V9) with standard baudrate of 9600 for Bluetooth modules.
+//-- This code will have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
+//-- Designed to work with Rover or other wheel robots. some of these functions will need a good power source such as a LIPO battery.
+//-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
+//-----------------------------------------------------------------
+//-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
+//-- in accordance with the GPL Version 2 when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
 //------------------------------------------------------------------
 // -- ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen OCT 2018
 // -- Added PIN definitions for ease of use: Jason Snow NOV 2018
 // -- ADDED NEOPIXEL: Paul Van De Veen NOV 2018
+// -- ADDED Eye Matrix Progmem and control: Jason Snow NOV 2018
+// -- REMOVED Eye Matrix Progmem and control: Jason Snow AUG 2019
 //-------------------------------------------------------------------
-// Otto libraries Otto version 9        June 2019
+// Otto libraries version 9        June 2019
 //-------------------------------------------------------------------
-// Otto SMARS version 9 sketch   June 2019 using same libraries as Otto biped
-// (SMARS tracks - designed by Kevin Thomas)
+// Otto Rover version 9 sketch   July 2019
 //-------------------------------------------------------------------
 #include <EEPROM.h>
-#include <EnableInterrupt.h>
-// Library to manage the Neopixel RGB led
-#include <Adafruit_NeoPixel.h>
-//-- Library to manage serial commands
+#include <EnableInterrupt.h> // Library to manage the Neopixel RGB led
+#include <Adafruit_NeoPixel.h> //-- Library to manage serial commands
 #include <OttoSerialCommand.h>
 OttoSerialCommand SCmd;  // The SerialCommand object
-//-- Otto Library version 2
-#include <Otto9.h>
+#include <Otto9.h> //-- Otto Library version
 Otto9 Otto;  //This is Otto!
 //---------------------------------------------------------
 //--Configure the pins where the motor drivers are attached
@@ -34,7 +30,7 @@ Otto9 Otto;  //This is Otto!
           --------------- 
          |     O   O     |
          |---------------|
-PWM 3==>||               || <== PWM 5
+PWM 6==>||               || <== PWM 5
 DIR 2==>| ------  ------  | <== DIR 4
         |                 |
 */
@@ -42,7 +38,7 @@ DIR 2==>| ------  ------  | <== DIR 4
 #define Motor_2_PWM 5 // motor 2 speed PWM pin    (L9110 driver module mE2)
 #define Motor_1_DIR 2 // motor 1 direction pin    (L9110 driver module mI1)
 #define Motor_2_DIR 4 // motor 2 direction pin    (L9110 driver module mI2)
-boolean DCMotor = true;    // SET TO TRUE for DC motor SMARS version or Sketch will fail to control the motors
+boolean DCMotor = true;    // SET TO TRUE for DC motor Rover version or Sketch will fail to control the motors
 boolean L9110 = false;     // select this option when using the L9110 driver module
 // ULTRASONIC PINs /////////////////////////////////////////////////////////////////////////
 #define PIN_Trigger  8  //TRIGGER pin (8)
@@ -68,7 +64,7 @@ Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NE
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
-const char programID[] = "Otto_SMARS"; //Each program will have an ID 
+const char programID[] = "OttoRover_V9"; //Each program will have an ID 
 ///////////////////////////////////////////////////////////////////
 bool goingforward = false; // motor direction logic
 bool goingreverse = false; // motor direction logic

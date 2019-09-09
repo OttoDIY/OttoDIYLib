@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//-- Otto DIY APP Firmware version 9 (V09) with standard baudrate of 9600 for Bluetooth modules.
+//-- Otto DIY PLUS APP Firmware version 9 (V9) with standard baudrate of 9600 for Bluetooth modules.
 //-- This code will have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
 //-- Designed to work with the basic Otto or PLUS or Humanoid or other biped robots. some of these functions will need a good power source such as a LIPO battery.
 //-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
@@ -13,17 +13,14 @@
 // -- ADDED Eye Matrix Progmem and control: Jason Snow November 2018
 // -- DELETED noise sense in mode 3 Jason Snow August 2019
 // -- REMOVED Eye Matrix Progmem and control: Jason Snow AUG 2019
-// -- ADDED Battery meassurementin in mode 3 Jason Snow August 2019
+// -- ADDED Battery meassurement in mode 3 Jason Snow August 2019
 //-------------------------------------------------------------------------
 #include <EEPROM.h>
 #include <EnableInterrupt.h>
-// Library to manage the Neopixel RGB led
-#include <Adafruit_NeoPixel.h>
-//-- Library to manage serial commands
-#include <OttoSerialCommand.h>
+#include <Adafruit_NeoPixel.h> // Library to manage the Neopixel RGB led
+#include <OttoSerialCommand.h> //-- Library to manage serial commands
 OttoSerialCommand SCmd;  // The SerialCommand object
-//-- Otto Library version 9
-#include <Otto9.h>
+#include <Otto9.h> //-- Otto Library version 9
 Otto9 Otto;  //This is Otto!
 
 //---------------------------------------------------------
@@ -73,7 +70,7 @@ Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NE
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 
-const char programID[] = "Otto_BIPED9"; //Each program will have a ID
+const char programID[] = "OttoPLUS_V9"; //Each program will have a ID
 const char name_fac = '$'; //Factory name
 const char name_fir = '#'; //First name
 //-- Movement parameters

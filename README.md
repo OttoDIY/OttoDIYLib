@@ -43,7 +43,47 @@ Reference Information for Arduino Libraries:
 ﻿https://www.arduino.cc/en/Hacking/LibraryTutorial﻿
  
  ## Wirings and Electornic diagrams:
- It vary pero Otto but we will follow these standard connections
+We will follow these standard connections
+SERVOS:
+PIN_YL 2 left leg
+PIN_YR 3 right leg
+PIN_RL 4 left foot
+PIN_RR 5 right foot
+PIN_LA 6 Left arm if enabled
+PIN_RA 7 Right arm if enabled
+
+ULTRASONIC:
+PIN_Trigger  8  //TRIGGER pin (8)
+#PIN_Echo    9  //ECHO pin (9)
+
+BUZZER:
+PIN_Buzzer  13 //BUZZER pin (13)
+
+SOUND SENSOR:
+PIN_NoiseSensor A6  //SOUND SENSOR   ANALOG pin (A6)
+ 
+LED MATRIX:
+
+DIN_PIN    A3   //DIN pin (A3)
+CS_PIN     A2   //CS pin (A2)
+CLK_PIN    A1   //CLK pin (A1)
+LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
+
+BATTERY SENSE:
+boolean BATTcheck = true;    // SET TO FALSE IF NOT USING THIS OPTION
+PIN_Battery   A7  //3.7V BATTERY MONITOR   ANALOG pin (A7)
+
+TOUCH SENSOR or PUSH BUTTON 
+PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
+
+RGB NEOPIXEL LED:
+boolean enableRGB = true;    // SET TO FALSE IF NOT USING THIS OPTION
+NeopixelRGB_PIN  12 // NEOPIXEL pin   DIGITAL PIN (12)
+NUMPIXELS       1   // change for more than 1, becarefull with the current
+
+SERVO ASSEMBLY:
+to help assemble Otto's feet and legs - wire link between GND and pin 7 for PLUS & pin 10 for humanoid
+#define PIN_ASSEMBLY    10   //ASSEMBLY pin (10) LOW = assembly    HIGH  = normal operation
  <img src="https://github.com/OttoDIY/Libraries/blob/master/OttoDIY_ALLwirings.png" width="500" align="center">
  
  ## Contribute
