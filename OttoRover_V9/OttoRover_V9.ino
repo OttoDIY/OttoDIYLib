@@ -31,15 +31,16 @@ Otto9 Otto;  //This is Otto!
          |     O   O     |
          |---------------|
 PWM 6==>||               || <== PWM 5
-DIR 2==>| ------  ------  | <== DIR 4
+DIR 7==>| ------  ------  | <== DIR 4
         |                 |
 */
-#define Motor_1_PWM 6 // motor 1 speed PWM pin    (L9110 driver module mE1)
-#define Motor_2_PWM 5 // motor 2 speed PWM pin    (L9110 driver module mE2)
-#define Motor_1_DIR 2 // motor 1 direction pin    (L9110 driver module mI1)
-#define Motor_2_DIR 4 // motor 2 direction pin    (L9110 driver module mI2)
-boolean DCMotor = true;    // SET TO TRUE for DC motor Rover version or Sketch will fail to control the motors
-boolean L9110 = false;     // select this option when using the L9110 driver module
+// MOTOR CONTROL PINs //////////////////////////////////////////////////////////////////////////
+#define Motor_1_PWM 6 // motor 1 speed PWM pin (6)   (L9110 driver module mE1)
+#define Motor_2_PWM 5 // motor 2 speed PWM pin (5)   (L9110 driver module mE2)
+#define Motor_1_DIR 7 // motor 1 direction pin (7)   (L9110 driver module mI1)
+#define Motor_2_DIR 4 // motor 2 direction pin (4)   (L9110 driver module mI2)
+boolean DCMotor = true;    // SET TO TRUE for DC motor SMARS version or Sketch will fail to control the motors
+boolean L9110 = true;     // select this option when using the L9110 driver module or DRV8833 module
 // ULTRASONIC PINs /////////////////////////////////////////////////////////////////////////
 #define PIN_Trigger  8  //TRIGGER pin (8)
 #define PIN_Echo     9  //ECHO pin (9)
@@ -84,8 +85,8 @@ int APPrightSPEED = 0; //  right motor speed variable from APP mode 4
 bool AUXcontrol1 = false; // logic for aux control switch 1 from APP
 bool AUXcontrol2 = false; // logic for aux control switch 2 from APP 
 ///////////////////////////////////////////////////////////////////
-#define OUT1 3 // Aux output 1 - pin 3
-#define OUT2 7 // Aux output 2 - pin 7
+#define OUT1 2 // Aux output 1 - pin 2
+#define OUT2 3 // Aux output 2 - pin 3
 ///////////////////////////////////////////////////////////////////
 int calibration = 0; // used if one motor is faster than the other due to mechanical differences
 volatile int MODE = 0; //State of Otto in the principal state machine.
@@ -191,7 +192,20 @@ void loop()
     SCmd.readSerial();
     Otto.putMouth(happyOpen);
    }
- 
+ if (buttonPushed){ 
+   motorstop(); // stop motors or they continuously turn
+    MODE = MODE +1; 
+    if (MODE == 5) MODE = 0;
+    if (MODE == 0) Otto.putMouth(zero);
+    if (MODE == 1) Otto.putMouth(one);
+    if (MODE == 2) Otto.putMouth(two);
+    if (MODE == 3) Otto.putMouth(three);
+    if (MODE == 4) Otto.putMouth(four);
+    delay(1000);
+    Otto.putMouth(happyOpen);
+    buttonPushed = false;
+      }
+  
     switch (MODE) 
      {
             //-- MODE 0 - Otto is awaiting
@@ -344,11 +358,11 @@ void motormoveForward() {
 if (L9110 == true){
   if (goingforward == false) motorstop();
  // DIR motor
-    digitalWrite(Motor_1_DIR, LOW);//left motor direction
-    digitalWrite(Motor_2_DIR, LOW);//right motor direction
-     // PWM motor
-    analogWrite(Motor_1_PWM, lSpeed);//left motor speed
-    analogWrite(Motor_2_PWM, rSpeed);//right motor speed
+    digitalWrite(Motor_1_DIR, HIGH);
+    digitalWrite(Motor_2_DIR, HIGH);
+    // PWM motor
+    analogWrite(Motor_1_PWM, lSpeed);
+    analogWrite(Motor_2_PWM, rSpeed);
     goingreverse = false;
     goingforward = true;
     goingleft = false;
@@ -376,11 +390,11 @@ void motormoveBackward() {
 if (L9110 == true){
 if (goingreverse == false) motorstop();  
     // DIR motor
-    digitalWrite(Motor_1_DIR, HIGH);//left motor direction
-    digitalWrite(Motor_2_DIR, HIGH);//right motor direction
-    // PWM motor
-    analogWrite(Motor_1_PWM, 255 - lSpeed);
-    analogWrite(Motor_2_PWM, 255 - rSpeed);
+    digitalWrite(Motor_1_DIR, LOW);//left motor direction
+    digitalWrite(Motor_2_DIR, LOW);//right motor direction
+     // PWM motor
+    analogWrite(Motor_1_PWM, lSpeed);//left motor speed
+    analogWrite(Motor_2_PWM, rSpeed);//right motor speed
     goingreverse = true;
     goingforward = false;
     goingleft = false;
@@ -406,15 +420,16 @@ if (goingreverse == false) motorstop();
  * Turn Left
  */
 void motorturnLeft() {
+  //map(APPrightSPEED, 0, -100, 255, 55);
 // STOP motors before direction change to help protect motor drivers
 if (L9110 == true){
   if (goingleft == false) motorstop();
     // DIR motor   
-    digitalWrite(Motor_1_DIR, HIGH);
-    digitalWrite(Motor_2_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_1_PWM, 255 - lSpeed);
-    analogWrite(Motor_2_PWM, rSpeed);
+    digitalWrite(Motor_1_DIR, LOW);
+    digitalWrite(Motor_2_DIR, HIGH);
+     // PWM motor
+    analogWrite(Motor_1_PWM, lSpeed);
+    analogWrite(Motor_2_PWM, 255 - rSpeed);
     goingreverse = false;
     goingforward = false;
     goingleft = true;
@@ -445,11 +460,11 @@ void motorturnRight() {
  if (L9110 == true){
   if (goingright == false) motorstop();   
     // DIR motor 
-    digitalWrite(Motor_1_DIR, LOW);
-    digitalWrite(Motor_2_DIR, HIGH);
-     // PWM motor
-    analogWrite(Motor_1_PWM, lSpeed);
-    analogWrite(Motor_2_PWM, 255 - rSpeed);
+    digitalWrite(Motor_1_DIR, HIGH);
+    digitalWrite(Motor_2_DIR, LOW);
+    // PWM motor
+    analogWrite(Motor_1_PWM, 255 - lSpeed);
+    analogWrite(Motor_2_PWM, rSpeed);
     goingreverse = false;
     goingforward = false;
     goingleft = false;
@@ -489,17 +504,17 @@ void motorstop() {
 //-- Function to receive motor speed and direction commands
 void receivePWM(){
     sendAck();
-    //Otto.home();
     //Definition of Motor Bluetooth commands
     //M ModeID    
-    char *arg; 
+    char *arg;
     arg = SCmd.next(); 
     if (arg != NULL) 
     {
       APPleftSPEED=atoi(arg);
       }
       else{
-      Otto.putMouth(xMouth);
+        motorstop();
+     Otto.putMouth(xMouth);
       delay(2000);
        Otto.clearMouth();
       APPleftSPEED=0; //stop
@@ -513,100 +528,27 @@ void receivePWM(){
        Otto.clearMouth();
       APPrightSPEED=0;
     }
+    //if ( Channel == ChannelNumber){
 // D0 PWM motor control
 // first map the value received from the app to a value between 0 and full speed
-// the value from the app is positive for forward and negative for reverse
+// the value from the app is negative for forward and positive for reverse
  if (APPleftSPEED < -1 ){
-  leftSPEED = map(APPleftSPEED, 0, -100, 0, 255);
+  leftSPEED = map(APPleftSPEED, 0, -100, 255, 105);
  }
   else
   {
-   leftSPEED = map(APPleftSPEED, 0, 100, 0, 255);
+   leftSPEED = map(APPleftSPEED, 0, 100, 0, 150);
   }
  if (APPrightSPEED < -1 ){
-  rightSPEED = map(APPrightSPEED, 0, -100, 0, 255);
+  rightSPEED = map(APPrightSPEED, 0, -100, 255, 105);
  }
  else 
  {
-  rightSPEED = map(APPrightSPEED, 0, 100, 0, 255);
+  rightSPEED = map(APPrightSPEED, 0, 100, 0, 150);
  }
 
 // just a little deadband
 
-if (L9110 == true){
-  if (APPleftSPEED > 5 ){
-    if (APPleftFORWARD == false){;
-      digitalWrite(Motor_1_PWM, LOW);
-      digitalWrite(Motor_1_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_1_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_1_PWM,leftSPEED);
-    APPleftREVERSE = false;
-    APPleftFORWARD = true;
-  }
-  else  {
-  if (APPleftSPEED < -5 ){
-    if (APPleftREVERSE == false){;
-      digitalWrite(Motor_1_PWM, LOW);
-      digitalWrite(Motor_1_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_1_DIR, HIGH);
-    // PWM motor
-    analogWrite(Motor_1_PWM, 255 - leftSPEED);
-    APPleftREVERSE = true;
-    APPleftFORWARD = false;
-  }
-  else{
-  digitalWrite(Motor_1_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_1_PWM, 0);
-    goingreverse = false;
-    goingforward = true;
-  }
-}
-if (APPrightSPEED > 5 ){
-  if (APPrightFORWARD == false){;
-      digitalWrite(Motor_2_PWM, LOW);
-      digitalWrite(Motor_2_DIR, LOW);
-      delay(250);
-    }
-    // DIR motor
-    digitalWrite(Motor_2_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_2_PWM,rightSPEED);
-    APPrightREVERSE = false;
-    APPrightFORWARD = true;
-  }
-  else  {
-  if (APPrightSPEED < -5 ){
-    if (APPrightREVERSE == false){;
-      digitalWrite(Motor_2_PWM, LOW);
-      digitalWrite(Motor_2_DIR, LOW);
-      delay(250);
-    }
-    digitalWrite(Motor_2_DIR, HIGH);
-    // PWM motor
-     analogWrite(Motor_2_PWM, 255 - rightSPEED);
-    APPrightREVERSE = true;
-    APPrightFORWARD = false;
-  }
-  else{
-    digitalWrite(Motor_2_DIR, LOW);
-    // PWM motor
-    analogWrite(Motor_2_PWM, 0);
-    APPrightFORWARD = false;
-    APPrightFORWARD = true;
-
-    }
-  }
-}
-else
-{
 if (APPleftSPEED > 5 ){
     if (APPleftFORWARD == false){;
       digitalWrite( Motor_1_PWM, LOW);
@@ -676,7 +618,7 @@ if (APPrightSPEED > 5 ){
     APPrightFORWARD = true;
       }
     }
-  }
+
 }
 
 void receiveAUX()
