@@ -11,8 +11,8 @@
   #include "WProgram.h"
   #include <pins_arduino.h>
 #endif
+
 #include "Oscillator.h"
-#include <Servo.h>
 
 //-- This function returns true if another sample
 //-- should be taken (i.e. the TS time has passed since
@@ -48,8 +48,8 @@ void Oscillator::attach(int pin, bool rev)
       //-- Initialization of oscilaltor parameters
       _TS=30;
       _T=2000;
-      _N = _T/_TS;
-      _inc = 2*M_PI/_N;
+      _NN = _T/_TS;
+      _inc = 2*M_PI/_NN;
 
       _previousMillis=0;
 
@@ -84,8 +84,8 @@ void Oscillator::SetT(unsigned int T)
   _T=T;
   
   //-- Recalculate the parameters
-  _N = _T/_TS;
-  _inc = 2*M_PI/_N;
+  _NN = _T/_TS;
+  _inc = 2*M_PI/_NN;
 };
 
 /*******************************/

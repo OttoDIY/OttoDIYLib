@@ -4,8 +4,8 @@
 #ifndef Otto9_h
 #define Otto9_h
 
-#include <Servo.h>
 #include <Oscillator.h>
+
 #include <EEPROM.h>
 #include <US.h>
 
@@ -24,9 +24,6 @@
 #define SMALL       5
 #define MEDIUM      15
 #define BIG         30
-
-
-
 
 class Otto9
 {
