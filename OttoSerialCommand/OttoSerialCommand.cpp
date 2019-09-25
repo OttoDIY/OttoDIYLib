@@ -12,9 +12,11 @@
 
 #include "OttoSerialCommand.h"
 
-
 #include <string.h>
 
+#if defined(ESP32)
+BluetoothSerial SerialBT;
+#endif
 
 // Constructor makes sure some things are set. 
 OttoSerialCommand::OttoSerialCommand()
@@ -22,10 +24,28 @@ OttoSerialCommand::OttoSerialCommand()
 	strncpy(delim," ",MAXDELIMETER);  // strtok_r needs a null-terminated string
 	term='\r';   // return character, default terminator for commands
 	numCommand=0;    // Number of callback handlers installed
-	clearBuffer(); 
+	clearBuffer();
 }
 
-
+void OttoSerialCommand::initBT(String blueToothName)
+{
+	if (blueToothName && blueToothName != "")
+	{
+		// seems we were passed a name, use blueTooth
+		Serial.print("We want to start bluetooth ");
+		Serial.print(blueToothName);
+		Serial.println("");
+		
+#if defined(ESP32)
+		SerialBT.begin(blueToothName);
+		usingBluetooth = true;
+#endif
+	}
+	else
+	{
+		usingBluetooth = false;
+	}
+}
 
 //
 // Initialize the command buffer being processed to all null characters
@@ -48,6 +68,38 @@ char *OttoSerialCommand::next()
 	return nextToken; 
 }
 
+int OttoSerialCommand::serialAvailable()
+{
+#if defined(ESP32)
+	if (usingBluetooth)
+	{
+		int avail = SerialBT.available();
+//		Serial.print(avail);
+//		Serial.println(" available BT");
+		return avail;
+	}
+	else
+#endif
+	return Serial.available();
+}
+
+int OttoSerialCommand::serialRead()
+{
+#if defined(ESP32)
+	if (usingBluetooth)
+	{
+		int data = SerialBT.read();
+
+		Serial.print("received [");
+		Serial.print(data);
+		Serial.println("]");
+		return data;
+	}
+	else
+#endif
+	return Serial.read();
+}
+
 // This checks the Serial stream for characters, and assembles them into a buffer.  
 // When the terminator character (default '\r') is seen, it starts parsing the 
 // buffer for a prefix command, and calls handlers setup by addCommand() member
@@ -55,12 +107,12 @@ void OttoSerialCommand::readSerial()
 {
 	bool onlyOneCommand = true;
 	// If we're using the Hardware port, check it.   Otherwise check the user-created OttoSoftwareSerial Port
-	while ((Serial.available() > 0)&&(onlyOneCommand==true))
+	while ((serialAvailable() > 0)&&(onlyOneCommand==true))
 	{
 		int i; 
 		boolean matched; 
 		
-			inChar=Serial.read();   // Read single available character, there may be more waiting
+		inChar=serialRead();   // Read single available character, there may be more waiting
 		
 		if (inChar==term) {     // Check for the terminator (default '\r') meaning end of command
 
@@ -116,4 +168,18 @@ void OttoSerialCommand::addCommand(const char *command, void (*function)())
 void OttoSerialCommand::addDefaultHandler(void (*function)())
 {
 	defaultHandler = function;
+}
+
+Stream * OttoSerialCommand::ottoSerial(void)
+{
+#if defined(ESP32)
+	if (usingBluetooth && SerialBT.hasClient())
+	{
+		return &SerialBT;
+	}
+	else
+#endif
+	{
+		return &Serial;
+	}
 }

@@ -15,6 +15,9 @@
 #include "Otto_sound9.h"
 #include "Otto_gestures9.h"
 #include <TimerFreeTone.h>
+#include "EnableInterrupt.h"
+#include "US.h"
+#include "OttoSerialCommand.h"
 
 //-- Constants
 #define FORWARD     1

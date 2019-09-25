@@ -20,6 +20,13 @@
 
 #include <string.h>
 
+#if defined(ESP32)
+#include "BluetoothSerial.h"
+
+# if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+# error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+# endif
+#endif
 
 #define SERIALCOMMANDBUFFER 35  //16 after changed by me
 #define MAXSERIALCOMMANDS	16
@@ -32,9 +39,11 @@ class OttoSerialCommand
 
 		void clearBuffer();   // Sets the command buffer to all '\0' (nulls)
 		char *next();         // returns pointer to next token found in command buffer (for getting arguments to commands)
+		void initBT(String);  // start a bluetooth peripheral SSP (UART)
 		void readSerial();    // Main entry point.  
 		void addCommand(const char *, void(*)());   // Add commands to processing dictionary
-		void addDefaultHandler(void (*function)());    // A handler to call when no valid command received. 
+		void addDefaultHandler(void (*function)());    // A handler to call when no valid command received.
+		Stream *ottoSerial();  // return the active Serial 
 	
 	private:
 		char inChar;          // A character read from the serial stream 
@@ -52,7 +61,11 @@ class OttoSerialCommand
 		OttoSerialCommandCallback CommandList[MAXSERIALCOMMANDS];   // Actual definition for command/handler array
 		void (*defaultHandler)();           // Pointer to the default handler function 
 		int usingOttoSoftwareSerial;            // Used as boolean to see if we're using OttoSoftwareSerial object or not
-
+		int serialAvailable();				// is a char available from the Serial or the SerialBT whichever is selected at construction
+		int serialRead();					// read a char from the active Serial device
+#if defined(ESP32)
+		bool usingBluetooth;
+#endif
 };
 
 #endif //OttoSerialCommand_h
