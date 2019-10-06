@@ -15,8 +15,6 @@ Otto_Matrix::Otto_Matrix()
 	//load = _load;
 	//clock = _clock;
 	//num = _num;
-	//for (int i=0; i<80; i++)
-		//buffer[i] = 0;
 }
 
 void Otto_Matrix::init(byte _data, byte _load, byte _clock, byte _num, int _rotation)
@@ -27,9 +25,11 @@ void Otto_Matrix::init(byte _data, byte _load, byte _clock, byte _num, int _rota
   num = _num;
   rotation = _rotation;
   if ((rotation > 4) || (rotation == 0)) rotation = 1; // we have to have number between 1 and 4
- // itoa(_rotation, rotation2,1);
-  for (int i=0; i<80; i++)
+  for (int i=0; i<8; i++)
     buffer[i] = 0;
+
+    for (int i=0; i<80; i++)
+    CHARbuffer[i] = 0;
     
 	pinMode(data,  OUTPUT);
 	pinMode(clock, OUTPUT);
@@ -57,8 +57,11 @@ void Otto_Matrix::clearMatrix()
 	for (int i=0; i<8; i++) 
 		setColumnAll(i,0);
 		
-	for (int i=0; i<80; i++)
+	for (int i=0; i<8; i++)
 		buffer[i] = 0;
+
+    for (int i=0; i<80; i++)
+    CHARbuffer[i] = 0;
 }
 
 void Otto_Matrix::setCommand(byte command, byte value)
@@ -86,11 +89,11 @@ void Otto_Matrix::setColumn(byte col, byte value)
 			shiftOut(data, clock, MSBFIRST, c + 1);
 			shiftOut(data, clock, MSBFIRST, value);
 		}
-		else
-		{
-			shiftOut(data, clock, MSBFIRST, 0);
-			shiftOut(data, clock, MSBFIRST, 0);
-		}
+		//else
+		//{
+			//shiftOut(data, clock, MSBFIRST, 0);
+			//shiftOut(data, clock, MSBFIRST, 0);
+		//}
 	}
 	digitalWrite(load, LOW);
 	digitalWrite(load, HIGH);
@@ -135,94 +138,7 @@ void Otto_Matrix::setDot(byte col, byte row, byte value)
 	digitalWrite(load, HIGH);
 }
 
-/* void MaxMatrix::writeSprite(int x, int y, const byte* sprite)
-{
-	int w = sprite[0];
-	int h = sprite[1];
-	
-	if (h == 8 && y == 0)
-		for (int i=0; i<w; i++)
-		{
-			int c = x + i;
-			if (c>=0 && c<80)
-				setColumn(c, sprite[i+2]);
-		}
-	else
-		for (int i=0; i<w; i++)
-			for (int j=0; j<h; j++)
-			{
-				int c = x + i;
-				int r = y + j;
-				if (c>=0 && c<80 && r>=0 && r<8)
-					setDot(c, r, bitRead(sprite[i+2], j));
-			}
-}
-
-void MaxMatrix::reload()
-{
-	for (int i=0; i<8; i++)
-	{
-		int col = i;
-		digitalWrite(load, LOW);    
-		for (int j=0; j<num; j++) 
-		{
-			shiftOut(data, clock, MSBFIRST, i + 1);
-			shiftOut(data, clock, MSBFIRST, buffer[col]);
-			col += 8;
-		}
-		digitalWrite(load, LOW);
-		digitalWrite(load, HIGH);
-	}
-}
-
-void MaxMatrix::shiftLeft(bool rotate, bool fill_zero)
-{
-	byte old = buffer[0];
-	int i;
-	for (i=0; i<80; i++)
-		buffer[i] = buffer[i+1];
-	if (rotate) buffer[num*8-1] = old;
-	else if (fill_zero) buffer[num*8-1] = 0;
-	
-	reload();
-}
-
-void MaxMatrix::shiftRight(bool rotate, bool fill_zero)
-{
-	int last = num*8-1;
-	byte old = buffer[last];
-	int i;
-	for (i=79; i>0; i--)
-		buffer[i] = buffer[i-1];
-	if (rotate) buffer[0] = old;
-	else if (fill_zero) buffer[0] = 0;
-	
-	reload();
-}
-
-void MaxMatrix::shiftUp(bool rotate)
-{
-	for (int i=0; i<num*8; i++)
-	{
-		bool b = buffer[i] & 1;
-		buffer[i] >>= 1;
-		if (rotate) bitWrite(buffer[i], 7, b);
-	}
-	reload();
-}
-
-void MaxMatrix::shiftDown(bool rotate)
-{
-	for (int i=0; i<num*8; i++)
-	{
-		bool b = buffer[i] & 128;
-		buffer[i] <<= 1;
-		if (rotate) bitWrite(buffer[i], 0, b);
-	}
-	reload();
-}
-*/
-// rutina para Zowi, para meter sus caritas en la matriz de 8
+// routine for OTTO and ZOWI, for the 6 x 5 matrix
 void Otto_Matrix::writeFull(unsigned long value) {
   if (rotation == 1) {
 	for (int r=0; r<5;r++){
@@ -256,3 +172,75 @@ if (rotation == 2) {
             }
   }
 }
+
+void Otto_Matrix::sendChar (const byte data, byte pos, byte number, byte scrollspeed){
+  if (scrollspeed < 50 ) scrollspeed = 50;
+   if (scrollspeed > 150 ) scrollspeed = 150;
+  int charPos;
+charPos = pos * 8;
+//Serial.print ("sendchar  ");
+//Serial.print (pos);
+//Serial.print (" -  ");
+//Serial.print (number);
+//Serial.print (" -  ");
+//Serial.print (charPos);
+//Serial.print (" -  ");
+//Serial.println (data);
+//we need to add 8 for each character
+  CHARbuffer[0 + charPos] = 0;
+  CHARbuffer[1 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[0]);
+  CHARbuffer[2 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[1]);
+  CHARbuffer[3 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[2]);
+  CHARbuffer[4 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[3]);
+  CHARbuffer[5 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[4]);
+  CHARbuffer[6 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[5]);
+  CHARbuffer[7 + charPos] = 0;
+
+ if (number == (pos + 1)){ // last character so display the total text
+// we need to display first character and scroll left until each charater is shown.
+    for (int c=0; c<8;c++){ // show first character
+         byte value = CHARbuffer[c];
+            for (int r=0; r<8; r++){
+              if (rotation == 1) {
+                setDot(c,7-r,(0b00000001 & (value >> r)));//       
+                }
+                if (rotation == 2) {
+                 setDot(7-c,r,(0b00000001 & (value >> r)));//  
+                }
+                if (rotation == 3) {
+                 //setDot(r,c,(1));// top LH corner
+                 setDot(r,c,(0b00000001 & (value >> r)));//  
+                }
+                if (rotation == 4) {
+                 setDot(7-r,7-c,(0b00000001 & (value >> r)));//  
+                }
+           }
+      }
+      delay(500); // show first digit for longer
+      for (int i=0; i<((number*8)-1); i++){   // shift buffer the correct number of characters (8 lines per character)
+        CHARbuffer[i] = CHARbuffer[i+1];
+         for (int c=0; c<8;c++){ // 
+             byte value = CHARbuffer[(1+c)+i];
+                for (int r=0; r<8; r++){
+                  if (rotation == 1) {
+                  setDot(c,7-r,(0b00000001 & (value >> r)));//       
+                   }
+                  if (rotation == 2) {
+                  setDot(7-c,r,(0b00000001 & (value >> r)));//  
+                  }
+                  if (rotation == 3) {
+                   setDot(r,c,(0b00000001 & (value >> r)));//  
+                 }
+                  if (rotation == 4) {
+                 setDot(7-r,7-c,(0b00000001 & (value >> r)));//  
+                }
+              }
+        }
+     delay(scrollspeed);// this sets the scroll speed
+  
+      }
+      clearMatrix();
+ }   
+}
+
+

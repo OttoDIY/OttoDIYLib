@@ -1,26 +1,16 @@
 #######################################
-# Syntax Coloring Map For Otto DIY Libraries
+# Syntax Coloring Map 
 #######################################
 # Class
 #######################################
-
-Otto DIY Libraries (KEYWORD1)
-
+KEYWORD1
 
 #######################################
 # Methods and Functions
 #######################################
-
-ottorobot	KEYWORD2
-ottolibraries			KEYWORD2
-ottobot	KEYWORD2
-ottoDIY	KEYWORD2
-ottohumanoid	KEYWORD2
-ottoplus			KEYWORD2
-ottorover			KEYWORD2
+KEYWORD2
 
 #######################################
 # Constants
 #######################################
-
-Otto_Libraries	LITERAL1
+LITERAL1

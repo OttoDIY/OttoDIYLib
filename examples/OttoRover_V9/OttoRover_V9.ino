@@ -12,6 +12,7 @@
 // -- ADDED NEOPIXEL: Paul Van De Veen NOV 2018
 // -- ADDED Eye Matrix Progmem and control: Jason Snow NOV 2018
 // -- REMOVED Eye Matrix Progmem and control: Jason Snow AUG 2019
+// -- ADDED TEXT display on matrix Jason Snow September 2019
 //-------------------------------------------------------------------
 // Otto libraries version 9        June 2019
 //-------------------------------------------------------------------
@@ -54,6 +55,7 @@ boolean L9110 = true;     // select this option when using the L9110 driver modu
 #define CLK_PIN    A1   //CLK pin (A1)
 #define LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
 // BATTERY SENSE PIN //////////////////////////////////////////////////////////////////////////
+boolean BATTcheck = true;    // SET TO FALSE IF NOT USING THIS OPTION
 #define PIN_Battery   A7  //3v7 BATTERY MONITOR   ANALOG pin (A7)
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
@@ -66,6 +68,7 @@ Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NE
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 const char programID[] = "OttoRover_V9"; //Each program will have an ID 
+const char message1[] = "I AM OTTO"; //9 characters MAXIMUM
 ///////////////////////////////////////////////////////////////////
 bool goingforward = false; // motor direction logic
 bool goingreverse = false; // motor direction logic
@@ -103,6 +106,9 @@ int moveId = 0;          //Number of movement
 int modeId = 0;          //Number of mode
 int moveSize = 15;       //Asociated with the height of some movements
 volatile bool buttonPushed=false;  //Variable to remember when a button has been pushed
+double batteryCHECK = 0;
+unsigned long int matrix;
+unsigned long timerMillis = 0;
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
@@ -151,11 +157,8 @@ void setup() {
   SCmd.addCommand("H", receiveGesture);   //  sendAck & sendFinalAck
   SCmd.addCommand("K", receiveSing);      //  sendAck & sendFinalAck
   SCmd.addCommand("C", receiveTrims);     //  sendAck & sendFinalAck
-  SCmd.addCommand("G", receiveServo);     //  sendAck & sendFinalAck
   SCmd.addCommand("R", receiveName);      //  sendAck & sendFinalAck
-  SCmd.addCommand("E", requestName);
   SCmd.addCommand("D", requestDistance);
-  SCmd.addCommand("N", requestNoise);
   SCmd.addCommand("B", requestBattery);   // 3v7 lipo battery
   SCmd.addCommand("I", requestProgramId);
   SCmd.addCommand("J", requestMode);
@@ -180,7 +183,13 @@ void setup() {
 
   Otto.putMouth(happyOpen);
   previousMillis = millis();
-
+  delay(1000);// wait for 1 second, this is so that you can see the image on the Matrix for 1 second before repeating
+  Otto.clearMouth();  
+  // write a text string of no more than nine limited characters and scroll at a speed between 50 and 150 (FAST and SLOW)
+ // limited characters are : CAPITALS A to Z   NUMBERS 0 to 9    'SPACE'  : ; < >  = @ 
+  Otto.writeText (message1, 75);
+  delay (4000);
+  Otto.clearMouth();
 }
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
@@ -191,6 +200,13 @@ void loop()
     {
     SCmd.readSerial();
     Otto.putMouth(happyOpen);
+   }
+   //Every 60 seconds check battery level
+   if (BATTcheck == true) {
+      if (millis() - timerMillis >= 60000) {
+        OttoLowBatteryAlarm();
+        timerMillis = millis();
+      }
    }
  if (buttonPushed){ 
    motorstop(); // stop motors or they continuously turn
@@ -324,20 +340,34 @@ void loop()
         //-- MODE 3 - Noise detector mode
       //--------------------------------------------------------- 
         case 3:
-        if (Otto.getNoise() >= 650) { //740
-         // if we detect noise then we do something - change this for what ever you want Otto to do if there
-         // is a noise, change the value for noise levels
-          delay(50); 
-            Otto.putMouth(bigSurprise);
-            Otto.sing(S_OhOoh);
-            delay(500); //
-            Otto.putMouth(random(10,21));
-            delay(500); //
-            randomDance=random(5,21);
-            delay(500); //
-            Otto.putMouth(happyOpen);
+        // battery display as an icon on the mouth, battery icon will has three levels of power
+      if (BATTcheck == true) {
+      batteryCHECK = Otto.getBatteryLevel();
+        Otto.clearMouth();
+        if (batteryCHECK < 40)
+        {
+          matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
         }
-        break;
+        if (batteryCHECK > 45)
+        {
+          matrix = 0b00001100010010010010011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+       
+        if (batteryCHECK > 65)
+        {
+          matrix = 0b00001100010010011110011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+        if (batteryCHECK > 80)
+        {
+          matrix = 0b00001100011110011110011110011110; // show empty battery symbol
+          Otto.putMouth(matrix, false);
+        }
+        delay(1500);
+      }
+      break;
       //-- MODE 4 - Otto APP mode (listening SerialPort) 
       //---------------------------------------------------------
       case 4:
@@ -714,33 +744,6 @@ void receiveLED() {
   sendFinalAck();
 }
 
-//-- Function to receive buzzer commands
-void recieveBuzzer() {
-  //sendAck & stop if necessary
-  sendAck();
-  Otto.home();
-
-  bool error = false;
-  int frec;
-  int duration;
-  char *arg;
-
-  arg = SCmd.next();
-  if (arg != NULL) frec = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) duration = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-  if (error == true) {
-    Otto.putMouth(xMouth);
-    delay(2000);
-    Otto.clearMouth();
-  }
-  else Otto._tone(frec, duration, 1);
-  sendFinalAck();
-}
-
 //-- Function to receive TRims commands
 void receiveTrims() {
   //sendAck & stop if necessary
@@ -777,48 +780,6 @@ void receiveTrims() {
   } else { //Save it on EEPROM
     Otto.setTrims(trim_YL, trim_YR, trim_RL, trim_RR);
     Otto.saveTrimsOnEEPROM(); //Uncomment this only for one upload when you finaly set the trims.
-  }
-  sendFinalAck();
-}
-
-//-- Function to receive Servo commands
-void receiveServo() {
-  sendAck();
-  moveId = 30;
-
-  //Definition of Servo Bluetooth command
-  //G  servo_YL servo_YR servo_RL servo_RR
-  //Example of receiveServo Bluetooth commands
-  //G 90 85 96 78
-  bool error = false;
-  char *arg;
-  int servo_YL, servo_YR, servo_RL, servo_RR;
-
-  arg = SCmd.next();
-  if (arg != NULL) servo_YL = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) servo_YR = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) servo_RL = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) {
-    servo_RR = atoi(arg);  // Converts a char string to an integer
-  }
-  else error = true;
-  if (error == true) {
-    Otto.putMouth(xMouth);
-    delay(2000);
-    Otto.clearMouth();
-  }
-  else { //Update Servo:
-    int servoPos[4] = {servo_YL, servo_YR, servo_RL, servo_RR};
-    Otto._moveServos(200, servoPos);   //Move 200ms
   }
   sendFinalAck();
 }
@@ -1067,43 +1028,31 @@ void receiveName() {
   //sendAck & stop if necessary
   sendAck();
   Otto.home();
-  char newOttoName[11] = "";  //Variable to store data read from Serial.
-  int eeAddress = 5;          //Location we want the data to be in EEPROM.
+  char newOttoName[9] = "";  //Variable to store data read from Serial.
   char *arg;
   arg = SCmd.next();
   if (arg != NULL) {
     //Complete newOttoName char string
     int k = 0;
-    while ((*arg) && (k < 11)) {
+    while ((*arg) && (k < 9)) {
       newOttoName[k] = *arg++;
       k++;
     }
-    EEPROM.put(eeAddress, newOttoName);
+    // write a text string of no more than nine limited characters and scroll at a speed between 50 and 150 (FAST and SLOW)
+    // limited characters are : CAPITALS A to Z   NUMBERS 0 to 9    'SPACE'  : ; < >  = @ 
+    Otto.clearMouth();
+    Otto.writeText (newOttoName, 75);
+    delay (1000);
+    Otto.clearMouth();
   }
   else
   {
-    //Otto.putMouth(xMouth);
+    Otto.putMouth(xMouth);
     delay(2000);
-    //Otto.clearMouth();
+    Otto.clearMouth();
   }
   sendFinalAck();
 }
-
-//-- Function to send Otto's name
-void requestName() {
-  Otto.home(); //stop if necessary
-  char actualOttoName[11] = ""; //Variable to store data read from EEPROM.
-  int eeAddress = 5;            //EEPROM address to start reading from
-  //Get the float data from the EEPROM at position 'eeAddress'
-  EEPROM.get(eeAddress, actualOttoName);
-
-  Serial.print(F("&&"));
-  Serial.print(F("E "));
-  Serial.print(actualOttoName);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
 //-- Function to send ultrasonic sensor measure (distance in "cm")
 void requestDistance() {
   Otto.home();  //stop if necessary
@@ -1111,17 +1060,6 @@ void requestDistance() {
   Serial.print(F("&&"));
   Serial.print(F("D "));
   Serial.print(distance);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-//-- Function to send noise sensor measure
-void requestNoise() {
-  Otto.home();  //stop if necessary
-  int microphone = Otto.getNoise(); //analogRead(PIN_NoiseSensor);
-  Serial.print(F("&&"));
-  Serial.print(F("N "));
-  Serial.print(microphone);
   Serial.println(F("%%"));
   Serial.flush();
 }
@@ -1267,22 +1205,34 @@ void requestMode() {
 //-- Functions with animatics
 //--------------------------------------------------------
 
+//-- Function to read battery level - if it is low then show low battery
 void OttoLowBatteryAlarm() {
-  double batteryLevel = Otto.getBatteryLevel();
-  if (batteryLevel < 45) {
+  //
+   double batteryLevel = Otto.getBatteryLevel();
+  if (batteryLevel < 35) {
     Otto.putMouth(thunder);
     Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
     delay(30);
     Otto.bendTones (2000, 880, 1.02, 8, 3);  //A5 = 880
+    delay(30);
+    Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
+    delay(30);
+    Otto.bendTones (2000, 880, 1.02, 8, 3);  //A5 = 880
     Otto.clearMouth();
-    delay(500);
-
+    matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+     Otto.putMouth(matrix, false);
+    delay(2000);
+    Otto.clearMouth();
+     delay(1000);
+    matrix = 0b00001100010010010010010010011110; // show empty battery symbol
+    Otto.putMouth(matrix, false);
+    delay(2000);
+    Otto.clearMouth();
+    Otto.putMouth(happyOpen);
   }
 }
 
 void OttoSleeping_withInterrupts() {
-  int bedPos_0[4] = {100, 80, 60, 120};
-  Otto._moveServos(700, bedPos_0);
   for (int i = 0; i < 4; i++) {
     Otto.putAnimationMouth(dreamMouth, 0);
     Otto.bendTones (100, 200, 1.04, 10, 10);
@@ -1310,4 +1260,7 @@ void ButtonPushed(){
         Otto.putMouth(smallSurprise);
     } 
 } 
-
+void checkBATT(void* context) 
+{
+OttoLowBatteryAlarm();
+}

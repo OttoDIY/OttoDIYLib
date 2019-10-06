@@ -9,6 +9,7 @@
 #define _Otto_Matrix9_H_
 
 #include "Arduino.h"
+#include "Otto_gestures9.h"
 
 #define max7219_reg_noop        0x00
 #define max7219_reg_digit0      0x01
@@ -32,10 +33,12 @@ class Otto_Matrix
     byte load;
     byte clock;
     byte num;
-    byte buffer[80];
+    byte buffer[8];
+    byte CHARbuffer[80];
     int  rotation;
     void reload();
 	  char rotation2;
+  
   public:
     Otto_Matrix();
     
@@ -46,13 +49,8 @@ class Otto_Matrix
     void setColumn(byte col, byte value);
     void setColumnAll(byte col, byte value);
     void setDot(byte col, byte row, byte value);
-    //void writeSprite(int x, int y, const byte* sprite);
-    
-    //void shiftLeft(bool rotate = false, bool fill_zero = true);
-    //void shiftRight(bool rotate = false, bool fill_zero = true);
-    //void shiftUp(bool rotate = false);
-    //void shiftDown(bool rotate = false);
     void writeFull(unsigned long value);
+    void sendChar ( const byte data, byte pos, byte number, byte scrollspeed);
 };
 
 #endif

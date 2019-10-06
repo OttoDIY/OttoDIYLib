@@ -11,51 +11,8 @@
 
 #include "Otto9Humanoid.h"
 
-void Otto9Humanoid::init(int YL, int YR, int RL, int RR, bool load_calibration, int NoiseSensor, int Buzzer, int USTrigger, int USEcho) {
-  
-  servo_pins[0] = YL;
-  servo_pins[1] = YR;
-  servo_pins[2] = RL;
-  servo_pins[3] = RR;
-
-  attachServos();
-  isOttoResting=false;
-
-  if (load_calibration) {
-    for (int i = 0; i < 4; i++) {
-      int servo_trim = EEPROM.read(i);
-      if (servo_trim > 128) servo_trim -= 256;
-      servo[i].SetTrim(servo_trim);
-    }
-  }
-  
-  for (int i = 0; i < 4; i++) servo_position[i] = 90;
-
-  //US sensor init with the pins:
-  us.init(USTrigger, USEcho);
-
-  //Buzzer & noise sensor pins: 
-  pinBuzzer = Buzzer;
-  pinNoiseSensor = NoiseSensor;
-
-  pinMode(Buzzer,OUTPUT);
-  pinMode(NoiseSensor,INPUT);
-}
 ////////////////////////////////////////////////////////////////////////////
-void Otto9Humanoid::initDC(int NoiseSensor, int Buzzer, int USTrigger, int USEcho) {
 
-  isOttoResting=false;
-
-  //US sensor init with the pins:
-  us.init(USTrigger, USEcho);
-
-  //Buzzer & noise sensor pins: 
-  pinBuzzer = Buzzer;
-  pinNoiseSensor = NoiseSensor;
-
-  pinMode(Buzzer,OUTPUT);
-  pinMode(NoiseSensor,INPUT);
-}
 ///////////////////////////////////////////////////////
 void Otto9Humanoid::initHUMANOID(int YL, int YR, int RL, int RR,int LA, int RA, bool load_calibration, int NoiseSensor, int Buzzer, int USTrigger, int USEcho) {
   isHUMANOID = true;
@@ -107,37 +64,24 @@ void Otto9Humanoid::initBatLevel(int batteryPIN){
 //-- ATTACH & DETACH FUNCTIONS ----------------------------------//
 ///////////////////////////////////////////////////////////////////
 void Otto9Humanoid::attachServos(){
-  if (isHUMANOID == true){
+
     servo[0].attach(servo_pins[0]);
     servo[1].attach(servo_pins[1]);
     servo[2].attach(servo_pins[2]);
     servo[3].attach(servo_pins[3]);
     servo[4].attach(servo_pins[4]);
     servo[5].attach(servo_pins[5]);
-  }
-  else{
-    servo[0].attach(servo_pins[0]);
-    servo[1].attach(servo_pins[1]);
-    servo[2].attach(servo_pins[2]);
-    servo[3].attach(servo_pins[3]);
-  }
+
 }
 
 void Otto9Humanoid::detachServos(){
-  if (isHUMANOID == true){
+
     servo[0].detach();
     servo[1].detach();
     servo[2].detach();
     servo[3].detach();
     servo[4].detach();
     servo[5].detach();
-  }
-  else{
-    servo[0].detach();
-    servo[1].detach();
-    servo[2].detach();
-    servo[3].detach();
-  }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -737,12 +681,36 @@ ledmatrix.writeFull(PROGMEM_getAnything(&Mouthtable[mouth]));
   }
 }
 
-
 void Otto9Humanoid::clearMouth(){
 
   ledmatrix.clearMatrix();
 }
+// // limited characters are : CAPITALS A to Z   NUMBERS 0 to 9    'SPACE'  : ; < >  = @ 
+void Otto9Humanoid::writeText(const char * s, byte scrollspeed){
+ int a ;
+ int b ;
+  for(a = 0; s[a] != '\0'; a++){
+    b = a +1 ;
+    if (b > 9 ) b = 9; // only maximum of nine characters allowed
+  }
+  for(int charNUMBER = 0; charNUMBER <b; charNUMBER++){
+      if ((* s < 48) || (* s > 91)) {
+        if (* s == 32){
+          ledmatrix.sendChar (44, charNUMBER, b, scrollspeed);
+        }
+        else
+        {
+          ledmatrix.sendChar (43, charNUMBER, b, scrollspeed);
+        }
+     }
+      else
+      {
+      ledmatrix.sendChar ((* s - 48), charNUMBER, b, scrollspeed);
+     }
+  * s++;
+  }
 
+}
 
 ///////////////////////////////////////////////////////////////////
 //-- SOUNDS -----------------------------------------------------//
@@ -905,21 +873,7 @@ void Otto9Humanoid::sing(int songName){
 ///////////////////////////////////////////////////////////////////
 
 void Otto9Humanoid::playGesture(int gesture){
-
-  int sadPos[4]=      {110, 70, 20, 160};
-  int bedPos[4]=      {100, 80, 60, 120};
-  int fartPos_1[4]=   {90, 90, 145, 122}; //rightBend
-  int fartPos_2[4]=   {90, 90, 80, 122};
-  int fartPos_3[4]=   {90, 90, 145, 80};
-  int confusedPos[4]= {110, 70, 90, 90};
-  int angryPos[4]=    {90, 90, 70, 110};
-  int headLeft[4]=    {110, 110, 90, 90};
-  int headRight[4]=   {70, 70, 90, 90};
-  int fretfulPos[4]=  {90, 90, 90, 110};
-  int bendPos_1[4]=   {90, 90, 70, 35};
-  int bendPos_2[4]=   {90, 90, 55, 35};
-  int bendPos_3[4]=   {90, 90, 42, 35};
-  int bendPos_4[4]=   {90, 90, 34, 35};
+ int gesturePOSITION[6];
   
   switch(gesture){
 
@@ -952,7 +906,13 @@ void Otto9Humanoid::playGesture(int gesture){
 
     case OttoSad: 
         putMouth(sad);
-        _moveServos(700, sadPos);     
+        gesturePOSITION[0] = 110;//int sadPos[6]=      {110, 70, 20, 160, 90, 90};
+        gesturePOSITION[1] = 70;
+         gesturePOSITION[2] = 20;
+          gesturePOSITION[3] = 160;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(700, gesturePOSITION);     
         bendTones(880, 830, 1.02, 20, 200);
         putMouth(sadClosed);
         bendTones(830, 790, 1.02, 20, 200);  
@@ -972,8 +932,13 @@ void Otto9Humanoid::playGesture(int gesture){
 
 
     case OttoSleeping:
-        _moveServos(700, bedPos);     
-
+    gesturePOSITION[0] = 100;//int bedPos[6]=      {100, 80, 60, 120, 90, 90};
+        gesturePOSITION[1] = 80;
+         gesturePOSITION[2] = 60;
+          gesturePOSITION[3] = 120;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(700, gesturePOSITION);     
         for(int i=0; i<4;i++){
           putAnimationMouth(dreamMouth,0);
           bendTones (100, 200, 1.04, 10, 10);
@@ -998,19 +963,37 @@ void Otto9Humanoid::playGesture(int gesture){
 
 
     case OttoFart:
-        _moveServos(500,fartPos_1);
+    gesturePOSITION[0] = 90;// int fartPos_1[6]=   {90, 90, 145, 122, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 145;
+          gesturePOSITION[3] = 122;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(500,gesturePOSITION);
         delay(300);     
         putMouth(lineMouth);
         sing(S_fart1);  
         putMouth(tongueOut);
         delay(250);
-        _moveServos(500,fartPos_2);
+        gesturePOSITION[0] = 90;// int fartPos_2[6]=   {90, 90, 80, 122, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 80;
+          gesturePOSITION[3] = 122;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(500,gesturePOSITION);
         delay(300);
         putMouth(lineMouth);
         sing(S_fart2); 
         putMouth(tongueOut);
         delay(250);
-        _moveServos(500,fartPos_3);
+        gesturePOSITION[0] = 90;// int fartPos_3[6]=   {90, 90, 145, 80, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 145;
+          gesturePOSITION[3] = 80;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(500,gesturePOSITION);
         delay(300);
         putMouth(lineMouth);
         sing(S_fart3);
@@ -1024,7 +1007,13 @@ void Otto9Humanoid::playGesture(int gesture){
 
 
     case OttoConfused:
-        _moveServos(300, confusedPos); 
+    gesturePOSITION[0] = 110;//int confusedPos[6]= {110, 70, 90, 90, 90, 90};
+        gesturePOSITION[1] = 70;
+         gesturePOSITION[2] = 90;
+          gesturePOSITION[3] = 90;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(300, gesturePOSITION); 
         putMouth(confused);
         sing(S_confused);
         delay(500);
@@ -1046,7 +1035,13 @@ void Otto9Humanoid::playGesture(int gesture){
 
 
     case OttoAngry: 
-        _moveServos(300, angryPos); 
+    gesturePOSITION[0] = 90;//int angryPos[6]=    {90, 90, 70, 110, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 70;
+          gesturePOSITION[3] = 110;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(300, gesturePOSITION); 
         putMouth(angry);
 
         _tone(note_A5,100,30);
@@ -1056,9 +1051,21 @@ void Otto9Humanoid::playGesture(int gesture){
         delay(15);
         bendTones(note_A5, note_E5, 1.02, 20, 4);
         delay(400);
-        _moveServos(200, headLeft); 
+        gesturePOSITION[0] = 110;//int headLeft[6]=    {110, 110, 90, 90, 90, 90};
+        gesturePOSITION[1] = 110;
+         gesturePOSITION[2] = 90;
+          gesturePOSITION[3] = 90;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(200, gesturePOSITION); 
         bendTones(note_A5, note_D6, 1.02, 20, 4);
-        _moveServos(200, headRight); 
+        gesturePOSITION[0] = 70;//int headRight[6]=   {70, 70, 90, 90, 90, 90};
+        gesturePOSITION[1] = 70;
+         gesturePOSITION[2] = 90;
+          gesturePOSITION[3] = 90;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(200, gesturePOSITION); 
         bendTones(note_A5, note_E5, 1.02, 20, 4);
 
         home();  
@@ -1074,7 +1081,13 @@ void Otto9Humanoid::playGesture(int gesture){
         putMouth(lineMouth);
 
         for(int i=0; i<4; i++){
-          _moveServos(100, fretfulPos);   
+          gesturePOSITION[0] = 90;//int fretfulPos[6]=  {90, 90, 90, 110, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 90;
+          gesturePOSITION[3] = 110;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+          _moveServos(100, gesturePOSITION);   
           home();
         }
 
@@ -1156,7 +1169,7 @@ void Otto9Humanoid::playGesture(int gesture){
         putMouth(smallSurprise);
         //final pos   = {90,90,150,30}
         for (int i = 0; i < 60; ++i){
-          int pos[]={90,90,90+i,90-i};  
+          int pos[]={90,90,90+i,90-i, 90, 90};  
           _moveServos(10,pos);
           _tone(1600+i*20,15,1);
         }
@@ -1164,7 +1177,7 @@ void Otto9Humanoid::playGesture(int gesture){
         putMouth(bigSurprise);
         //final pos   = {90,90,90,90}
         for (int i = 0; i < 60; ++i){
-          int pos[]={90,90,150-i,30+i};  
+          int pos[]={90,90,150-i,30+i, 90, 90};  
           _moveServos(10,pos);
           _tone(2800+i*20,15,1);
         }
@@ -1185,17 +1198,40 @@ void Otto9Humanoid::playGesture(int gesture){
     break;
 
     case OttoFail:
-
         putMouth(sadOpen);
-        _moveServos(300,bendPos_1);
+         gesturePOSITION[0] = 90;//int bendPos_1[6]=   {90, 90, 70, 35, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 70;
+          gesturePOSITION[3] = 35;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(300,gesturePOSITION);
         _tone(900,200,1);
         putMouth(sadClosed);
-        _moveServos(300,bendPos_2);
+        gesturePOSITION[0] = 90;//int bendPos_2[6]=   {90, 90, 55, 35, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 55;
+          gesturePOSITION[3] = 35;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(300,gesturePOSITION);
         _tone(600,200,1);
         putMouth(confused);
-        _moveServos(300,bendPos_3);
+        gesturePOSITION[0] = 90;//int bendPos_3[6]=   {90, 90, 42, 35, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 42;
+          gesturePOSITION[3] = 35;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(300,gesturePOSITION);
         _tone(300,200,1);
-        _moveServos(300,bendPos_4);
+        gesturePOSITION[0] = 90;//int bendPos_4[6]=   {90, 90, 34, 35, 90, 90};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 34;
+          gesturePOSITION[3] = 35;
+           gesturePOSITION[4] = 90;
+            gesturePOSITION[5] = 90;
+        _moveServos(300,gesturePOSITION);
         putMouth(xMouth);
 
         detachServos();
@@ -1209,4 +1245,4 @@ void Otto9Humanoid::playGesture(int gesture){
     break;
 
   }
-}    
+}        

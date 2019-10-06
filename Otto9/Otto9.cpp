@@ -675,6 +675,31 @@ void Otto9::clearMouth(){
   ledmatrix.clearMatrix();
 }
 
+void Otto9::writeText(const char * s, byte scrollspeed){
+ int a ;
+ int b ;
+  for(a = 0; s[a] != '\0'; a++){
+    b = a +1 ;
+    if (b > 9 ) b = 9; // only maximum of nine characters allowed
+  }
+  for(int charNUMBER = 0; charNUMBER <b; charNUMBER++){
+      if ((* s < 48) || (* s > 91)) {
+        if (* s == 32){
+          ledmatrix.sendChar (44, charNUMBER, b, scrollspeed);
+        }
+        else
+        {
+          ledmatrix.sendChar (43, charNUMBER, b, scrollspeed);
+        }
+     }
+      else
+      {
+      ledmatrix.sendChar ((* s - 48), charNUMBER, b, scrollspeed);
+     }
+  * s++;
+  }
+
+}
 
 ///////////////////////////////////////////////////////////////////
 //-- SOUNDS -----------------------------------------------------//
@@ -837,21 +862,7 @@ void Otto9::sing(int songName){
 ///////////////////////////////////////////////////////////////////
 
 void Otto9::playGesture(int gesture){
-
-  int sadPos[4]=      {110, 70, 20, 160};
-  int bedPos[4]=      {100, 80, 60, 120};
-  int fartPos_1[4]=   {90, 90, 145, 122}; //rightBend
-  int fartPos_2[4]=   {90, 90, 80, 122};
-  int fartPos_3[4]=   {90, 90, 145, 80};
-  int confusedPos[4]= {110, 70, 90, 90};
-  int angryPos[4]=    {90, 90, 70, 110};
-  int headLeft[4]=    {110, 110, 90, 90};
-  int headRight[4]=   {70, 70, 90, 90};
-  int fretfulPos[4]=  {90, 90, 90, 110};
-  int bendPos_1[4]=   {90, 90, 70, 35};
-  int bendPos_2[4]=   {90, 90, 55, 35};
-  int bendPos_3[4]=   {90, 90, 42, 35};
-  int bendPos_4[4]=   {90, 90, 34, 35};
+ int gesturePOSITION[4];
   
   switch(gesture){
 
@@ -884,7 +895,11 @@ void Otto9::playGesture(int gesture){
 
     case OttoSad: 
         putMouth(sad);
-        _moveServos(700, sadPos);     
+        gesturePOSITION[0] = 110;//int sadPos[6]=      {110, 70, 20, 160};
+        gesturePOSITION[1] = 70;
+         gesturePOSITION[2] = 20;
+          gesturePOSITION[3] = 160;
+        _moveServos(700, gesturePOSITION);     
         bendTones(880, 830, 1.02, 20, 200);
         putMouth(sadClosed);
         bendTones(830, 790, 1.02, 20, 200);  
@@ -904,8 +919,11 @@ void Otto9::playGesture(int gesture){
 
 
     case OttoSleeping:
-        _moveServos(700, bedPos);     
-
+    gesturePOSITION[0] = 100;//int bedPos[6]=      {100, 80, 60, 120};
+        gesturePOSITION[1] = 80;
+         gesturePOSITION[2] = 60;
+          gesturePOSITION[3] = 120;
+        _moveServos(700, gesturePOSITION);     
         for(int i=0; i<4;i++){
           putAnimationMouth(dreamMouth,0);
           bendTones (100, 200, 1.04, 10, 10);
@@ -930,19 +948,31 @@ void Otto9::playGesture(int gesture){
 
 
     case OttoFart:
-        _moveServos(500,fartPos_1);
+    gesturePOSITION[0] = 90;// int fartPos_1[6]=   {90, 90, 145, 122};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 145;
+          gesturePOSITION[3] = 122;
+        _moveServos(500,gesturePOSITION);
         delay(300);     
         putMouth(lineMouth);
         sing(S_fart1);  
         putMouth(tongueOut);
         delay(250);
-        _moveServos(500,fartPos_2);
+        gesturePOSITION[0] = 90;// int fartPos_2[6]=   {90, 90, 80, 122};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 80;
+          gesturePOSITION[3] = 122;
+        _moveServos(500,gesturePOSITION);
         delay(300);
         putMouth(lineMouth);
         sing(S_fart2); 
         putMouth(tongueOut);
         delay(250);
-        _moveServos(500,fartPos_3);
+        gesturePOSITION[0] = 90;// int fartPos_3[6]=   {90, 90, 145, 80};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 145;
+          gesturePOSITION[3] = 80;
+        _moveServos(500,gesturePOSITION);
         delay(300);
         putMouth(lineMouth);
         sing(S_fart3);
@@ -956,7 +986,11 @@ void Otto9::playGesture(int gesture){
 
 
     case OttoConfused:
-        _moveServos(300, confusedPos); 
+    gesturePOSITION[0] = 110;//int confusedPos[6]= {110, 70, 90, 90};
+        gesturePOSITION[1] = 70;
+         gesturePOSITION[2] = 90;
+          gesturePOSITION[3] = 90;
+        _moveServos(300, gesturePOSITION); 
         putMouth(confused);
         sing(S_confused);
         delay(500);
@@ -978,7 +1012,11 @@ void Otto9::playGesture(int gesture){
 
 
     case OttoAngry: 
-        _moveServos(300, angryPos); 
+    gesturePOSITION[0] = 90;//int angryPos[6]=    {90, 90, 70, 110};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 70;
+          gesturePOSITION[3] = 110;
+        _moveServos(300, gesturePOSITION); 
         putMouth(angry);
 
         _tone(note_A5,100,30);
@@ -988,9 +1026,17 @@ void Otto9::playGesture(int gesture){
         delay(15);
         bendTones(note_A5, note_E5, 1.02, 20, 4);
         delay(400);
-        _moveServos(200, headLeft); 
+        gesturePOSITION[0] = 110;//int headLeft[6]=    {110, 110, 90, 90};
+        gesturePOSITION[1] = 110;
+         gesturePOSITION[2] = 90;
+          gesturePOSITION[3] = 90;
+        _moveServos(200, gesturePOSITION); 
         bendTones(note_A5, note_D6, 1.02, 20, 4);
-        _moveServos(200, headRight); 
+        gesturePOSITION[0] = 70;//int headRight[6]=   {70, 70, 90, 90};
+        gesturePOSITION[1] = 70;
+         gesturePOSITION[2] = 90;
+          gesturePOSITION[3] = 90;
+        _moveServos(200, gesturePOSITION); 
         bendTones(note_A5, note_E5, 1.02, 20, 4);
 
         home();  
@@ -1006,7 +1052,11 @@ void Otto9::playGesture(int gesture){
         putMouth(lineMouth);
 
         for(int i=0; i<4; i++){
-          _moveServos(100, fretfulPos);   
+          gesturePOSITION[0] = 90;//int fretfulPos[6]=  {90, 90, 90, 110};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 90;
+          gesturePOSITION[3] = 110;
+          _moveServos(100, gesturePOSITION);   
           home();
         }
 
@@ -1117,17 +1167,32 @@ void Otto9::playGesture(int gesture){
     break;
 
     case OttoFail:
-
         putMouth(sadOpen);
-        _moveServos(300,bendPos_1);
+         gesturePOSITION[0] = 90;//int bendPos_1[6]=   {90, 90, 70, 35};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 70;
+          gesturePOSITION[3] = 35;
+        _moveServos(300,gesturePOSITION);
         _tone(900,200,1);
         putMouth(sadClosed);
-        _moveServos(300,bendPos_2);
+        gesturePOSITION[0] = 90;//int bendPos_2[6]=   {90, 90, 55, 35};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 55;
+          gesturePOSITION[3] = 35;
+        _moveServos(300,gesturePOSITION);
         _tone(600,200,1);
         putMouth(confused);
-        _moveServos(300,bendPos_3);
+        gesturePOSITION[0] = 90;//int bendPos_3[6]=   {90, 90, 42, 35};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 42;
+          gesturePOSITION[3] = 35;
+        _moveServos(300,gesturePOSITION);
         _tone(300,200,1);
-        _moveServos(300,bendPos_4);
+        gesturePOSITION[0] = 90;//int bendPos_4[6]=   {90, 90, 34, 35};
+        gesturePOSITION[1] = 90;
+         gesturePOSITION[2] = 34;
+          gesturePOSITION[3] = 35;
+        _moveServos(300,gesturePOSITION);
         putMouth(xMouth);
 
         detachServos();
@@ -1141,4 +1206,4 @@ void Otto9::playGesture(int gesture){
     break;
 
   }
-}    
+} 
