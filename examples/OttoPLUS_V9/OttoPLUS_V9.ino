@@ -55,7 +55,7 @@ RR 5==>   -----   ------  <== RL 4
 #define CLK_PIN    A1   //CLK pin (A1)
 #define LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
 // BATTERY SENSE PIN //////////////////////////////////////////////////////////////////////////
-boolean BATTcheck = true;    // SET TO FALSE IF NOT USING THIS OPTION
+boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
 #define PIN_Battery   A7  //3v7 BATTERY MONITOR   ANALOG pin (A7)
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
@@ -84,7 +84,7 @@ volatile bool buttonPushed=false;  //Variable to remember when a button has been
 //--    * MODE = 0: Otto is awaiting
 //--    * MODE = 1: Dancing mode!
 //--    * MODE = 2: Obstacle detector mode
-//--    * MODE = 3: Battery chek mode for Otto with LED matrix mouth
+//--    * MODE = 3: Battery chek mode for Otto with LED matrix mouth OR use it for your own MODE
 //--    * MODE = 4: OttoPAD or any Teleoperation mode (listening SerialPort).
 //---------------------------------------------------------
 volatile int MODE = 0; //State of Otto in the principal state machine.
@@ -149,8 +149,8 @@ void setup() {
   delay(1000);
   Otto.putMouth(happyOpen);
   previousMillis = millis();
-// if Pin 7 is LOW then place OTTO's servos in home mode to enable easy assembly, 
-// when you have finished assembling Otto, remove the link between pin 7 and GND
+// if Pin 10 is LOW then place OTTO's servos in home mode to enable easy assembly, 
+// when you have finished assembling Otto, remove the link between pin 10 and GND
   while (digitalRead(PIN_ASSEMBLY) == LOW) {
     Otto.home();
     Otto.sing(S_happy_short);   // sing every 5 seconds so we know OTTO is still working
