@@ -251,7 +251,7 @@ void Otto9::walk(float steps, int T, int dir){
   //--       90 : Walk backward
   //-- Feet servos also have the same offset (for tiptoe a little bit)
   int A[4]= {30, 30, 20, 20};
-  int O[4] = {0, 0, 4, -4};
+  int O[4] = {0, 0, 4, 4};
   double phase_diff[4] = {0, 0, DEG2RAD(dir * -90), DEG2RAD(dir * -90)};
 
   //-- Let's oscillate the servos!
@@ -274,7 +274,7 @@ void Otto9::turn(float steps, int T, int dir){
   //--   the right leg are bigger than the left. So, the robot describes an 
   //--   left arc
   int A[4]= {30, 30, 20, 20};
-  int O[4] = {0, 0, 4, -4};
+  int O[4] = {0, 0, 4, 4};
   double phase_diff[4] = {0, 0, DEG2RAD(-90), DEG2RAD(-90)}; 
     
   if (dir == LEFT) {  
