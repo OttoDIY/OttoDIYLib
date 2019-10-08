@@ -716,8 +716,9 @@ void Otto9::_tone (float noteFrequency, long noteDuration, int silentDuration){
       //delay(noteDuration);       //REMOVED FOR TimerFreeTone, PUT BACK for TONE       milliseconds to microseconds
       //noTone(PIN_Buzzer);
       
-      //delay(silentDuration);     //REMOVED FOR TimerFreeTone, PUT BACK for TONE
+      delay(silentDuration);     //
 }
+
 
 
 void Otto9::bendTones (float initFrequency, float finalFrequency, float prop, long noteDuration, int silentDuration){
