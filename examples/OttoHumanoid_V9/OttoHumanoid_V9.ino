@@ -170,7 +170,7 @@ Otto.clearMouth();
 // write a text string of no more than nine limited characters and scroll at a speed between 50 and 150 (FAST and SLOW)
  // limited characters are : CAPITALS A to Z   NUMBERS 0 to 9    'SPACE'  : ; < >  = @ 
 Otto.writeText (message1, 70);
-delay (4000);
+delay (2000);
 Otto.clearMouth();
 Otto.putMouth(smile);
 }
@@ -689,7 +689,7 @@ void receiveName() {
     // write a text string of no more than nine limited characters and scroll at a speed between 50 and 150 (FAST and SLOW)
     // limited characters are : CAPITALS A to Z   NUMBERS 0 to 9    'SPACE'  : ; < >  = @ 
     Otto.clearMouth();
-    //Otto.writeText (newOttoName, 75);
+    Otto.writeText (newOttoName, 75);
     delay (1000);
     Otto.clearMouth();
   }
