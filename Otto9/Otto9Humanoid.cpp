@@ -660,6 +660,9 @@ double Otto9Humanoid::getBatteryVoltage(){
 ///////////////////////////////////////////////////////////////////
 //-- MOUTHS & ANIMATIONS ----------------------------------------//
 ///////////////////////////////////////////////////////////////////
+void Otto9Humanoid::setLed(byte X, byte Y, byte value){
+  ledmatrix.setDot( X,  Y, value);
+}
 
 
 // EXAMPLE putAnimationMouth(dreamMouth,0);
