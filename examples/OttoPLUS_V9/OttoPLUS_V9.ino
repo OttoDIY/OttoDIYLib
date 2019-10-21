@@ -184,6 +184,7 @@ void loop() {
    }
   // interrupt code, here we do something if TOUCH sensor or BUTTON pressed
   if (buttonPushed){ 
+    Otto.home(); //place Otto into HOME position
     MODE = MODE +1; 
     if (MODE == 5) MODE = 0;
     Otto.sing(S_mode1);
@@ -284,20 +285,20 @@ void loop() {
           matrix = 0b00001100010010010010010010011110; // show empty battery symbol
           Otto.putMouth(matrix, false);
         }
-        if (batteryCHECK > 45)
+        if (batteryCHECK > 45 && batteryCHECK <= 64)
         {
-          matrix = 0b00001100010010010010011110011110; // show empty battery symbol
+          matrix = 0b00001100010010010010011110011110; // show 1/3 battery symbol
           Otto.putMouth(matrix, false);
         }
        
-        if (batteryCHECK > 65)
+        if (batteryCHECK > 65 && batteryCHECK <= 79)
         {
-          matrix = 0b00001100010010011110011110011110; // show empty battery symbol
+          matrix = 0b00001100010010011110011110011110; // show 2/3 battery symbol
           Otto.putMouth(matrix, false);
         }
         if (batteryCHECK > 80)
         {
-          matrix = 0b00001100011110011110011110011110; // show empty battery symbol
+          matrix = 0b00001100011110011110011110011110; // show full battery symbol
           Otto.putMouth(matrix, false);
         }
         delay(1500);
