@@ -162,6 +162,7 @@ Otto.clearMouth();
 Otto.writeText (message1, 70);
 delay (4000);
 Otto.clearMouth();
+Otto.putMouth(smile);
 }
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
