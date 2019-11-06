@@ -23,19 +23,15 @@
 OttoSerialCommand SCmd;  // The SerialCommand object
 #include <Otto9.h> //-- Otto Library version 9
 Otto9 Otto;  //This is Otto!
-
 //---------------------------------------------------------
-//-- First step: Configure the pins where the servos are attached
-/*
-         ---------------
-        |     O   O     |
-        |---------------|
-YR 3==> |               | <== YL 2
-         ---------------
-            ||     ||
-            ||     ||
-RR 5==>   -----   ------  <== RL 4
-         |-----   ------|
+//-- Make sure the servos are in the right pin
+/*             -------- 
+              |  O  O  |
+              |--------|
+  RIGHT LEG 3 |        | LEFT LEG 2
+               -------- 
+               ||     ||
+RIGHT FOOT 5 |---     ---| LEFT FOOT 4     
 */
 // SERVO PINs //////////////////////////////////////////////////////////////////////////////
 #define PIN_YL 2 //servo[0]  left leg
@@ -168,13 +164,8 @@ Otto.putMouth(smile);
 //-- Principal Loop ---------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void loop() {
-  if (Serial.available() > 0 && MODE != 4) {
-    // test
-    //Disable Pin Interruptions
-    disableInterrupt(PIN_Button);
-    SCmd.readSerial();
-    //MODE=4;
-    Otto.putMouth(happyOpen);
+ if (Serial.available() > 0 && MODE != 4) {
+    MODE=4;
   }
   //Every 60 seconds check battery level
    if (BATTcheck == true) {
@@ -185,7 +176,6 @@ void loop() {
    }
   // interrupt code, here we do something if TOUCH sensor or BUTTON pressed
   if (buttonPushed){ 
-    Otto.home(); //place Otto into HOME position
     MODE = MODE +1; 
     if (MODE == 5) MODE = 0;
     Otto.sing(S_mode1);
@@ -286,20 +276,20 @@ void loop() {
           matrix = 0b00001100010010010010010010011110; // show empty battery symbol
           Otto.putMouth(matrix, false);
         }
-        if (batteryCHECK > 45 && batteryCHECK <= 64)
+        if (batteryCHECK > 45)
         {
-          matrix = 0b00001100010010010010011110011110; // show 1/3 battery symbol
+          matrix = 0b00001100010010010010011110011110; // show empty battery symbol
           Otto.putMouth(matrix, false);
         }
        
-        if (batteryCHECK > 65 && batteryCHECK <= 79)
+        if (batteryCHECK > 65)
         {
-          matrix = 0b00001100010010011110011110011110; // show 2/3 battery symbol
+          matrix = 0b00001100010010011110011110011110; // show empty battery symbol
           Otto.putMouth(matrix, false);
         }
         if (batteryCHECK > 80)
         {
-          matrix = 0b00001100011110011110011110011110; // show full battery symbol
+          matrix = 0b00001100011110011110011110011110; // show empty battery symbol
           Otto.putMouth(matrix, false);
         }
         delay(1500);
