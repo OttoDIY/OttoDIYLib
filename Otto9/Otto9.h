@@ -6,7 +6,12 @@
 
 #include <Oscillator.h>
 
-#include <EEPROM.h>
+#if defined(ESP32)
+# include <Preferences.h>
+#else
+# include <EEPROM.h>
+#endif
+
 #include <US.h>
 
 #include "BatReader9.h"
@@ -15,8 +20,7 @@
 #include "Otto_sound9.h"
 #include "Otto_gestures9.h"
 #include <TimerFreeTone.h>
-#include "EnableInterrupt.h"
-#include "US.h"
+
 #include "OttoSerialCommand.h"
 
 //-- Constants
@@ -95,6 +99,9 @@ class Otto9
     void matrixIntensity(int intensity);
     void initBatLevel(int batteryPIN);
     void setLed(byte X, byte Y, byte value);
+#if defined(ESP32)
+	Preferences prefs;
+#endif
   private:
    
     BatReader9 battery;
@@ -117,7 +124,6 @@ class Otto9
     unsigned long int getMouthShape(int number);
     unsigned long int getAnimShape(int anim, int index);
     void _execute(int A[4], int O[4], int T, double phase_diff[4], float steps);
-
 };
 
 #endif
