@@ -51,6 +51,7 @@ class OttoSerialCommand: public Stream
 		void readSerial();    // Main entry point.  
 		void addCommand(const char *, void(*)());   // Add commands to processing dictionary
 		void addDefaultHandler(void (*function)());    // A handler to call when no valid command received.
+		bool isBluetooth(void);
 	
 	private:
 		char inChar;          // A character read from the serial stream 

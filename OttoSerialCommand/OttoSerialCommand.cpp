@@ -85,15 +85,32 @@ void OttoSerialCommand::begin(int baud)
 	usingBluetooth = false;
 }
 
+bool OttoSerialCommand::isBluetooth(void)
+{
+	if (usingBluetooth)
+	{
+#if defined(ESP32)
+		if (SerialBT.hasClient())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+#else
+		return false;
+#endif
+	}
+	return false;
+}
+
 int OttoSerialCommand::available()
 {
 #if defined(ESP32)
-	if (usingBluetooth)
+	if (isBluetooth())
 	{
-		int avail = SerialBT.available();
-//		Serial.print(avail);
-//		Serial.println(" available BT");
-		return avail;
+		return SerialBT.available();
 	}
 	else
 #endif
@@ -103,9 +120,9 @@ int OttoSerialCommand::available()
 int OttoSerialCommand::read()
 {
 #if defined(ESP32)
-	if (usingBluetooth)
+	if (isBluetooth())
 	{
-		int data = SerialBT.read();
+		return SerialBT.read();
 	}
 	else
 #endif
@@ -115,7 +132,7 @@ int OttoSerialCommand::read()
 int OttoSerialCommand::peek()
 {
 #if defined(ESP32)
-	if (usingBluetooth)
+	if (isBluetooth())
 	{
 		return SerialBT.peek();
 	}
@@ -127,7 +144,7 @@ int OttoSerialCommand::peek()
 size_t OttoSerialCommand::write(uint8_t c)
 {
 #if defined(ESP32)
-	if (usingBluetooth)
+	if (isBluetooth())
 	{
 		return SerialBT.write(c);
 	}
@@ -139,7 +156,7 @@ size_t OttoSerialCommand::write(uint8_t c)
 size_t OttoSerialCommand::write(const uint8_t *buffer, size_t size)
 {
 #if defined(ESP32)
-	if (usingBluetooth)
+	if (isBluetooth())
 	{
 		return SerialBT.write(buffer, size);
 	}
@@ -151,13 +168,13 @@ size_t OttoSerialCommand::write(const uint8_t *buffer, size_t size)
 void OttoSerialCommand::flush()
 {
 #if defined(ESP32)
-	if (usingBluetooth)
+	if (isBluetooth())
 	{
 		SerialBT.flush();
 	}
 	else
 #endif
-	return Serial.flush();
+	Serial.flush();
 }
 
 // This checks the Serial stream for characters, and assembles them into a buffer.  
@@ -166,6 +183,7 @@ void OttoSerialCommand::flush()
 void OttoSerialCommand::readSerial() 
 {
 	bool onlyOneCommand = true;
+	
 	// If we're using the Hardware port, check it.   Otherwise check the user-created OttoSoftwareSerial Port
 	while ((available() > 0)&&(onlyOneCommand==true))
 	{
@@ -187,7 +205,6 @@ void OttoSerialCommand::readSerial()
 				// Compare the found command against the list of known commands for a match
 				if (strncmp(token,CommandList[i].command,SERIALCOMMANDBUFFER) == 0) 
 				{
-					
 					// Execute the stored handler function for the command
 					(*CommandList[i].function)(); 
 					clearBuffer(); 
