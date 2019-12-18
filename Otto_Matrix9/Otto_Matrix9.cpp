@@ -11,28 +11,26 @@
 
 Otto_Matrix::Otto_Matrix() 
 {
-    //data = _data;
-    //load = _load;
-    //clock = _clock;
-    //num = _num;
-    //for (int i=0; i<80; i++)
-    //buffer[i] = 0;
+	//data = _data;
+	//load = _load;
+	//clock = _clock;
+	//num = _num;
 }
 
 void Otto_Matrix::init(byte _data, byte _load, byte _clock, byte _num, int _rotation)
 {
-    data = _data;
-    load = _load;
-    clock = _clock;
-    num = _num;
-    rotation = _rotation;
-    if ((rotation > 4) || (rotation == 0)) rotation = 1; // we have to have number between 1 and 4
-    // itoa(_rotation, rotation2,1);
-    for (int i=0; i<80; i++)
-	buffer[i] = 0;
-    
-    pinMode(load,  OUTPUT);
+   data = _data;
+  load = _load;
+  clock = _clock;
+  num = _num;
+  rotation = _rotation;
+  if ((rotation > 4) || (rotation == 0)) rotation = 1; // we have to have number between 1 and 4
+  for (int i=0; i<8; i++)
+    buffer[i] = 0;
 
+    for (int i=0; i<80; i++)
+    CHARbuffer[i] = 0;
+    
 #if defined(ESP32)
     SPI.begin ( clock,  -1,  data, load);
     SPI.setDataMode(SPI_MODE0);
@@ -44,52 +42,56 @@ void Otto_Matrix::init(byte _data, byte _load, byte _clock, byte _num, int _rota
     digitalWrite(clock, HIGH); 
 #endif
 
-    setCommand(max7219_reg_scanLimit, 0x07);      
-    setCommand(max7219_reg_decodeMode, 0x00);  // using an led matrix (not digits)
-    setCommand(max7219_reg_shutdown, 0x01);    // not in shutdown mode
-    setCommand(max7219_reg_displayTest, 0x00); // no display test
+        setCommand(max7219_reg_scanLimit, 0x07);      
+	setCommand(max7219_reg_decodeMode, 0x00);  // using an led matrix (not digits)
+	setCommand(max7219_reg_shutdown, 0x01);    // not in shutdown mode
+	setCommand(max7219_reg_displayTest, 0x00); // no display test
 	
-    // empty registers, turn all LEDs off
-    clearMatrix();
+	// empty registers, turn all LEDs off
+	clearMatrix();
 	
-    setIntensity(0x0f);    // the first 0x0f is the value you can set
+	setIntensity(0x0f);    // the first 0x0f is the value you can set
 }
 
 void Otto_Matrix::setIntensity(byte intensity)
 {
-    setCommand(max7219_reg_intensity, intensity);
+	setCommand(max7219_reg_intensity, intensity);
 }
 
 void Otto_Matrix::clearMatrix()
 {
-    for (int i=0; i<8; i++) 
-	setColumnAll(i,0);
+	for (int i=0; i<8; i++) 
+		setColumnAll(i,0);
 		
+	for (int i=0; i<8; i++)
+		buffer[i] = 0;
+
     for (int i=0; i<80; i++)
-	buffer[i] = 0;
+    CHARbuffer[i] = 0;
 }
 
 void Otto_Matrix::setCommand(byte command, byte value)
 {
+	digitalWrite(load, LOW);    
 #if defined(ESP32)
     SPI.transfer16(command << 8 | value);
 #else
-    digitalWrite(load, LOW);    
-    for (int i=0; i<num; i++) 
-    {
-	shiftOut(data, clock, MSBFIRST, command);
-	shiftOut(data, clock, MSBFIRST, value);
-    }
-    digitalWrite(load, LOW);
-    digitalWrite(load, HIGH);
+	for (int i=0; i<num; i++) 
+	{
+		shiftOut(data, clock, MSBFIRST, command);
+		shiftOut(data, clock, MSBFIRST, value);
+	}
 #endif
+	digitalWrite(load, LOW);
+	digitalWrite(load, HIGH);
 }
 
 
 void Otto_Matrix::setColumn(byte col, byte value)
 {
-    int n = col / 8;
-    int c = col % 8;
+	int n = col / 8;
+	int c = col % 8;
+	digitalWrite(load, LOW);    
 #if defined(ESP32)
     for (int i=0; i<num; i++)
     {
@@ -97,34 +99,35 @@ void Otto_Matrix::setColumn(byte col, byte value)
         {
 	    SPI.transfer16((c + 1) << 8 | value);
 	}
-	else
-	{
-	    SPI.transfer16(0);
-	}
+	//else
+	//{
+	//    SPI.transfer16(0);
+	//}
     }
-#else	
-    digitalWrite(load, LOW);    
-    for (int i=0; i<num; i++) 
-    {
-	if (i == n)
+#else
+        for (int i=0; i<num; i++) 
 	{
-	    shiftOut(data, clock, MSBFIRST, c + 1);
-	    shiftOut(data, clock, MSBFIRST, value);
+		if (i == n)
+		{
+			shiftOut(data, clock, MSBFIRST, c + 1);
+			shiftOut(data, clock, MSBFIRST, value);
+		}
+		//else
+		//{
+			//shiftOut(data, clock, MSBFIRST, 0);
+			//shiftOut(data, clock, MSBFIRST, 0);
+		//}
 	}
-	else
-	{
-	    shiftOut(data, clock, MSBFIRST, 0);
-	    shiftOut(data, clock, MSBFIRST, 0);
-	}
-    }
-    digitalWrite(load, LOW);
-    digitalWrite(load, HIGH);
 #endif
-    buffer[col] = value;
+	digitalWrite(load, LOW);
+	digitalWrite(load, HIGH);
+	
+	buffer[col] = value;
 }
 
 void Otto_Matrix::setColumnAll(byte col, byte value)
 {
+	digitalWrite(load, LOW);    
 #if defined(ESP32)
     for (int i=0; i<num; i++) 
     {
@@ -132,24 +135,24 @@ void Otto_Matrix::setColumnAll(byte col, byte value)
 	buffer[col * i] = value;
     }
 #else
-    digitalWrite(load, LOW);    
-    for (int i=0; i<num; i++) 
-    {
-	shiftOut(data, clock, MSBFIRST, col + 1);
-	shiftOut(data, clock, MSBFIRST, value);
-	buffer[col * i] = value;
-    }
-    digitalWrite(load, LOW);
-    digitalWrite(load, HIGH);
+	for (int i=0; i<num; i++) 
+	{
+		shiftOut(data, clock, MSBFIRST, col + 1);
+		shiftOut(data, clock, MSBFIRST, value);
+		buffer[col * i] = value;
+	}
 #endif
+	digitalWrite(load, LOW);
+	digitalWrite(load, HIGH);
 }
 
 void Otto_Matrix::setDot(byte col, byte row, byte value)
 {
     bitWrite(buffer[col], row, value);
 
-    int n = col / 8;
-    int c = col % 8;
+	int n = col / 8;
+	int c = col % 8;
+	digitalWrite(load, LOW);    
 #if defined(ESP32)
     for (int i=0; i<num; i++) 
     {
@@ -163,143 +166,127 @@ void Otto_Matrix::setDot(byte col, byte row, byte value)
 	}
     }
 #else
-    digitalWrite(load, LOW);    
-    for (int i=0; i<num; i++) 
-    {
-	if (i == n)
+        for (int i=0; i<num; i++) 
 	{
-	    shiftOut(data, clock, MSBFIRST, c + 1);
-	    shiftOut(data, clock, MSBFIRST, buffer[col]);
+		if (i == n)
+		{
+			shiftOut(data, clock, MSBFIRST, c + 1);
+			shiftOut(data, clock, MSBFIRST, buffer[col]);
+		}
+		else
+		{
+			shiftOut(data, clock, MSBFIRST, 0);
+			shiftOut(data, clock, MSBFIRST, 0);
+		}
 	}
-	else
-	{
-	    shiftOut(data, clock, MSBFIRST, 0);
-	    shiftOut(data, clock, MSBFIRST, 0);
-	}
-    }
-    digitalWrite(load, LOW);
-    digitalWrite(load, HIGH);
 #endif
+	digitalWrite(load, LOW);
+	digitalWrite(load, HIGH);
 }
 
-/* void MaxMatrix::writeSprite(int x, int y, const byte* sprite)
-   {
-   int w = sprite[0];
-   int h = sprite[1];
-	
-   if (h == 8 && y == 0)
-   for (int i=0; i<w; i++)
-   {
-   int c = x + i;
-   if (c>=0 && c<80)
-   setColumn(c, sprite[i+2]);
-   }
-   else
-   for (int i=0; i<w; i++)
-   for (int j=0; j<h; j++)
-   {
-   int c = x + i;
-   int r = y + j;
-   if (c>=0 && c<80 && r>=0 && r<8)
-   setDot(c, r, bitRead(sprite[i+2], j));
-   }
-   }
-
-   void MaxMatrix::reload()
-   {
-   for (int i=0; i<8; i++)
-   {
-   int col = i;
-   digitalWrite(load, LOW);    
-   for (int j=0; j<num; j++) 
-   {
-   shiftOut(data, clock, MSBFIRST, i + 1);
-   shiftOut(data, clock, MSBFIRST, buffer[col]);
-   col += 8;
-   }
-   digitalWrite(load, LOW);
-   digitalWrite(load, HIGH);
-   }
-   }
-
-   void MaxMatrix::shiftLeft(bool rotate, bool fill_zero)
-   {
-   byte old = buffer[0];
-   int i;
-   for (i=0; i<80; i++)
-   buffer[i] = buffer[i+1];
-   if (rotate) buffer[num*8-1] = old;
-   else if (fill_zero) buffer[num*8-1] = 0;
-	
-   reload();
-   }
-
-   void MaxMatrix::shiftRight(bool rotate, bool fill_zero)
-   {
-   int last = num*8-1;
-   byte old = buffer[last];
-   int i;
-   for (i=79; i>0; i--)
-   buffer[i] = buffer[i-1];
-   if (rotate) buffer[0] = old;
-   else if (fill_zero) buffer[0] = 0;
-	
-   reload();
-   }
-
-   void MaxMatrix::shiftUp(bool rotate)
-   {
-   for (int i=0; i<num*8; i++)
-   {
-   bool b = buffer[i] & 1;
-   buffer[i] >>= 1;
-   if (rotate) bitWrite(buffer[i], 7, b);
-   }
-   reload();
-   }
-
-   void MaxMatrix::shiftDown(bool rotate)
-   {
-   for (int i=0; i<num*8; i++)
-   {
-   bool b = buffer[i] & 128;
-   buffer[i] <<= 1;
-   if (rotate) bitWrite(buffer[i], 0, b);
-   }
-   reload();
-   }
-*/
-// rutina para Zowi, para meter sus caritas en la matriz de 8
+// routine for OTTO and ZOWI, for the 6 x 5 matrix
 void Otto_Matrix::writeFull(unsigned long value) {
-    if (rotation == 1) {
+  if (rotation == 1) {
 	for (int r=0; r<5;r++){
             for (int c=0; c<6; c++){
                 setDot(6-c,7-r,(1L & (value >> r*6+c)));
-	    }
-	}
-    }
-    if (rotation == 2) {
-	for (int r=0; r<5;r++){
+                }
+            }
+  }
+if (rotation == 2) {
+  for (int r=0; r<5;r++){
             for (int c=0; c<6; c++){
                 //setDot(6-c,7-r,(1L & (value >> r*6+c)));
                 setDot(1+c,r,    (1L & (value >> r*6+c)));
-	    }
-	}
-    }
-    if (rotation == 3) {
-	for (int r=0; r<5;r++){
+                }
+            }
+  }
+  if (rotation == 3) {
+  for (int r=0; r<5;r++){
             for (int c=0; c<6; c++){
                 //setDot(6-c,7-r,(1L & (value >> r*6+c)));
                 setDot(r,6-c,    (1L & (value >> r*6+c)));
-	    }
-	}
-    }
-    if (rotation == 4) {
-	for (int r=0; r<5;r++){
+                }
+            }
+  }
+  if (rotation == 4) {
+  for (int r=0; r<5;r++){
             for (int c=0; c<6; c++){
                 //setDot(6-c,7-r,(1L & (value >> r*6+c)));
                 setDot(7-r,1+c, (1L & (value >> r*6+c)));  
-	    }
-	}
-    }
+                }
+            }
+  }
 }
+
+void Otto_Matrix::sendChar (const byte data, byte pos, byte number, byte scrollspeed){
+  if (scrollspeed < 50 ) scrollspeed = 50;
+   if (scrollspeed > 150 ) scrollspeed = 150;
+  int charPos;
+charPos = pos * 8;
+//Serial.print ("sendchar  ");
+//Serial.print (pos);
+//Serial.print (" -  ");
+//Serial.print (number);
+//Serial.print (" -  ");
+//Serial.print (charPos);
+//Serial.print (" -  ");
+//Serial.println (data);
+//we need to add 8 for each character
+  CHARbuffer[0 + charPos] = 0;
+  CHARbuffer[1 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[0]);
+  CHARbuffer[2 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[1]);
+  CHARbuffer[3 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[2]);
+  CHARbuffer[4 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[3]);
+  CHARbuffer[5 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[4]);
+  CHARbuffer[6 + charPos] = pgm_read_byte(&Character_font_6x8[data].data[5]);
+  CHARbuffer[7 + charPos] = 0;
+
+ if (number == (pos + 1)){ // last character so display the total text
+// we need to display first character and scroll left until each charater is shown.
+    for (int c=0; c<8;c++){ // show first character
+         byte value = CHARbuffer[c];
+            for (int r=0; r<8; r++){
+              if (rotation == 1) {
+                setDot(c,7-r,(0b00000001 & (value >> r)));//       
+                }
+                if (rotation == 2) {
+                 setDot(7-c,r,(0b00000001 & (value >> r)));//  
+                }
+                if (rotation == 3) {
+                 //setDot(r,c,(1));// top LH corner
+                 setDot(r,c,(0b00000001 & (value >> r)));//  
+                }
+                if (rotation == 4) {
+                 setDot(7-r,7-c,(0b00000001 & (value >> r)));//  
+                }
+           }
+      }
+      delay(500); // show first digit for longer
+      for (int i=0; i<((number*8)-1); i++){   // shift buffer the correct number of characters (8 lines per character)
+        CHARbuffer[i] = CHARbuffer[i+1];
+         for (int c=0; c<8;c++){ // 
+             byte value = CHARbuffer[(1+c)+i];
+                for (int r=0; r<8; r++){
+                  if (rotation == 1) {
+                  setDot(c,7-r,(0b00000001 & (value >> r)));//       
+                   }
+                  if (rotation == 2) {
+                  setDot(7-c,r,(0b00000001 & (value >> r)));//  
+                  }
+                  if (rotation == 3) {
+                   setDot(r,c,(0b00000001 & (value >> r)));//  
+                 }
+                  if (rotation == 4) {
+                 setDot(7-r,7-c,(0b00000001 & (value >> r)));//  
+                }
+              }
+        }
+     delay(scrollspeed);// this sets the scroll speed
+  
+      }
+      clearMatrix();
+ }   
+}
+
+
