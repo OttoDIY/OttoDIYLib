@@ -95,6 +95,8 @@ class Otto9Humanoid
     void initMATRIX(int DIN, int CS, int CLK, int rotate);
     void matrixIntensity(int intensity);
     void initBatLevel(int batteryPIN);
+    void setLed(byte X, byte Y, byte value);
+    void writeText (const char * s, byte scrollspeed);
   private:
    
     BatReader9 battery;

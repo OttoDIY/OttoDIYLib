@@ -10,11 +10,11 @@
 # Methods and Functions (KEYWORD2)
 #######################################
 
-#######################################
-# Instances (KEYWORD2)
-#######################################
+enableInterrupt 	KEYWORD2
+disableInterrupt	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
+PINCHANGEINTERRUPT	LITERAL1

@@ -102,6 +102,7 @@ class Otto9
 #if defined(ESP32)
 	Preferences prefs;
 #endif
+    void writeText (const char * s, byte scrollspeed);
   private:
    
     BatReader9 battery;
