@@ -170,7 +170,8 @@ void OttoSerialCommand::flush()
 #if defined(ESP32)
 	if (isBluetooth())
 	{
-		SerialBT.flush();
+		// currently there is a bug in SerialBT.flush, it works without it
+		//SerialBT.flush();
 	}
 	else
 #endif
