@@ -15,26 +15,43 @@
 #include "WProgram.h"
 #endif
 
-
-
-
 #include <string.h>
+#include "Stream.h"
 
+#if defined(ESP32)
+#include "BluetoothSerial.h"
+
+# if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+# error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+# endif
+#endif
 
 #define SERIALCOMMANDBUFFER 35  //16 after changed by me
 #define MAXSERIALCOMMANDS	16
 #define MAXDELIMETER 2
 
-class OttoSerialCommand
+class OttoSerialCommand: public Stream
 {
 	public:
 		OttoSerialCommand();      // Constructor
+ 
+		// We need these to be a Stream (Serial)
+		bool begin(String bluetoothName=String());
+		void begin(int);
+        int available(void);
+        int peek(void);
+        int read(void);
+        size_t write(uint8_t c);
+        size_t write(const uint8_t *buffer, size_t size);
+        void flush();
+//        void end(void);
 
 		void clearBuffer();   // Sets the command buffer to all '\0' (nulls)
 		char *next();         // returns pointer to next token found in command buffer (for getting arguments to commands)
 		void readSerial();    // Main entry point.  
 		void addCommand(const char *, void(*)());   // Add commands to processing dictionary
-		void addDefaultHandler(void (*function)());    // A handler to call when no valid command received. 
+		void addDefaultHandler(void (*function)());    // A handler to call when no valid command received.
+		bool isBluetooth(void);
 	
 	private:
 		char inChar;          // A character read from the serial stream 
@@ -51,8 +68,8 @@ class OttoSerialCommand
 		int numCommand;
 		OttoSerialCommandCallback CommandList[MAXSERIALCOMMANDS];   // Actual definition for command/handler array
 		void (*defaultHandler)();           // Pointer to the default handler function 
-		int usingOttoSoftwareSerial;            // Used as boolean to see if we're using OttoSoftwareSerial object or not
-
+		int usingOttoSoftwareSerial;        // Used as boolean to see if we're using OttoSoftwareSerial object or not
+		bool usingBluetooth;
 };
 
 #endif //OttoSerialCommand_h

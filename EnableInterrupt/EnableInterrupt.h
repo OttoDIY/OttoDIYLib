@@ -42,6 +42,9 @@ uint8_t arduinoInterruptedPin=0;
 #endif
 define enableInterrupt(pin,userFunc,mode) attachInterrupt(pin, userFunc,mode)
 define disableInterrupt(pin) detachInterrupt(pin)
+#elif defined ESP32
+#define enableInterrupt(pin,userFunc,mode) attachInterrupt(pin, userFunc,mode)
+#define disableInterrupt(pin) detachInterrupt(pin)
 #else
 
 /* 

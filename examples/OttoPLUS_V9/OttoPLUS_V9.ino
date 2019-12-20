@@ -16,7 +16,7 @@
 // -- ADDED Battery meassurement in mode 3 Jason Snow August 2019
 // -- ADDED TEXT display on matrix Jason Snow September 2019
 //-------------------------------------------------------------------------
-#include <EEPROM.h>
+
 #include <EnableInterrupt.h>
 #include <Adafruit_NeoPixel.h> // Library to manage the Neopixel RGB led
 #include <OttoSerialCommand.h> //-- Library to manage serial commands
@@ -33,6 +33,40 @@ Otto9 Otto;  //This is Otto!
                ||     ||
 RIGHT FOOT 5 |---     ---| LEFT FOOT 4     
 */
+#if defined(ESP32)
+// SERVO PINs //////////////////////////////////////////////////////////////////////////////
+#define PIN_YL 33 //servo[0]  left leg
+#define PIN_YR 25 //servo[1]  right leg
+#define PIN_RL 26 //servo[2]  left foot
+#define PIN_RR 27 //servo[3]  right foot
+// ULTRASONIC PINs /////////////////////////////////////////////////////////////////////////
+#define PIN_Trigger  2  //TRIGGER pin (2)
+#define PIN_Echo     15  //ECHO pin (15)
+// BUZZER PIN //////////////////////////////////////////////////////////////////////////////
+#define PIN_Buzzer  4 //BUZZER pin (4)
+// SOUND SENSOR PIN //////////////////////////////////////////////////////////////////////////
+#define PIN_NoiseSensor 35  //SOUND SENSOR   ESP32 pin(35)
+// LED MATRIX PINs //////////////////////////////////////////////////////////////////////////
+#define DIN_PIN    19   //DIN pin (19)
+#define CS_PIN      5   //CS pin (5)
+#define CLK_PIN    18   //CLK pin (18)
+#define LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
+// BATTERY SENSE PIN //////////////////////////////////////////////////////////////////////////
+boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
+#define PIN_Battery   36      //3v7 BATTERY MONITOR   ANALOG pin (36)
+// TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
+#define PIN_Button    T4 // TOUCH SENSOR Pin T4 GPIO13
+#define TOUCH_THRESHOLD 40
+// RGB NEOPIXEL LED PIN   /////////////////////////////////////////////////////////////////////
+boolean enableRGB = false;    // SET TO FALSE IF NOT USING THIS OPTION
+#define NeopixelRGB_PIN  12 // NEOPIXEL pin   DIGITAL PIN (12)
+#define NUMPIXELS       1   // There is only one Neopixel use in MY Otto, chnage for more than 1
+Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NEO_RGB + NEO_KHZ800);
+// SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
+// to help assemble Otto's feet and legs - wire link between pin 10 and GND
+#define PIN_ASSEMBLY    10   //ASSEMBLY pin (10) LOW = assembly    HIGH  = normal operation
+#define SERIAL_BAUD 57600  // we are not using this for bluetooth
+#else
 // SERVO PINs //////////////////////////////////////////////////////////////////////////////
 #define PIN_YL 2 //servo[0]  left leg
 #define PIN_YR 3 //servo[1]  right leg
@@ -63,6 +97,8 @@ Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NE
 // SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
 // to help assemble Otto's feet and legs - wire link between pin 7 and GND
 #define PIN_ASSEMBLY    10   //ASSEMBLY pin (10) LOW = assembly    HIGH  = normal operation
+#define SERIAL_BAUD 9600  // so we can use this for bluetooth
+#endif
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -99,16 +135,21 @@ unsigned long timerMillis = 0;
 ///////////////////////////////////////////////////////////////////
 void setup() {
   //Serial communication initialization
-  Serial.begin(9600);
+  SCmd.begin(SERIAL_BAUD);
   Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins
   Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);   // set up Matrix display pins = DIN pin,CS pin, CLK pin, MATRIX orientation 
   Otto.matrixIntensity(1);// set up Matrix display intensity
   Otto.initBatLevel(PIN_Battery);// set up Battery percent read pin - MUST BE AN ANALOG PIN
   randomSeed(analogRead(PIN_NoiseSensor));   //Set a random seed
   pinMode(PIN_ASSEMBLY,INPUT_PULLUP); // - Easy assembly pin - LOW is assembly Mode
+#if defined(ESP32)
+  // there is a real Touch interface. use it.
+  touchAttachInterrupt(T4, ButtonPushed, TOUCH_THRESHOLD);
+#else
   pinMode(PIN_Button,INPUT); // - ensure pull-down resistors are used
   //Interrupts
   enableInterrupt(PIN_Button, ButtonPushed, RISING);
+#endif  
   if (enableRGB == true) {  // ONLY IF RGB NEOPIXEL OPTION IS SELECTED
   NeopixelLed.begin();
   NeopixelLed.show(); // Initialize all pixels to 'off'
@@ -128,6 +169,13 @@ void setup() {
   SCmd.addCommand("J", requestMode);
   SCmd.addCommand("P", requestRGB);
   SCmd.addDefaultHandler(receiveStop);
+  
+#if defined(ESP32)
+  // Startup Bluetooth serial port
+  SCmd.begin("ESP32_OttoPLUS");
+  Serial.println("Staring BTSerial");
+#endif
+
   //Otto wake up!
   Otto.sing(S_connection);
   Otto.home();
@@ -164,7 +212,7 @@ Otto.putMouth(smile);
 //-- Principal Loop ---------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void loop() {
- if (Serial.available() > 0 && MODE != 4) {
+ if (SCmd.available() > 0 && MODE != 4) {
     MODE=4;
   }
   //Every 60 seconds check battery level
@@ -666,11 +714,11 @@ void receiveName() {
 void requestDistance() {
   Otto.home();  //stop if necessary
   int distance = Otto.getDistance();
-  Serial.print(F("&&"));
-  Serial.print(F("D "));
-  Serial.print(distance);
-  Serial.println(F("%%"));
-  Serial.flush();
+  SCmd.print(F("&&"));
+  SCmd.print(F("D "));
+  SCmd.print(distance);
+  SCmd.println(F("%%"));
+  SCmd.flush();
 }
 
 //-- Function to send battery voltage percent
@@ -678,40 +726,40 @@ void requestBattery() {
   Otto.home();  //stop if necessary
   //The first read of the battery is often a wrong reading, so we will discard this value.
   double batteryLevel = Otto.getBatteryLevel();
-  Serial.print(F("&&"));
-  Serial.print(F("B "));
-  Serial.print(batteryLevel);
-  Serial.println(F("%%"));
-  Serial.flush();
+  SCmd.print(F("&&"));
+  SCmd.print(F("B "));
+  SCmd.print(batteryLevel);
+  SCmd.println(F("%%"));
+  SCmd.flush();
 }
 
 //-- Function to send program ID
 void requestProgramId() {
   Otto.home();   //stop if necessary
-  Serial.print(F("&&"));
-  Serial.print(F("I "));
-  Serial.print(programID);
-  Serial.println(F("%%"));
-  Serial.flush();
+  SCmd.print(F("&&"));
+  SCmd.print(F("I "));
+  SCmd.print(programID);
+  SCmd.println(F("%%"));
+  SCmd.flush();
 }
 
 
 //-- Function to send Ack comand (A)
 void sendAck() {
   delay(30);
-  Serial.print(F("&&"));
-  Serial.print(F("A"));
-  Serial.println(F("%%"));
-  Serial.flush();
+  SCmd.print(F("&&"));
+  SCmd.print(F("A"));
+  SCmd.println(F("%%"));
+  SCmd.flush();
 }
 
 //-- Function to send final Ack comand (F)
 void sendFinalAck() {
   delay(30);
-  Serial.print(F("&&"));
-  Serial.print(F("F"));
-  Serial.println(F("%%"));
-  Serial.flush();
+  SCmd.print(F("&&"));
+  SCmd.print(F("F"));
+  SCmd.println(F("%%"));
+  SCmd.flush();
 }
 //-- Function to receive mode selection.
 void requestMode() {

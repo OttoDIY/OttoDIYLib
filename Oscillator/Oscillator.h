@@ -8,7 +8,11 @@
 #ifndef Oscillator_h
 #define Oscillator_h
 
-#include <Servo.h>
+#if defined(ESP32)
+# include <ESP32Servo.h>
+#else
+# include <Servo.h>
+#endif
 
 //-- Macro for converting from degrees to radians
 #ifndef DEG2RAD
@@ -52,7 +56,7 @@ class Oscillator
     int _trim;        //-- Calibration offset
     double _phase;    //-- Current phase
     double _inc;      //-- Increment of phase
-    double _N;        //-- Number of samples
+    double _NN;        //-- Number of samples
     unsigned int _TS; //-- sampling period (ms)
     
     long _previousMillis; 
