@@ -39,6 +39,7 @@ void Otto_Matrix::init(byte _data, byte _load, byte _clock, byte _num, int _rota
 #else
     pinMode(data,  OUTPUT);
     pinMode(clock, OUTPUT);
+    pinMode(load,  OUTPUT);
     digitalWrite(clock, HIGH); 
 #endif
 
