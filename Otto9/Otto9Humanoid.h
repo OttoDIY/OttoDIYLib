@@ -4,6 +4,7 @@
 #ifndef Otto9Humanoid_h
 #define Otto9Humanoid_h
 
+#include <Servo.h>
 #include <Oscillator.h>
 #include <EEPROM.h>
 #include <US.h>

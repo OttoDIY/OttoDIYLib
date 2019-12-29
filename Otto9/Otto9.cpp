@@ -21,24 +21,6 @@ void Otto9::init(int YL, int YR, int RL, int RR, bool load_calibration, int Nois
   attachServos();
   isOttoResting=false;
 
-#if defined(ESP32)
-  prefs.begin("otto");
-
-  if (load_calibration) {
-	  int8_t prefTrims[4] = {};
-	  prefs.getBytes("Trims", prefTrims, sizeof(prefTrims));
-	  
-	  Serial.print("Preference Trims ");
-	  
-	  for (int i = 0 ; i < 4 ; i++) {
-		  Serial.print("[");
-		  Serial.print(prefTrims[i]);
-		  Serial.print("]");
-		  servo[i].SetTrim(prefTrims[i]);
-	  }
-	  Serial.println("");
-  }
-#else  
   if (load_calibration) {
     for (int i = 0; i < 4; i++) {
       int servo_trim = EEPROM.read(i);
@@ -46,8 +28,7 @@ void Otto9::init(int YL, int YR, int RL, int RR, bool load_calibration, int Nois
       servo[i].SetTrim(servo_trim);
     }
   }
-#endif
- 
+  
   for (int i = 0; i < 4; i++) servo_position[i] = 90;
 
   //US sensor init with the pins:
@@ -114,20 +95,11 @@ void Otto9::setTrims(int YL, int YR, int RL, int RR) {
 }
 
 void Otto9::saveTrimsOnEEPROM() {
-#if defined(ESP32)
-  int8_t prefTrims[4];
-
-  for (int i = 0; i < 4; i++){ 
-      prefTrims[i] = servo[i].getTrim();
-  }
   
-  // write it out
-  prefs.putBytes("Trims", prefTrims, sizeof(prefTrims));
-#else
   for (int i = 0; i < 4; i++){ 
       EEPROM.write(i, servo[i].getTrim());
-  }
-#endif
+  } 
+      
 }
 
 
