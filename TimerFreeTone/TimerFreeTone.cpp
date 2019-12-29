@@ -13,11 +13,7 @@ void TimerFreeTone(uint8_t pin, unsigned long frequency, unsigned int duration, 
 	if (frequency == 0 || volume == 0) { // If frequency or volume are zero, just wait duration and exit.
 		delay(duration);
 		return;
-	}
-#ifdef ESP32
-	// we are going to ignore volume for now
-	tone(pin, frequency, duration);
-#else
+	} 
 	frequency = 1000000 / frequency;                              // Calculate the square wave length (in microseconds).
 	uint32_t duty = frequency / _tft_volume[min(volume, 10) - 1]; // Calculate the duty cycle (volume).
 #ifdef __AVR__
@@ -42,5 +38,4 @@ void TimerFreeTone(uint8_t pin, unsigned long frequency, unsigned int duration, 
 	#endif
 		delayMicroseconds(frequency - duty); // Square wave duration (how long to leave pin low).
 	}
-#endif
 }

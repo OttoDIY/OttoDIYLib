@@ -11,10 +11,6 @@
 #include "Arduino.h"
 #include "Otto_gestures9.h"
 
-#if defined(ESP32)
-# include <SPI.h>
-#endif
-
 #define max7219_reg_noop        0x00
 #define max7219_reg_digit0      0x01
 #define max7219_reg_digit1      0x02
@@ -41,8 +37,8 @@ class Otto_Matrix
     byte CHARbuffer[80];
     int  rotation;
     void reload();
-    char rotation2;
-    
+	  char rotation2;
+  
   public:
     Otto_Matrix();
     

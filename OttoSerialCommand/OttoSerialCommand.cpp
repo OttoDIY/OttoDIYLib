@@ -12,11 +12,9 @@
 
 #include "OttoSerialCommand.h"
 
+
 #include <string.h>
 
-#if defined(ESP32)
-BluetoothSerial SerialBT;
-#endif
 
 // Constructor makes sure some things are set. 
 OttoSerialCommand::OttoSerialCommand()
@@ -24,8 +22,10 @@ OttoSerialCommand::OttoSerialCommand()
 	strncpy(delim," ",MAXDELIMETER);  // strtok_r needs a null-terminated string
 	term='\r';   // return character, default terminator for commands
 	numCommand=0;    // Number of callback handlers installed
-	clearBuffer();
+	clearBuffer(); 
 }
+
+
 
 //
 // Initialize the command buffer being processed to all null characters
@@ -48,150 +48,19 @@ char *OttoSerialCommand::next()
 	return nextToken; 
 }
 
-
-// Stream functions 
-
-// begin for bluetooth (ESP32)
-
-bool OttoSerialCommand::begin(String bluetoothName)
-{
-	bool results = false;
-	
-#if defined(ESP32)
-	if (bluetoothName.length())
-	{
-		// seems we were passed a name, print it out
-		Serial.print("We want to start bluetooth ");
-		Serial.print(bluetoothName);
-		Serial.println("");
-		
-		// start the bluetooth SPP
-		results = SerialBT.begin(bluetoothName);
-		usingBluetooth = true;
-	}
-	else
-#endif
-	{
-		usingBluetooth = false;
-	}
-
-	return results;
-}
-
-// begin for a real serial port with a baud rate
-void OttoSerialCommand::begin(int baud)
-{
-	Serial.begin(baud);
-	usingBluetooth = false;
-}
-
-bool OttoSerialCommand::isBluetooth(void)
-{
-	if (usingBluetooth)
-	{
-#if defined(ESP32)
-		if (SerialBT.hasClient())
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-#else
-		return false;
-#endif
-	}
-	return false;
-}
-
-int OttoSerialCommand::available()
-{
-#if defined(ESP32)
-	if (isBluetooth())
-	{
-		return SerialBT.available();
-	}
-	else
-#endif
-	return Serial.available();
-}
-
-int OttoSerialCommand::read()
-{
-#if defined(ESP32)
-	if (isBluetooth())
-	{
-		return SerialBT.read();
-	}
-	else
-#endif
-	return Serial.read();
-}
-
-int OttoSerialCommand::peek()
-{
-#if defined(ESP32)
-	if (isBluetooth())
-	{
-		return SerialBT.peek();
-	}
-	else
-#endif
-	return Serial.peek();
-}
-
-size_t OttoSerialCommand::write(uint8_t c)
-{
-#if defined(ESP32)
-	if (isBluetooth())
-	{
-		return SerialBT.write(c);
-	}
-	else
-#endif
-	return Serial.write(c);
-}
-
-size_t OttoSerialCommand::write(const uint8_t *buffer, size_t size)
-{
-#if defined(ESP32)
-	if (isBluetooth())
-	{
-		return SerialBT.write(buffer, size);
-	}
-	else
-#endif
-	return Serial.write(buffer, size);
-}
-
-void OttoSerialCommand::flush()
-{
-#if defined(ESP32)
-	if (isBluetooth())
-	{
-		// currently there is a bug in SerialBT.flush, it works without it
-		//SerialBT.flush();
-	}
-	else
-#endif
-	Serial.flush();
-}
-
 // This checks the Serial stream for characters, and assembles them into a buffer.  
 // When the terminator character (default '\r') is seen, it starts parsing the 
 // buffer for a prefix command, and calls handlers setup by addCommand() member
 void OttoSerialCommand::readSerial() 
 {
 	bool onlyOneCommand = true;
-	
 	// If we're using the Hardware port, check it.   Otherwise check the user-created OttoSoftwareSerial Port
-	while ((available() > 0)&&(onlyOneCommand==true))
+	while ((Serial.available() > 0)&&(onlyOneCommand==true))
 	{
 		int i; 
 		boolean matched; 
 		
-		inChar=read();   // Read single available character, there may be more waiting
+			inChar=Serial.read();   // Read single available character, there may be more waiting
 		
 		if (inChar==term) {     // Check for the terminator (default '\r') meaning end of command
 
@@ -206,6 +75,7 @@ void OttoSerialCommand::readSerial()
 				// Compare the found command against the list of known commands for a match
 				if (strncmp(token,CommandList[i].command,SERIALCOMMANDBUFFER) == 0) 
 				{
+					
 					// Execute the stored handler function for the command
 					(*CommandList[i].function)(); 
 					clearBuffer(); 
