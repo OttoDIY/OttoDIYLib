@@ -46,7 +46,7 @@ Otto.matrixIntensity(1);// set up Matrix display intensity
   pinMode(1,INPUT);
   pinMode(2,INPUT);
   pinMode(3,INPUT);
-  pinMode(4,INPUT);
+  pinMode(A0,INPUT);
   pinMode(5,INPUT);
   //buzzer
   pinMode(13,OUTPUT);
@@ -75,9 +75,9 @@ void loop(){
 }
 
 void checkButtons(){
-  if(digitalRead(7)==0)
+  if(digitalRead(A0)==1)
      direction = TOPA;
-  else if(digitalRead(4)==0)
+  else if(digitalRead(A0)==0)
      direction = RIGHTA;
   else if(digitalRead(5)==0)
      direction = LEFTA;

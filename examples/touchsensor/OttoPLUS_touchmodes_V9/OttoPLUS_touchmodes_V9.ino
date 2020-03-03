@@ -1,8 +1,8 @@
 //----------------------------------------------------------------
 //-- CC BY SA (http://ottodiy.com)
-//-- 11 December 2018
+//-- 03 March 2020
 //-----------------------------------------------------------------
-//-- Otto withTouch Sensor!
+//-- Otto with Touch Sensor!
 //-- Author: Alberto Prieto
 //-- This Otto uses a touch sensor to switch three modes
 //-- Mode 1: Otto avoid obstacles
@@ -17,18 +17,13 @@
 Otto9 Otto;  //This is Otto!
 //---------------------------------------------------------
 //-- First step: Make sure the pins for servos are in the right position
-/*
-              --^--       <== Touch Sensor A0
-         --------------- 
-        |     O   O     |
-        |---------------|
-YR 3==> |               | <== YL 2
-         --------------- 
-            ||     ||
-RR 5==>   -----   ------  <== RL 4
-         |-----   ------|
-
-
+/*             -------- 
+              |  O  O  |
+              |--------|
+  RIGHT LEG 3 |        | LEFT LEG 2
+               -------- 
+               ||     ||
+RIGHT FOOT 5 |---     ---| LEFT FOOT 4  
 */
   #define PIN_YL 2 //servo[2]
   #define PIN_YR 3 //servo[3]
@@ -40,11 +35,9 @@ RR 5==>   -----   ------  <== RL 4
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 //-- Movement parameters
-int movimiento = 0;
+int movement = 0;
 boolean izqder = true;
 // TEMPO: 97 BPM
-
-//---------------------------------------------------------
 bool obstacleDetected = false;
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
@@ -65,10 +58,10 @@ void loop() {
    if (estado == HIGH)
    {
      Otto.sing(S_buttonPushed);
-     movimiento = movimiento + 1;
+     movement = movement + 1;
    }
 
-   if (movimiento == 1)
+   if (movement == 1)
    {
         if(obstacleDetected){
           Serial.println("OBJETO DETECTADO"); 
@@ -98,7 +91,7 @@ void loop() {
         }
    }
 
-   if (movimiento == 2)
+   if (movement == 2)
    {
       if(obstacleDetected){ 
         Serial.println("OBJETO DETECTADO");  
@@ -113,7 +106,7 @@ void loop() {
         } 
    }
 
-   if (movimiento == 3)
+   if (movement == 3)
    {
       Otto.jitter(10,500,40); 
       Otto.home();
@@ -130,12 +123,12 @@ void loop() {
       Otto.shakeLeg(2,1000,1);  
       Otto.home();
       Otto.sing(S_disconnection);
-      movimiento = 0;
+      movement = 0;
    }
 }
 
 ///////////////////////////////////////////////////////////////////
-//-- Function to read distance sensor & to actualize obstacleDetected variable
+//-- Function to read distance sensor & to update obstacleDetected variable
 void obstacleDetector(){
    int distance = Otto.getDistance();
         if(distance<15){

@@ -12,7 +12,7 @@
  Now we need a LedControl to work with.
  We have only a single MAX72XX.
  */
-LedControl lc=LedControl(12,11,10,1); //DIN, CLK, LOAD 
+LedControl lc=LedControl(A3,A1,A2,1); //DIN, CLK, LOAD 
 /**************************************************************
  * Global Variables
  */
@@ -27,7 +27,7 @@ String scoreStr;
 String scoreArr[] = {"" ,"" ,"" };
 
 /* micro switches for control */
-int pinLeft = 7;
+int pinLeft = 2;
 int pinRight = 3;
 volatile unsigned long buttonPressed;
 int buttonDelay = 150;  //handle contact bounce
@@ -63,7 +63,7 @@ void setup() {
   ship = 3;
   now = millis();
   buttonPressed = millis();
-  randomSeed(analogRead(15)); // better random numbers
+  randomSeed(analogRead(A6)); // better random numbers
 
   for(int i = 0; i<8; i++)
     columns[i] = 0;
@@ -118,7 +118,7 @@ void left()
  */
 void right()
 {
-    if(millis() - buttonPressed > buttonDelay) // handle switch contact bounce
+    if( buttonPressed) // handle switch contact bounce
     {
       if(ship != 7)
         ship++;
