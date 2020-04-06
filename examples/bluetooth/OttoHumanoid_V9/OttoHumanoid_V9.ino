@@ -54,7 +54,7 @@ FR 5==>   -----   ------  <== FL 4
 #define CLK_PIN    A1   //CLK pin (A1)
 #define LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
 // BATTERY SENSE PIN //////////////////////////////////////////////////////////////////////////
-boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
+boolean BATTcheck = true;    // SET TO FALSE IF NOT USING THIS OPTION
 #define PIN_Battery   A7  //3v7 BATTERY MONITOR   ANALOG pin (A7)
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
@@ -153,24 +153,24 @@ void setup() {
   while (digitalRead(PIN_ASSEMBLY) == LOW) {
     Otto.home();
     Otto.sing(S_happy_short);   // sing every 5 seconds so we know OTTO is still working
-    delay(5000);
+    delay(500);
   }
-delay (4000);
+delay (500);
 Otto.clearMouth();
 // test for matrix
  matrix = 0b000000000000000000000000000001;// set the variable to the first LED bottom RHS again
   for (int i = 0; i < 30; i++) { // this FOR NEXT LOOP repeats the code following it 30 times
       Otto.putMouth(matrix, false); // display the single LED
       matrix = matrix << 1 ;// shift the single LED one to the left (to the next LED)
-      delay(250);// wait for 1/4 second, this is so that you can see the image on the Matrix 
+      delay(100);// wait for 1/4 second, this is so that you can see the image on the Matrix 
       Otto.clearMouth();// clear the Matrix display so that it is ready for the next image
     }
-  delay(1000);// wait for 1 second, this is so that you can see the image on the Matrix for 1 second before repeating
+  delay(300);// wait for 1 second, this is so that you can see the image on the Matrix for 1 second before repeating
   Otto.clearMouth();  
 // write a text string of no more than nine limited characters and scroll at a speed between 50 and 150 (FAST and SLOW)
  // limited characters are : CAPITALS A to Z   NUMBERS 0 to 9    'SPACE'  : ; < >  = @ 
-Otto.writeText (message1, 70);
-delay (2000);
+Otto.writeText (message1, 20);
+delay (300);
 Otto.clearMouth();
 Otto.putMouth(smile);
 }
