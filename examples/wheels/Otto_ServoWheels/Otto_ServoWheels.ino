@@ -1,26 +1,13 @@
-//-- AUGUST 2017: modified for a WHEELED OTTO with MAX7219 MATRIX LED module
-//-- Two continous rotation serovs are used
-//-- Jason Snow
+//-- APRIL  2020: modified for a WHEELY OTTO with MAX7219 MATRIX LED module
 //-----------------------------------------------------------------
-//#include <Servo.h> 
-//#include <Oscillator.h>
-//#include <EEPROM.h>
 #include <BatReader.h>
-#include <US.h>
 #include "MaxMatrix.h"
-MaxMatrix ledmatrix=MaxMatrix(12,10,11, 1); //PIN  12=DIN, PIN 10=CS, PIN 11=CLK
-
-//-- Library to manage external interruptions
+MaxMatrix ledmatrix=MaxMatrix(A3,A2,A1,1); //DIN,CS,CLK
 #include <EnableInterrupt.h> 
-
-//-- Library to manage serial commands
 #include <OttoSerialCommand.h>
 OttoSerialCommand SCmd;  //The SerialCommand object
-
-//-- Otto Library
 #include <OttoW.h>
 OttoW OttoW;  //This is Otto!
- 
 //---------------------------------------------------------
 //-- First step: Configure the pins where the servos are attached
 /*
@@ -29,32 +16,19 @@ OttoW OttoW;  //This is Otto!
         |---------------|
 YR 3==> |               | <== YL 2
          --------------- 
-
 */
-
   #define PIN_YL 2 //servo[0]
   #define PIN_YR 3 //servo[1]
-  
-
-//---Otto Buttons
-#define PIN_SecondButton 6
-#define PIN_ThirdButton 7
-// buzzer connected to pin 13
+#define PIN_Button   A0
 
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 
-const char programID[]="Otto_todo"; //Each program will have a ID
-
-const char name_fac='$'; //Factory name
-const char name_fir='#'; //First name
-
-//-- Movement parameters
+const char programID[]="OttoWheely"; //Each program will have a ID
 int T=1000;              //Initial duration of movement
 int moveId=0;            //Number of movement
 int moveSize=15;         //Asociated with the height of some movements
-
 //---------------------------------------------------------
 //-- Otto has 5 modes:
 //--    * MODE = 0: Otto is awaiting  
@@ -63,46 +37,24 @@ int moveSize=15;         //Asociated with the height of some movements
 //--    * MODE = 3: Noise detector mode   
 //--    * MODE = 4: OttoPAD or any Teleoperation mode (listening SerialPort). 
 //---------------------------------------------------------
-volatile int MODE=2; //State of Otto in the principal state machine. 
-
+volatile int MODE=4; //State of Otto in the principal state machine. 
 volatile bool buttonPushed=false;  //Variable to remember when a button has been pushed
-volatile bool buttonAPushed=false; //Variable to remember when A button has been pushed
-volatile bool buttonBPushed=false; //Variable to remember when B button has been pushed
-
 unsigned long previousMillis=0;
-
 int randomDance=0;
 int randomSteps=0;
-
 bool obstacleDetected = false;
-
-
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void setup(){
-
-  //Serial communication initialization
-  Serial.begin(19200);  
-
-  pinMode(PIN_SecondButton,INPUT); //D6 - ensure pull-down resistors are used
-  pinMode(PIN_ThirdButton,INPUT); //D7 - ensure pull-down resistors are used
-  
-  //Set the servo pins
+Serial.begin(9600);  //Serial communication initialization
+  pinMode(PIN_Button,INPUT); // - ensure pull-down resistors are used
   OttoW.init(PIN_YL,PIN_YR,true);
- 
-  OttoW.setTrims(0,-2); // PLACE YOUR CALIBRATION VALUES HERE  =  Left Servo , Right servo 
-  
-// set up Matrix display
+  OttoW.setTrims(80,20); // PLACE YOUR CALIBRATION VALUES HERE  =  Left Servo , Right servo 
   ledmatrix.init();
   ledmatrix.setIntensity(1);
-  //Set a random seed
-  randomSeed(analogRead(A6));
-
-  //Interrumptions
-  enableInterrupt(PIN_SecondButton, secondButtonPushed, RISING);
-  enableInterrupt(PIN_ThirdButton, thirdButtonPushed, RISING);
-
+  randomSeed(analogRead(A6));   //Set a random seed
+ enableInterrupt(PIN_Button, ButtonPushed, RISING);
   //Setup callbacks for SerialCommand commands 
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
   SCmd.addCommand("L", receiveLED);       //  sendAck & sendFinalAck
@@ -119,126 +71,36 @@ void setup(){
   //SCmd.addCommand("B", requestBattery); // doesn't function - needs work
   SCmd.addCommand("I", requestProgramId);
   SCmd.addDefaultHandler(receiveStop);
-
-
-
-  //Otto wake up!
   OttoW.sing(S_connection);
   OttoW.home();
-
-
-  //If Otto's name is '&' (factory name) means that is the first time this program is executed.
-  //This first time, Otto mustn't do anything. Just born at the factory!
-  //5 = EEPROM address that contains first name character
- /* if (EEPROM.read(5)==name_fac){ 
-
-    EEPROM.put(5, name_fir); //From now, the name is '#'
-    EEPROM.put(6, '\0'); 
-    zowi.putMouth(culito);
-
-    while(true){    
-       delay(1000);
-    }
-  }  
-
-*/
-  //Send Otto name, programID & battery level.
-  requestName();
   delay(50);
-  //requestProgramId();
-  delay(50);
-  //requestBattery();
-  
-  //Checking battery
-  //OttoLowBatteryAlarm();
-
-
- // Animation Uuuuuh - A little moment of initial surprise
- //-----
-  for(int i=0; i<2; i++){
-      for (int i=0;i<8;i++){
-        if(buttonPushed){break;}  
-        OttoW.putAnimationMouth(littleUuh,i);
-        delay(150);
-      }
-  }
- //-----
-
-
-  //Smile for a happy Otto :)
-  if(!buttonPushed){ 
-    OttoW.putMouth(smile);
-    OttoW.sing(S_happy);
-    delay(200);
-  }
-
-
-  //If Otto's name is '#' means that Otto hasn't been baptized
-  //In this case, Otto does a longer greeting
-  //5 = EEPROM address that contains first name character
-  if (EEPROM.read(5)==name_fir){ 
-
-    if(!buttonPushed){  
-        OttoW.jump(1,700);
-        delay(200); 
-    }
-
-    if(!buttonPushed){  
-        OttoW.shakeLeg(1,T,1); 
-    }  
-    
-    if(!buttonPushed){ 
-        OttoW.putMouth(smallSurprise);
-        OttoW.swing(2,800,20);  
-        OttoW.home();
-    }  
-  }
-
-
-  if(!buttonPushed){ 
-    OttoW.putMouth(happyOpen);
-  }
-
-  previousMillis = millis();
-
 }
-
-
-
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void loop() {
 
-
   if (Serial.available()>0 && MODE!=4){
-
     MODE=4;
     OttoW.putMouth(happyOpen);
-
-    //Disable Pin Interruptions
-    disableInterrupt(PIN_SecondButton);
-    disableInterrupt(PIN_ThirdButton);
-
     buttonPushed=false;
   }
-
-
-  //First attemp to initial software
   if (buttonPushed){  
-
+     MODE = MODE +1; 
+         if (MODE == 5) MODE = 0;
+    OttoW.sing(S_mode1);
+    if (MODE == 0) OttoW.putMouth(zero);
+    if (MODE == 1) OttoW.putMouth(one);
+    if (MODE == 2) OttoW.putMouth(two);
+    if (MODE == 3) OttoW.putMouth(three);
+    if (MODE == 4) OttoW.putMouth(four);
     OttoW.home();
-
     delay(100); //Wait for all buttons 
     OttoW.sing(S_buttonPushed);
     delay(200); //Wait for all buttons 
 
-    if      ( buttonAPushed && !buttonBPushed){ MODE=1; OttoW.sing(S_mode1);}
-    else if (!buttonAPushed && buttonBPushed) { MODE=2; OttoW.sing(S_mode2);}
-    else if ( buttonAPushed && buttonBPushed) { MODE=3; OttoW.sing(S_mode3);} //else
 
     OttoW.putMouth(MODE);
- 
     int showTime = 2000;
     while((showTime>0)){ //Wait to show the MODE number 
         
@@ -247,10 +109,7 @@ void loop() {
     }
      
     OttoW.putMouth(happyOpen);
-
     buttonPushed=false;
-    buttonAPushed=false;
-    buttonBPushed=false;
 
   }else{
 
@@ -265,10 +124,8 @@ void loop() {
             OttoSleeping_withInterrupts(); //ZZzzzzz...
             previousMillis=millis();         
         }
-
         break;
       
-
       //-- MODE 1 - Dance Mode!
       //---------------------------------------------------------
       case 1:
@@ -328,8 +185,7 @@ void loop() {
               delay(50);
               obstacleDetector();
            } 
-            
-           
+                     
            //If there are no obstacles and no button is pressed, Otto shows turns left
            
               if((obstacleDetected==true)||(buttonPushed==true)){break;}            
@@ -366,7 +222,6 @@ void loop() {
 
         break;
 
-
       //-- MODE 3 - Noise detector mode
       //---------------------------------------------------------  
       case 3:
@@ -398,52 +253,29 @@ void loop() {
       case 4:
 
         SCmd.readSerial();
-        
         //If Otto is moving yet
         if (OttoW.getRestState()==false){  
           move(moveId);
-        }
-      
+        }      
         break;      
-
-
       default:
           MODE=4;
           break;
     }
-
   } 
-
 }  
-
-
 
 ///////////////////////////////////////////////////////////////////
 //-- Functions --------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 
-//-- Function executed when second button is pushed
-void secondButtonPushed(){ 
-
-    buttonAPushed=true;
-
+//-- Function executed when  button is pushed / Touch sensor VIA INTERRUPT routine
+void ButtonPushed(){ 
     if(!buttonPushed){
         buttonPushed=true;
         OttoW.putMouth(smallSurprise);
-    }    
-}
-
-//-- Function executed when third button is pushed
-void thirdButtonPushed(){ 
-
-    buttonBPushed=true;
-
-    if(!buttonPushed){
-        buttonPushed=true;
-        OttoW.putMouth(smallSurprise);
-    }
-}
-
+    } 
+} 
 
 //-- Function to read distance sensor & to actualize obstacleDetected variable
 void obstacleDetector(){
@@ -458,7 +290,6 @@ void obstacleDetector(){
         }
 }
 
-
 //-- Function to receive Stop command.
 void receiveStop(){
 
@@ -468,17 +299,13 @@ void receiveStop(){
 
 }
 
-
-//-- Function to receive LED commands
 void receiveLED(){  
 
     //sendAck & stop if necessary
     sendAck();
     OttoW.home();
-
     //Examples of receiveLED Bluetooth commands
     //L 000000001000010100100011000000000
-    //L 001111111111111111111111111111111 (todos los LED encendidos)
     unsigned long int matrix;
     char *arg;
     char *endstr;
@@ -497,8 +324,6 @@ void receiveLED(){
 
 }
 
-
-//-- Function to receive buzzer commands
 void recieveBuzzer(){
   
     //sendAck & stop if necessary
@@ -533,8 +358,6 @@ void recieveBuzzer(){
 
 }
 
-
-//-- Function to receive TRims commands
 void receiveTrims(){  
 
     //sendAck & stop if necessary
@@ -557,9 +380,7 @@ void receiveTrims(){
     if (arg != NULL) { trim_YR=atoi(arg); }    // Converts a char string to an integer  
     else {error=true;}
 
-    arg = SCmd.next(); 
-    
-    
+    arg = SCmd.next();   
     if(error==true){
 
       OttoW.putMouth(xMouth);
@@ -572,9 +393,7 @@ void receiveTrims(){
     } 
 
     sendFinalAck();
-
 }
-
 
 //-- Function to receive Servo commands
 void receiveServo(){  
@@ -618,12 +437,9 @@ void receiveServo(){
       OttoW._moveServos(200, servoPos);   //Move 200ms
       
     }
-
     sendFinalAck();
 
 }
-
-
 //-- Function to receive movement commands
 void receiveMovement(){
 
@@ -669,64 +485,64 @@ void move(int moveId){
       //OttoW.home();
       break;
     case 1: //M 1 1000 
-      //OttoW.walk(1,T,1);
+      OttoW.walk(1,T,1);
       break;
     case 2: //M 2 1000 
-      //OttoW.walk(1,T,-1);
+      OttoW.walk(1,T,-1);
       break;
     case 3: //M 3 1000 
-      //OttoW.turn(1,T,1);
+      OttoW.turn(1,T,1);
       break;
     case 4: //M 4 1000 
-      //OttoW.turn(1,T,-1);
+      OttoW.turn(1,T,-1);
       break;
     case 5: //M 5 1000 30 
-      //OttoW.updown(1,T,moveSize);
+      OttoW.updown(1,T,moveSize);
       break;
     case 6: //M 6 1000 30
-      //OttoW.moonwalker(1,T,moveSize,1);
+      OttoW.moonwalker(1,T,moveSize,1);
       break;
     case 7: //M 7 1000 30
-      //OttoW.moonwalker(1,T,moveSize,-1);
+      OttoW.moonwalker(1,T,moveSize,-1);
       break;
     case 8: //M 8 1000 30
-      //OttoW.swing(1,T,moveSize);
+      OttoW.swing(1,T,moveSize);
       break;
     case 9: //M 9 1000 30 
-      //OttoW.crusaito(1,T,moveSize,1);
+     OttoW.crusaito(1,T,moveSize,1);
       break;
     case 10: //M 10 1000 30 
-      //OttoW.crusaito(1,T,moveSize,-1);
+      OttoW.crusaito(1,T,moveSize,-1);
       break;
     case 11: //M 11 1000 
-      //OttoW.jump(1,T);
+      OttoW.jump(1,T);
       break;
     case 12: //M 12 1000 30 
-     //OttoW.flapping(1,T,moveSize,1);
+     OttoW.flapping(1,T,moveSize,1);
       break;
     case 13: //M 13 1000 30
-      //OttoW.flapping(1,T,moveSize,-1);
+      OttoW.flapping(1,T,moveSize,-1);
       break;
     case 14: //M 14 1000 20
-      //OttoW.tiptoeSwing(1,T,moveSize);
+      OttoW.tiptoeSwing(1,T,moveSize);
       break;
     case 15: //M 15 500 
-      //OttoW.bend(1,T,1);
+      OttoW.bend(1,T,1);
       break;
     case 16: //M 16 500 
-      //OttoW.bend(1,T,-1);
+      OttoW.bend(1,T,-1);
       break;
     case 17: //M 17 500 
-      //OttoW.shakeLeg(1,T,1);
+      OttoW.shakeLeg(1,T,1);
       break;
     case 18: //M 18 500 
-      //OttoW.shakeLeg(1,T,-1);
+      OttoW.shakeLeg(1,T,-1);
       break;
     case 19: //M 19 500 20
-      //OttoW.jitter(1,T,moveSize);
+      OttoW.jitter(1,T,moveSize);
       break;
     case 20: //M 20 500 15
-      //OttoW.ascendingTurn(1,T,moveSize);
+      OttoW.ascendingTurn(1,T,moveSize);
       break;
     default:
         manualMode = true;
@@ -735,18 +551,14 @@ void move(int moveId){
 
   if(!manualMode){
     sendFinalAck();
-  }
-       
+  } 
 }
 
-
-//-- Function to receive gesture commands
 void receiveGesture(){
 
     //sendAck & stop if necessary
     sendAck();
     OttoW.home(); 
-
     //Definition of Gesture Bluetooth commands
     //H  GestureID  
     int gesture = 0;
@@ -807,13 +619,10 @@ void receiveGesture(){
     sendFinalAck();
 }
 
-//-- Function to receive sing commands
 void receiveSing(){
 
-    //sendAck & stop if necessary
     sendAck();
     OttoW.home(); 
-
     //Definition of Sing Bluetooth commands
     //K  SingID    
     int sing = 0;
