@@ -9,36 +9,24 @@
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // -- ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen October 2018
 // -- ADDED PIN definitions for ease of use: Jason Snow November 2018
-// -- ADDED NEOPIXEL: Paul Van De Veen November 2018
 // -- ADDED Eye Matrix Progmem and control: Jason Snow November 2018
-// -- DELETED noise sense in mode 3 Jason Snow August 2019
 // -- REMOVED Eye Matrix Progmem and control: Jason Snow AUG 2019
 // -- ADDED Battery meassurementin in mode 3 Jason Snow August 2019
 //-------------------------------------------------------------------------
 #include <EEPROM.h>
 #include <EnableInterrupt.h>
-// Library to manage the Neopixel RGB led
-#include <Adafruit_NeoPixel.h>
-//-- Library to manage serial commands
-#include <OttoSerialCommand.h>
+#include <OttoSerialCommand.h> //-- Library to manage serial commands
 OttoSerialCommand SCmd;  // The SerialCommand object
-//-- Otto Library version 9
 #include <Otto9.h>
 Otto9 Otto;  //This is Otto!
-
-//---------------------------------------------------------
-//-- First step: Configure the pins where the servos are attached
-/*
-         ---------------
-        |     O   O     |
-        |---------------|
-YR 3==> |               | <== YL 2
-         ---------------
-            ||     ||
-            ||     ||
-RR 5==>   -----   ------  <== RL 4
-         |-----   ------|
-*/
+/*             -------- 
+              |  O  O  |
+              |--------|
+  RIGHT LEG 3 |        | LEFT LEG 2
+               -------- 
+               ||     ||
+RIGHT FOOT 5 |---     ---| LEFT FOOT 4    
+*/ 
 // SERVO PINs //////////////////////////////////////////////////////////////////////////////
 #define PIN_YL 2 //servo[0]  left leg
 #define PIN_YR 3 //servo[1]  right leg
@@ -61,11 +49,6 @@ boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
 #define PIN_Battery   A7  //3v7 BATTERY MONITOR   ANALOG pin (A7)
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
-// RGB NEOPIXEL LED PIN   /////////////////////////////////////////////////////////////////////
-boolean enableRGB = false;    // SET TO FALSE IF NOT USING THIS OPTION
-#define NeopixelRGB_PIN  12 // NEOPIXEL pin   DIGITAL PIN (12)
-#define NUMPIXELS       1   // There is only one Neopixel use in MY Otto, chnage for more than 1
-Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NEO_RGB + NEO_KHZ800);
 // SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
 // to help assemble Otto's feet and legs - wire link between pin 7 and GND
 #define PIN_ASSEMBLY    7   //ASSEMBLY pin (7) LOW = assembly    HIGH  = normal operation
@@ -73,7 +56,7 @@ Adafruit_NeoPixel NeopixelLed = Adafruit_NeoPixel(NUMPIXELS, NeopixelRGB_PIN, NE
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 
-const char programID[] = "Otto_BIPED9"; //Each program will have a ID
+const char programID[] = "OttoPLUS_V9"; //Each program will have a ID
 const char name_fac = '$'; //Factory name
 const char name_fir = '#'; //First name
 //-- Movement parameters
@@ -95,9 +78,6 @@ unsigned long previousMillis = 0;
 int randomDance = 0;
 int randomSteps = 0;
 bool obstacleDetected = false;
-int REDled = 0;
-int GREENled = 0;
-int BLUEled = 0;
 double batteryCHECK = 0;
 unsigned long int matrix;
 unsigned long timerMillis = 0;
@@ -107,6 +87,7 @@ unsigned long timerMillis = 0;
 void setup() {
   //Serial communication initialization
   Serial.begin(9600);
+
   Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins
   Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);   // set up Matrix display pins = DIN pin,CS pin, CLK pin, MATRIX orientation 
   Otto.matrixIntensity(1);// set up Matrix display intensity
@@ -116,11 +97,6 @@ void setup() {
   pinMode(PIN_Button,INPUT); // - ensure pull-down resistors are used
   //Interrupts
   enableInterrupt(PIN_Button, ButtonPushed, RISING);
-  if (enableRGB == true) {  // ONLY IF RGB NEOPIXEL OPTION IS SELECTED
-  NeopixelLed.begin();
-  NeopixelLed.show(); // Initialize all pixels to 'off'
-  NeopixelLed.setBrightness(64); // Op Brightness 
-  }
   //Setup callbacks for SerialCommand commands
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
   SCmd.addCommand("L", receiveLED);       //  sendAck & sendFinalAck
@@ -137,7 +113,6 @@ void setup() {
   SCmd.addCommand("B", requestBattery);   // 3v7 lipo battery
   SCmd.addCommand("I", requestProgramId);
   SCmd.addCommand("J", requestMode);
-  SCmd.addCommand("P", requestRGB);
   SCmd.addDefaultHandler(receiveStop);
   //Otto wake up!
   Otto.sing(S_connection);
@@ -176,7 +151,6 @@ void setup() {
     Otto.sing(S_happy_short);   // sing every 5 seconds so we know OTTO is still working
     delay(5000);
   }
-
 }
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
@@ -191,7 +165,7 @@ void loop() {
     Otto.putMouth(happyOpen);
   }
   //Every 60 seconds check battery level
-   if (BATTcheck == true) {
+   if (BATTcheck == false) {
       if (millis() - timerMillis >= 60000) {
         OttoLowBatteryAlarm();
         timerMillis = millis();
@@ -863,49 +837,6 @@ void requestMode() {
   }
   sendFinalAck();
 }
-
-
-  //-- Function to receive RGB colours.
-  void requestRGB(){
-
-    sendAck();
-    Otto.home();
-    //P red breen blue
-    char *arg;
-    arg = SCmd.next();
-    if (arg != NULL)
-    {
-      REDled=atoi(arg);
-      }
-      else{
-      Otto.putMouth(xMouth);
-      delay(2000);
-      Otto.clearMouth();
-      REDled=0; //stop
-    }
-
-    arg = SCmd.next();
-    if (arg != NULL) {GREENled=atoi(arg);}
-    else{
-      GREENled=0;
-    }
-
-    arg = SCmd.next();
-    if (arg != NULL) {BLUEled=atoi(arg);}
-    else{
-      BLUEled =0;
-    }
-    Otto.putMouth(okMouth);
-      delay(2000);
-      if (enableRGB == true) { // ONLY IF RGB NEOPIXEL OPTION IS CHOSEN
-         //Conversion(ColorValue);
-      NeopixelLed.setPixelColor(0, NeopixelLed.Color(REDled, GREENled, BLUEled));
-      NeopixelLed.show();
-      delay(50);
-      }
-      Otto.clearMouth();
-      Otto.putMouth(happyOpen);
-  }
 
 //-- Functions with animatics
 //--------------------------------------------------------

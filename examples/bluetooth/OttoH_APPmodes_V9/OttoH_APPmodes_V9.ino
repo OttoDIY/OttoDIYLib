@@ -11,6 +11,7 @@
 // -- ADDED PIN definitions for ease of use: Jason Snow November 2018
 // -- ADDED Battery meassurementin in mode 3 Jason Snow August 2019
 // -- ADDED TEXT display on matrix Jason Snow September 2019
+// -- fixed typos  Camilo Parra May 2020
 //-------------------------------------------------------------------------
 #include <EEPROM.h>
 #include <EnableInterrupt.h>
@@ -83,7 +84,7 @@ volatile bool buttonPushed=false;  //Variable to remember when a button has been
 //--    * MODE = 0: Otto is awaiting
 //--    * MODE = 1: Dancing mode!
 //--    * MODE = 2: Obstacle detector mode
-//--    * MODE = 3: Battery chek mode for Otto with LED matrix mouth
+//--    * MODE = 3: Battery check mode for Otto with LED matrix mouth
 //--    * MODE = 4: OttoPAD or any Teleoperation mode (listening SerialPort).
 //---------------------------------------------------------
 volatile int MODE = 0; //State of Otto in the principal state machine.
@@ -130,7 +131,7 @@ void setup() {
   SCmd.addCommand("B", requestBattery);   // 3v7 lipo battery
   SCmd.addCommand("I", requestProgramId);
   SCmd.addCommand("J", requestMode);
-   SCmd.addCommand("P", requestRGB);
+  SCmd.addCommand("P", requestRGB);
   SCmd.addDefaultHandler(receiveStop);
   //Otto wake up!
   Otto.sing(S_connection);
@@ -279,7 +280,7 @@ void loop() {
       }
       break;
 
-    //-- MODE 3 - Noise detector mode
+    //-- MODE 3 - Battery check
     //---------------------------------------------------------
     case 3:
     // battery display as an icon on the mouth, battery icon will has three levels of power
