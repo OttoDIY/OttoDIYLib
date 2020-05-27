@@ -1,5 +1,6 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-- Otto DIY APP Firmware version 9 (V09) with standard baudrate of 9600 for Bluetooth modules.
+//-- FOR THIS CODE YOU MUST CONNECT THE BLUETOOTH MODULE TO TX AND RX AFTER THE CODE IS UPLOADED.
 //-- This code will have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
 //-- Designed to work with the basic Otto or PLUS or Humanoid or other biped robots. some of these functions will need a good power source such as a LIPO battery.
 //-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)

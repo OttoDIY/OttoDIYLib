@@ -1,8 +1,9 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-- Otto DIY Humanoid APP Firmware version 9 (V9) with standard baudrate of 9600 for Bluetooth modules.
+//-- FOR THIS CODE YOU MUST CONNECT THE BLUETOOTH MODULE TO TX AND RX AFTER THE CODE IS UPLOADED.
 //-- This code will have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
-//-- Designed to work with the basic Otto or PLUS or Humanoid or other biped robots. some of these functions will need a good power source such as a LIPO battery.
-//-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
+//-- Designed to work with the basic Otto or PLUS or other biped robots. some of these functions will need a good power source such as a LIPO battery.
+//-- Otto DIY invests time and resources providing open source code and hardware, please support by purchasing kits from (https://www.ottodiy.com)
 //-----------------------------------------------------------------
 //-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
 //-- in accordance with the GPL Version 2 when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
@@ -21,20 +22,14 @@ OttoSerialCommand SCmd;  // The SerialCommand object
 #include <Otto9Humanoid.h> //-- Otto Library version 9
 Otto9Humanoid Otto;  //This is Otto!
 //---------------------------------------------------------
-//-- First step: Configure the pins where the servos are attached
-/*
-         --------------- 
-        |     O   O     |
-        |---------------|
-RA 7==> |               | <== LA 6
-        |               |
-LR 3==> |               | <== LL 2
-         --------------- 
-            ||     ||
-            ||     ||
-FR 5==>   -----   ------  <== FL 4
-         |-----   ------|
-*/
+/*             -------- 
+              |  O  O  |
+  RIGHT ARM 7 |--------| LEFT ARM 6
+              |  |  |  | 
+  RIGHT LEG 3  --------  LEFT LEG 2
+               ||     ||
+RIGHT FOOT 5 |---     ---| LEFT FOOT 4    
+*/ 
 // SERVO PINs //////////////////////////////////////////////////////////////////////////////
 #define PIN_YL 2 //servo[0]  left leg
 #define PIN_YR 3 //servo[1]  right leg
