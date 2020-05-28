@@ -2,13 +2,8 @@
 #include <Oscillator.h>
 #include <EEPROM.h>
 #include <US.h>
-#include <EnableInterrupt.h>
-#include <OttoSerialCommand.h>
 #include <Otto9.h>
-#include <MaxMatrix.h>
 Otto9 Otto;  //This is Otto!!
-OttoSerialCommand SCmd;  //The SerialCommand object
-MaxMatrix ledmatrix=MaxMatrix(12,10,11, 1); //DIN,CS,CLK
 /***   Global variables and function definition  ***/
 #define PIN_YL 2 //servo[0]  left leg
 #define PIN_YR 3 //servo[1]  right leg
@@ -27,8 +22,7 @@ int moveSize=15;
 void setup() {
     Serial.begin(9600); //Serial communication initialization
   Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, A6, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins and Buzzer pin
-     ledmatrix.init();   //Starting up LED matrix display
-  ledmatrix.setIntensity(10);
+
     Otto.playGesture(OttoHappy);
     Otto.home();
   randomSeed(analogRead(A6));

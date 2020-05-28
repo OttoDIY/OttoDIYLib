@@ -2,12 +2,9 @@
 #include <Oscillator.h>
 #include <EEPROM.h>
 #include <US.h>
-#include <EnableInterrupt.h>
-#include <OttoSerialCommand.h>
 #include <Otto9.h>
 #include <Otto_Matrix9.h>
 Otto9 Otto;  //This is Otto!!
-OttoSerialCommand SCmd;  //The SerialCommand object
 // LED MATRIX PINs //////////////////////////////////////////////////////////////////////////
 #define DIN_PIN    A3   //DIN pin (A3)
 #define CS_PIN     A2   //CS pin (A2)
