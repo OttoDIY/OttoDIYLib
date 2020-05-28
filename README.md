@@ -2,10 +2,9 @@
 A purpose of this repository is to discuss and document properly the Otto libraries for Arduino IDE.
 
 ## Installation:
-How do I setup the Arduino IDE and libraries? or How to install the libraries (not Otto specific) ?
+How to install the Arduino IDE and libraries?
 Answer: "There are multiple ways to add libraries to your Arduino IDE after installed the most easy for me is to just Download all the libraries from the files tab for the specific project and move them to C:\Users\user\Documents\Arduino\libraries (or wherever your libraries folder was installed)
-Other ways use .zip installation through menu or even automatic updates online(i wish i knew how to do this for Otto) but i never need to do it this way, is a very general topic that all new Arduino users face and there is a lot information by just googling.
-ï»¿https://www.arduino.cc/en/Guide/Libraries#toc3»¿
+[Another way is to use .zip installation through menu is a very general topic that all new Arduino users face](https://www.arduino.cc/en/guide/libraries) 
  
 ## Compatibility:
 Otto Core Libraries is the code to be deployed to the user's Documents\Arduino\libraries directory, including: BatReader, EnableInterrupt, MaxMatrix, Oscillator, Otto, OttoSerialCommand
@@ -68,11 +67,6 @@ PIN_Battery   A7  //3.7V BATTERY MONITOR   ANALOG pin (A7)
 
 TOUCH SENSOR or PUSH BUTTON 
 PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
-
-RGB NEOPIXEL LED:
-boolean enableRGB = true;    // SET TO FALSE IF NOT USING THIS OPTION
-NeopixelRGB_PIN  12 // NEOPIXEL pin   DIGITAL PIN (12)
-NUMPIXELS 1   // change for more than 1, becarefull with the current
 
 SERVO ASSEMBLY:
 to help assemble Otto's feet and legs - wire link between GND and pin 7 for PLUS & pin 10 for humanoid

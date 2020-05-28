@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Otto_BT_TEST   sample sketch
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//-- Otto DIY PLUS APP Firmware version 9 (V9)
 //-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
 //-----------------------------------------------------------------
 //-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
@@ -10,8 +9,8 @@
 //BLUETOOTH SOFTWARE SERIAL    /////////////////////////////////////////////////////////////////////
 #include <SoftwareSerial.h>
 // SoftwareSerial (RX, TX)
-#define PIN_TX 3//connect BLUETOOTH RX pin here - pin 3
-#define PIN_RX 2 //connect BLUETOOTH TX pin here - pin 2
+#define PIN_TX 11//connect BLUETOOTH RX pin here - pin 3
+#define PIN_RX 12 //connect BLUETOOTH TX pin here - pin 2
 SoftwareSerial BTSerial ( PIN_TX , PIN_RX ); // set up software serial library with the name BTserial and the pins used for RX and TX
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
