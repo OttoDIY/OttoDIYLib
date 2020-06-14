@@ -9,8 +9,8 @@
 //BLUETOOTH SOFTWARE SERIAL    /////////////////////////////////////////////////////////////////////
 #include <SoftwareSerial.h>
 // SoftwareSerial (RX, TX)
-#define PIN_TX 11//connect BLUETOOTH RX pin here - pin 3
-#define PIN_RX 12 //connect BLUETOOTH TX pin here - pin 2
+#define PIN_TX 11//connect BLUETOOTH RX pin here 
+#define PIN_RX 12 //connect BLUETOOTH TX pin here
 SoftwareSerial BTSerial ( PIN_TX , PIN_RX ); // set up software serial library with the name BTserial and the pins used for RX and TX
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
@@ -22,7 +22,6 @@ SoftwareSerial BTSerial ( PIN_TX , PIN_RX ); // set up software serial library w
 void setup() {
     BTSerial.begin (9600); // start the software serial  communications
     Serial.begin (9600); // start the standard serial communications
-
 }
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
@@ -39,6 +38,3 @@ void loop() {
         Serial.println("");       
     }
 }  
-
-
-
