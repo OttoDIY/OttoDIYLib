@@ -1,0 +1,343 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <toolbox>toolbox_arduino_all</toolbox>
+  <block type="serial_init" id="Gtw4XUiQy^n!(0tZrJXZ" x="86" y="-551">
+    <field name="pin">0</field>
+    <field name="SPEED">9600</field>
+    <comment pinned="true" h="121" w="490">Begin serial &amp; setup the communication speed.
+After Check &amp; Upload the code,
+click on theSerial monitor button on the top right,
+then click in the start button, to see the sensors measurements data.
+    </comment>
+  </block>
+  <block type="base_setup_loop" id="IHiBj]IRq5c5_#FSz)(g" x="450" y="-278">
+    <statement name="DO">
+      <block type="otto9_homeh" id="JkHyV9sK.02ESp?+xG-h">
+        <next>
+          <block type="otto9_soundh" id="|E$8zXP5FwJF(|G6DiEn">
+            <field name="otto_sound">S_connection</field>
+            <next>
+              <block type="controls_for" id="/9XX#f.es;hD]O.s8nh{">
+                <field name="VAR">i</field>
+                <value name="FROM">
+                  <block type="math_number" id="89h_xE(hw)%lJs|dwd;L">
+                    <field name="NUM">0</field>
+                  </block>
+                </value>
+                <value name="TO">
+                  <block type="math_number" id="X0G@Mqly]Z.K!hJA!M0_">
+                    <field name="NUM">7</field>
+                  </block>
+                </value>
+                <value name="BY">
+                  <block type="math_number" id="kqa82W72uIMC8Q)kQg`s">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+                <statement name="DO">
+                  <block type="controls_for" id="j[_xGk$D;9+Xt)U+;yT*">
+                    <field name="VAR">j</field>
+                    <value name="FROM">
+                      <block type="math_number" id="?vH9_Td~V:[utjNsCcYD">
+                        <field name="NUM">0</field>
+                      </block>
+                    </value>
+                    <value name="TO">
+                      <block type="math_number" id="M*F0{_~AR,PZ_G0_w5?O">
+                        <field name="NUM">15</field>
+                      </block>
+                    </value>
+                    <value name="BY">
+                      <block type="math_number" id="=wJJK3trO,]Cd^:9i`b|">
+                        <field name="NUM">1</field>
+                      </block>
+                    </value>
+                    <statement name="DO">
+                      <block type="otto9_matrixp" id="QpJ-#wP]JN{g)2C.90~h">
+                        <value name="X">
+                          <shadow type="math_number" id="@^2[lA3/Oy*Y4B.;5^`q">
+                            <field name="NUM">0</field>
+                          </shadow>
+                          <block type="variables_get" id="(B[[,0K:!7taso6]RD7n">
+                            <field name="VAR">i</field>
+                          </block>
+                        </value>
+                        <value name="Y">
+                          <shadow type="math_number" id="Imta}_pqXp1:ybg+C,.h">
+                            <field name="NUM">0</field>
+                          </shadow>
+                          <block type="variables_get" id="g|9lK1)imDQj.q,)*Q;,">
+                            <field name="VAR">j</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="otto9_eyesp" id="UVB^AN5+RC-7BXfB%vUQ">
+                            <value name="X">
+                              <shadow type="math_number" id="VfA?ZBoydyKp8$B3^{[$">
+                                <field name="NUM">0</field>
+                              </shadow>
+                              <block type="variables_get" id="@$-OwRc}qP8eC7Yh9H(?">
+                                <field name="VAR">i</field>
+                              </block>
+                            </value>
+                            <value name="Y">
+                              <shadow type="math_number" id="nEqCN]@$v~UsZ,`eZHyw">
+                                <field name="NUM">0</field>
+                              </shadow>
+                              <block type="variables_get" id="vs3FV3r|X?@2pUDj)OC:">
+                                <field name="VAR">j</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="base_delay" id="$1/BCtt!vBsn)WKMh#bZ">
+                                <field name="unite">m</field>
+                                <value name="DELAY_TIME">
+                                  <shadow type="math_number" id="OQNOB6`BjZNFQiO%cc$I">
+                                    <field name="NUM">30</field>
+                                  </shadow>
+                                </value>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                  </block>
+                </statement>
+                <next>
+                  <block type="otto9_eyes" id=",jy=d.y0k;?|lA1E8u+t">
+                    <field name="otto9_eyes_choice">logo_bmp</field>
+                    <next>
+                      <block type="procedures_callnoreturn" id="sIgih+m~9daF84Gq65j3">
+                        <mutation name="do"></mutation>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="LOOP">
+      <block type="controls_if" id="+{+vhX?.2MVv%HCW.)Dd">
+        <value name="IF0">
+          <block type="otto9_obstacle" id="l~e^beRN$3_*:%DPdg~l">
+            <field name="obstacle">10</field>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="play" id="EOK$;hk|:*ACCp@mccWO">
+            <field name="tempo">125</field>
+            <field name="note">261</field>
+            <next>
+              <block type="play" id="Vn;7NgK;znL|(.oXW6nC">
+                <field name="tempo">125</field>
+                <field name="note">293</field>
+                <next>
+                  <block type="play" id="XuTeC5[e:[Wwp]5SX#Bx">
+                    <field name="tempo">125</field>
+                    <field name="note">329</field>
+                    <next>
+                      <block type="otto9_mouth#" id="5t=}L#3vi3*:WoaZDP=^">
+                        <value name="mouth">
+                          <shadow type="math_number" id="~0P2xmRrKYmC,9F4a(J%">
+                            <field name="NUM">10</field>
+                          </shadow>
+                          <block type="otto9_getdistance" id="u[gZh@T$7V7EN#lo}Ha["></block>
+                        </value>
+                        <next>
+                          <block type="play" id="]q|oF3G-U#w4UE31hl:Q">
+                            <field name="tempo">125</field>
+                            <field name="note">329</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="controls_if" id="Db?nAz{?I/8%v2WYr[+S">
+            <value name="IF0">
+              <block type="otto9_touchbutton" id="d|{Rl8zW_R35Wr~rlBs."></block>
+            </value>
+            <statement name="DO0">
+              <block type="otto9_eyes_clear" id="AIW2a!_^,)X!}6`O({W|">
+                <next>
+                  <block type="otto9_eyes" id="ZmI7!;xs0.7`VZx2PTIF">
+                    <field name="otto9_eyes_choice">magic_bmp</field>
+                    <next>
+                      <block type="otto9_gestureh" id="|9?9Eg,}kqMW!H6e@s{y">
+                        <field name="otto_gesture">OttoSuperHappy</field>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </statement>
+            <next>
+              <block type="controls_if" id="vg?}2]}O~MiOE%*q;}1O">
+                <value name="IF0">
+                  <block type="logic_compare" id="Bdt([F!Isi`kI$9IH-?6">
+                    <field name="OP">GT</field>
+                    <value name="A">
+                      <block type="otto9_getnoise" id="*QLK=$:qQKn$g[7+am7-"></block>
+                    </value>
+                    <value name="B">
+                      <shadow type="math_number" id="oz[OKSKq=N)]CS:J`_`+">
+                        <field name="NUM">700</field>
+                      </shadow>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="otto9_eyes" id="(f@8UR8p3kpC4Ai+5-k/">
+                    <field name="otto9_eyes_choice">angry2_bmp</field>
+                    <next>
+                      <block type="play" id="zLliFrXg_!N~uDx`yg}m">
+                        <field name="tempo">250</field>
+                        <field name="note">880</field>
+                        <next>
+                          <block type="otto9_mouth" id="D-!L(-a$R]#Z$Qv|Bz4q">
+                            <field name="otto9_mouth_choice">smallSurprise</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_if" id="O2!ncf-sK1-[z7-2A*+4">
+                    <value name="IF0">
+                      <block type="logic_compare" id="#l(JP|;|~sZ;N.ot]+IV">
+                        <field name="OP">GT</field>
+                        <value name="A">
+                          <block type="otto9_getnoise" id="F)$8a]c}KFj6AbywxI6K"></block>
+                        </value>
+                        <value name="B">
+                          <shadow type="math_number" id="~f~[t%Kf`:EjM[Bv@YX)">
+                            <field name="NUM">1000</field>
+                          </shadow>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="otto9_eyes" id="cNd9h!J:|`xrt)r_^%kR">
+                        <field name="otto9_eyes_choice">angry_bmp</field>
+                        <next>
+                          <block type="otto9_soundh" id="NSJT2~jcLQ-UxNa)fge%">
+                            <field name="otto_sound">S_fart1</field>
+                            <next>
+                              <block type="otto9_mouth" id="Q}0.2bN4G?`+{l`hM!E`">
+                                <field name="otto9_mouth_choice">bigSurprise</field>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="serial_write" id="{M/*E71u/P^3Sx713nYo">
+                        <value name="CONTENT">
+                          <block type="text" id="x]V@75}8`W{*XYDbx|NK">
+                            <field name="TEXT">sound sensor reading:</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="serial_write" id=")NMC6|:48XbSZ-!h1n}2">
+                            <value name="CONTENT">
+                              <block type="otto9_getnoise" id="R+dO1+kR=}HOT(~O+i_O"></block>
+                            </value>
+                            <next>
+                              <block type="serial_write" id="lYMp?zjDG?-$[Xbq!sU4">
+                                <value name="CONTENT">
+                                  <block type="serial_tab" id="9-wlAn2SQMEE-Zb66%j`"></block>
+                                </value>
+                                <next>
+                                  <block type="serial_write" id="N{ih:lDEIdMYq-@d-yk{">
+                                    <value name="CONTENT">
+                                      <block type="text" id="2.[t7Ez@jamGJ6vw,bwq">
+                                        <field name="TEXT">ultrasound sensor reading:</field>
+                                      </block>
+                                    </value>
+                                    <next>
+                                      <block type="serial_write" id="TjiO{2Ow}1oVsw[q)_SM">
+                                        <value name="CONTENT">
+                                          <block type="otto9_getdistance" id="`{v[]*2htn)fe(mM+{39"></block>
+                                        </value>
+                                        <next>
+                                          <block type="serial_write" id="7R|McHj,RqDhW5vw!g;P">
+                                            <value name="CONTENT">
+                                              <block type="text" id="uLRol]{8eK_4/#AkCxyi">
+                                                <field name="TEXT">cm</field>
+                                              </block>
+                                            </value>
+                                            <next>
+                                              <block type="serial_write" id="@*o!J(~[P|*)Ks.r=y]!">
+                                                <value name="CONTENT">
+                                                  <block type="serial_line" id="mB3Y1o%2qT)DJ3pj0+iU"></block>
+                                                </value>
+                                              </block>
+                                            </next>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id=",{#08Y*;1wiNG?JuW[L+" x="932" y="-9">
+    <field name="NAME">do</field>
+    <statement name="STACK">
+      <block type="otto9_clear" id="JTC2:RA[{^oQl,YL$yuT">
+        <next>
+          <block type="otto9_mouth" id="Y=s+=lVi8d]b@)y|+htL">
+            <field name="otto9_mouth_choice">okMouth</field>
+            <next>
+              <block type="otto9_doh" id="f}|z0FPMwpe[p=F?dLsT">
+                <field name="otto_do_movement">swing</field>
+                <field name="otto_move_speed">1000</field>
+                <field name="otto_dance_size">25</field>
+                <next>
+                  <block type="otto9_danceh" id=".k+=l+@M!Q[=YE7!*f#-">
+                    <field name="otto_dance_movement">flappingFRONT</field>
+                    <field name="otto_move_speed">1000</field>
+                    <field name="otto_dance_size">25</field>
+                    <next>
+                      <block type="otto9_arms" id="`.gU#j3y-!#5mOkwmi5p">
+                        <field name="otto9_arms_choice">HANDSUP</field>
+                        <next>
+                          <block type="otto9_soundh" id="#^mY+6Gj8SPUSvYxRi!R">
+                            <field name="otto_sound">S_disconnection</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>
