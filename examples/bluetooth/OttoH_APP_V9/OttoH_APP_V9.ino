@@ -19,21 +19,21 @@
 #include <SerialCommand.h>//-- Library to manage serial commands
 SoftwareSerial BTserial = SoftwareSerial(11,12); //  TX  RX of the Bluetooth
 SerialCommand SCmd(BTserial);  //The SerialCommand object
-#include <Otto9Humanoid.h> //-- Otto Library version 9
-Otto9Humanoid Otto;  //This is Otto!
+#include <Otto9Humanoid.h> 
+Otto9Humanoid Otto;  //This is Otto Humanoid!
 //---------------------------------------------------------
 //-- First step: Configure the pins where the servos are attached
 /*
          --------------- 
         |     O   O     |
         |---------------|
-RA 7==> |               | <== LA 6
+RA 7==> |               | <== LEFT ARM 6
         |               |
-LR 3==> |               | <== LL 2
+LR 3==> |               | <== LEFT LEG 2
          --------------- 
             ||     ||
             ||     ||
-FR 5==>   -----   ------  <== FL 4
+RF 5==>   -----   ------  <== LEFT FOOT 4
          |-----   ------|
 */
 // SERVO PINs //////////////////////////////////////////////////////////////////////////////
@@ -68,14 +68,14 @@ boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
 ///////////////////////////////////////////////////////////////////
 
 const char programID[] = "OttoHumanoid_V9"; //Each program will have a ID
+const char name_fac = '$'; //Factory name
+const char name_fir = '#'; //First name
 const char message1[] = "I AM OTTO"; //9 characters MAXIMUM
 //-- Movement parameters
 int T = 1000;            //Initial duration of movement
 int moveId = 0;          //Number of movement
-int modeId = 0;          //Number of mode
 int moveSize = 15;       //Asociated with the height of some movements
 volatile bool buttonPushed=false;  //Variable to remember when a button has been pushed
-//---------------------------------------------------------
 unsigned long previousMillis = 0;
 int randomDance = 0;
 int randomSteps = 0;
@@ -101,15 +101,19 @@ void setup() {
   //Setup callbacks for SerialCommand commands
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
   SCmd.addCommand("L", receiveLED);       //  sendAck & sendFinalAck
+  SCmd.addCommand("T", recieveBuzzer);    //  sendAck & sendFinalAck
   SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck
   SCmd.addCommand("H", receiveGesture);   //  sendAck & sendFinalAck
   SCmd.addCommand("K", receiveSing);      //  sendAck & sendFinalAck
+  SCmd.addCommand("J", requestMode);
   SCmd.addCommand("C", receiveTrims);     //  sendAck & sendFinalAck
+  SCmd.addCommand("G", receiveServo);     //  sendAck & sendFinalAck
   SCmd.addCommand("R", receiveName);      //  sendAck & sendFinalAck
+  SCmd.addCommand("E", requestName);
   SCmd.addCommand("D", requestDistance);
+  SCmd.addCommand("N", requestNoise);
   SCmd.addCommand("B", requestBattery);   // 3v7 lipo battery
   SCmd.addCommand("I", requestProgramId);
-  SCmd.addCommand("J", requestMode);
   SCmd.addDefaultHandler(receiveStop);
   //Otto wake up!
   Otto.sing(S_connection);
@@ -132,7 +136,7 @@ void setup() {
   while (digitalRead(PIN_ASSEMBLY) == LOW) {
     Otto.home();
     Otto.sing(S_happy_short);   // sing every 5 seconds so we know OTTO is still working
-    delay(500);
+    delay(5000);
   }
 delay (500);
 Otto.clearMouth();
@@ -194,8 +198,7 @@ void receiveLED() {
   unsigned long int matrix;
   char *arg;
   char *endstr;
-  arg = SCmd.next();
-  //Serial.println (arg);
+  arg = SCmd.next();//Serial.println (arg);
   if (arg != NULL) {
     matrix = strtoul(arg, &endstr, 2); // Converts a char string to unsigned long integer
     Otto.putMouth(matrix, false);
@@ -208,6 +211,32 @@ void receiveLED() {
   sendFinalAck();
 }
 
+//-- Function to receive buzzer commands
+void recieveBuzzer() {
+  //sendAck & stop if necessary
+  sendAck();
+  Otto.home();
+
+  bool error = false;
+  int frec;
+  int duration;
+  char *arg;
+
+  arg = SCmd.next();
+  if (arg != NULL) frec = atoi(arg);  // Converts a char string to an integer
+  else error = true;
+
+  arg = SCmd.next();
+  if (arg != NULL) duration = atoi(arg);  // Converts a char string to an integer
+  else error = true;
+  if (error == true) {
+    Otto.putMouth(xMouth);
+    delay(2000);
+    Otto.clearMouth();
+  }
+  else Otto._tone(frec, duration, 1);
+  sendFinalAck();
+}
 
 //-- Function to receive TRims commands
 void receiveTrims() {
@@ -257,7 +286,47 @@ void receiveTrims() {
   }
   sendFinalAck();
 }
+//-- Function to receive Servo commands
+void receiveServo() {
+  sendAck();
+  moveId = 30;
 
+  //Definition of Servo Bluetooth command
+  //G  servo_YL servo_YR servo_RL servo_RR
+  //Example of receiveServo Bluetooth commands
+  //G 90 85 96 78
+  bool error = false;
+  char *arg;
+  int servo_YL, servo_YR, servo_RL, servo_RR;
+
+  arg = SCmd.next();
+  if (arg != NULL) servo_YL = atoi(arg);  // Converts a char string to an integer
+  else error = true;
+
+  arg = SCmd.next();
+  if (arg != NULL) servo_YR = atoi(arg);  // Converts a char string to an integer
+  else error = true;
+
+  arg = SCmd.next();
+  if (arg != NULL) servo_RL = atoi(arg);  // Converts a char string to an integer
+  else error = true;
+
+  arg = SCmd.next();
+  if (arg != NULL) {
+    servo_RR = atoi(arg);  // Converts a char string to an integer
+  }
+  else error = true;
+  if (error == true) {
+    Otto.putMouth(xMouth);
+    delay(2000);
+    Otto.clearMouth();
+  }
+  else { //Update Servo:
+    int servoPos[4] = {servo_YL, servo_YR, servo_RL, servo_RR};
+    Otto._moveServos(200, servoPos);   //Move 200ms
+  }
+  sendFinalAck();
+}
 //-- Function to receive movement commands
 void receiveMovement() {
   sendAck();
@@ -504,90 +573,6 @@ void receiveSing() {
   sendFinalAck();
 }
 
-//-- Function to receive Name command
-void receiveName() {
-  //sendAck & stop if necessary
-  sendAck();
-  Otto.home();
-  char newOttoName[9] = "";  //Variable to store data read from Serial.
-  char *arg;
-  arg = SCmd.next();
-  if (arg != NULL) {
-    //Complete newOttoName char string
-    int k = 0;
-    while ((*arg) && (k < 9)) {
-      newOttoName[k] = *arg++;
-      k++;
-    }
-    // write a text string of no more than nine limited characters and scroll at a speed between 50 and 150 (FAST and SLOW)
-    // limited characters are : CAPITALS A to Z   NUMBERS 0 to 9    'SPACE'  : ; < >  = @ 
-    Otto.clearMouth();
-    Otto.writeText (newOttoName, 75);
-    delay (1000);
-    Otto.clearMouth();
-  }
-  else
-  {
-    Otto.putMouth(xMouth);
-    delay(2000);
-    Otto.clearMouth();
-  }
-  sendFinalAck();
-}
-
-
-//-- Function to send ultrasonic sensor measure (distance in "cm")
-void requestDistance() {
-  Otto.home();  //stop if necessary
-  int distance = Otto.getDistance();
-  Serial.print(F("&&"));
-  Serial.print(F("D "));
-  Serial.print(distance);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-
-//-- Function to send battery voltage percent
-void requestBattery() {
-  Otto.home();  //stop if necessary
-  //The first read of the battery is often a wrong reading, so we will discard this value.
-  double batteryLevel = Otto.getBatteryLevel();
-  Serial.print(F("&&"));
-  Serial.print(F("B "));
-  Serial.print(batteryLevel);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-//-- Function to send program ID
-void requestProgramId() {
-  Otto.home();   //stop if necessary
-  Serial.print(F("&&"));
-  Serial.print(F("I "));
-  Serial.print(programID);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-
-//-- Function to send Ack comand (A)
-void sendAck() {
-  delay(30);
-  Serial.print(F("&&"));
-  Serial.print(F("A"));
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-//-- Function to send final Ack comand (F)
-void sendFinalAck() {
-  delay(30);
-  Serial.print(F("&&"));
-  Serial.print(F("F"));
-  Serial.println(F("%%"));
-  Serial.flush();
-}
 //-- Function to receive mode selection.
 void requestMode() {
   sendAck();
@@ -683,6 +668,110 @@ void requestMode() {
   sendFinalAck();
 }
 
+//-- Function to receive Name command
+void receiveName() {
+  //sendAck & stop if necessary
+  sendAck();
+  Otto.home();
+  char newOttoName[9] = "";  //Variable to store data read from Serial.
+  char *arg;
+  arg = SCmd.next();
+  if (arg != NULL) {
+    //Complete newOttoName char string
+    int k = 0;
+    while ((*arg) && (k < 9)) {
+      newOttoName[k] = *arg++;
+      k++;
+    }
+    // write a text string of no more than nine limited characters and scroll at a speed between 50 and 150 (FAST and SLOW)
+    // limited characters are : CAPITALS A to Z   NUMBERS 0 to 9    'SPACE'  : ; < >  = @ 
+    Otto.clearMouth();
+    Otto.writeText (newOttoName, 75);
+    delay (1000);
+    Otto.clearMouth();
+  }
+  else
+  {
+    Otto.putMouth(xMouth);
+    delay(2000);
+    Otto.clearMouth();
+  }
+  sendFinalAck();
+}
+void requestName() {
+  Otto.home(); //stop if necessary
+  char actualOttoName[11] = ""; //Variable to store data read from EEPROM.
+  int eeAddress = 5;            //EEPROM address to start reading from
+  //Get the float data from the EEPROM at position 'eeAddress'
+  EEPROM.get(eeAddress, actualOttoName);
+
+  Serial.print(F("&&"));
+  Serial.print(F("E "));
+  Serial.print(actualOttoName);
+  Serial.println(F("%%"));
+  Serial.flush();
+}
+
+//-- Function to send ultrasonic sensor measure (distance in "cm")
+void requestDistance() {
+  Otto.home();  //stop if necessary
+  int distance = Otto.getDistance();
+  Serial.print(F("&&"));
+  Serial.print(F("D "));
+  Serial.print(distance);
+  Serial.println(F("%%"));
+  Serial.flush();
+}
+void requestNoise() {
+  Otto.home();  //stop if necessary
+  int microphone = Otto.getNoise(); //analogRead(PIN_NoiseSensor);
+  Serial.print(F("&&"));
+  Serial.print(F("N "));
+  Serial.print(microphone);
+  Serial.println(F("%%"));
+  Serial.flush();
+}
+
+//-- Function to send battery voltage percent
+void requestBattery() {
+  Otto.home();  //stop if necessary
+  //The first read of the battery is often a wrong reading, so we will discard this value.
+  double batteryLevel = Otto.getBatteryLevel();
+  Serial.print(F("&&"));
+  Serial.print(F("B "));
+  Serial.print(batteryLevel);
+  Serial.println(F("%%"));
+  Serial.flush();
+}
+
+//-- Function to send program ID
+void requestProgramId() {
+  Otto.home();   //stop if necessary
+  Serial.print(F("&&"));
+  Serial.print(F("I "));
+  Serial.print(programID);
+  Serial.println(F("%%"));
+  Serial.flush();
+}
+
+
+//-- Function to send Ack comand (A)
+void sendAck() {
+  delay(30);
+  Serial.print(F("&&"));
+  Serial.print(F("A"));
+  Serial.println(F("%%"));
+  Serial.flush();
+}
+
+//-- Function to send final Ack comand (F)
+void sendFinalAck() {
+  delay(30);
+  Serial.print(F("&&"));
+  Serial.print(F("F"));
+  Serial.println(F("%%"));
+  Serial.flush();
+}
 //-- Functions with animatics
 //--------------------------------------------------------
 
@@ -743,7 +832,4 @@ void ButtonPushed(){
         Otto.putMouth(smallSurprise);
     } 
 } 
-void checkBATT(void* context) 
-{
-OttoLowBatteryAlarm();
-}
+//void checkBATT(void* context) {OttoLowBatteryAlarm();}

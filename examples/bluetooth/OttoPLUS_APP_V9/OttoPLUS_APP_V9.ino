@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//-- Otto DIY APP Firmware version 9 (V09) with standard baudrate of 9600 for Bluetooth modules.
+//-- Otto DIY APP Firmware version 9 (V9) with standard baudrate of 9600 for Bluetooth modules.
 //-- This code will have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
 //-- Designed to work with the basic Otto or PLUS or Humanoid or other biped robots. some of these functions will need a good power source such as a LIPO battery.
 //-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
@@ -52,8 +52,8 @@ boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
 // SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
-// to help assemble Otto's feet and legs - wire link between pin 7 and GND
-#define PIN_ASSEMBLY    7   //ASSEMBLY pin (7) LOW = assembly    HIGH  = normal operation
+// to help assemble Otto's feet and legs - wire link between pin 10 and GND
+#define PIN_ASSEMBLY    10   //ASSEMBLY pin (10) LOW = assembly    HIGH  = normal operation
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -135,8 +135,8 @@ void setup() {
 
   Otto.putMouth(happyOpen);
   previousMillis = millis();
-// if Pin 7 is LOW then place OTTO's servos in home mode to enable easy assembly, 
-// when you have finished assembling Otto, remove the link between pin 7 and GND
+// if Pin 10 is LOW then place OTTO's servos in home mode to enable easy assembly, 
+// when you have finished assembling Otto, remove the link between pin 10 and GND
   while (digitalRead(PIN_ASSEMBLY) == LOW) {
     Otto.home();
     Otto.sing(S_happy_short);   // sing every 5 seconds so we know OTTO is still working
@@ -177,13 +177,10 @@ void receiveLED() {
   //sendAck & stop if necessary
   sendAck();
   Otto.home();
-  //Examples of receiveLED Bluetooth commands
-  //L 000000001000010100100011000000000
   unsigned long int matrix;
   char *arg;
   char *endstr;
-  arg = SCmd.next();
-  //Serial.println (arg);
+  arg = SCmd.next(); //Serial.println (arg);
   if (arg != NULL) {
     matrix = strtoul(arg, &endstr, 2); // Converts a char string to unsigned long integer
     Otto.putMouth(matrix, false);
@@ -718,7 +715,6 @@ void sendFinalAck() {
 void ButtonPushed(){ 
     if(!buttonPushed){
         buttonPushed=true;
-        Otto.putMouth(smallSurprise);
+        Otto.sing(S_connection);
     } 
 } 
-
