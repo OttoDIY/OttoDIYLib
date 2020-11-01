@@ -75,7 +75,7 @@ void loop()
 
   // Add more steps below here.
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-/*  Remove the "/*" comments from around code to activate it.
+
   
   //Simple Servo Control using Arduino Servo Functions
   // 0 - full speed backward, 180 full speed forward, 0 - stopped
@@ -90,7 +90,6 @@ void loop()
   leftServo.write(90);
   delay (1000);
 
-*/
 
 
 
