@@ -1,21 +1,5 @@
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//-- Otto DIY Scratch AI firmware with standard baudrate of 9600 for BLE Bluetooth modules.
-//-- This code have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
-//-- Designed to work with Otto Eyes. 
-//-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
-//-----------------------------------------------------------------
-//-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
-//-- in accordance with the GPL Version 2 when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// -- ADDED changed to original Software serial library Camilo Parra May 2020
-// -- DELETED interrupts and modes to use BTserial Camilo Parra May 2020
-// -- ADDED BLE communication for Scratch AI Camilo Parra August 2020 https://ottoschool.com/scratch/
-//-------------------------------------------------------------------------
 #include <Otto9.h>
 Otto9 Otto;
-#include <Wire.h>
-#include "Adafruit_LEDBackpack.h"
-Adafruit_8x16matrix ematrix = Adafruit_8x16matrix();
 #include <SerialCommand.h>//-- Library to manage serial commands
 SoftwareSerial BTserial = SoftwareSerial(11,12); //  TX  RX of the Bluetooth
 SerialCommand SCmd(BTserial);  //The SerialCommand object
@@ -27,26 +11,8 @@ int T=1000;              //Initial duration of movement
 int moveId=0;            //Number of movement
 int moveSize=15;         //Asociated with the height of some movements
 unsigned long int matrix;
-static const uint8_t PROGMEM
-logo_bmp[] = {  B01111110,B10000001,B10111001,B10101001,B10111001,B10010001,B10111001,B10010001,B10010001,B10111001,B10010001,B10111001,B10101001,B10111001,B10000001,B01111110},
-happy_bmp[] = {  B00000000,B00111100,B00000010,B00000010,B00000010,B00000010,B00111100,B00000000,B00000000,B00111100,B00000010,B00000010,B00000010,B00000010,B00111100,B00000000},
-eyes_bmp[] = {  B00000000,B00111100,B01000010,B01001010,B01000010,B01000010,B00111100,B00000000,B00000000,B00111100,B01000010,B01001010,B01000010,B01000010,B00111100,B00000000},
-sad_bmp[] =  {  B00000000,B00010000,B00010000,B00010000,B00010000,B00010000,B00010000,B00000000,B00000000,B00010000,B00010000,B00010000,B00010000,B00010000,B00010000,B00000000},
-xx_bmp[] =  {  B00000000,B00100010,B00010100,B00001000,B00010100,B00100010,B00000000,B00000000,B00000000,B00000000,B00100010,B00010100,B00001000,B00010100,B00100010,B00000000},
-XX_bmp[] = {  B01000001,B00100010,B00010100,B00001000,B00010100,B00100010,B01000001,B00000000,B00000000,B01000001,B00100010,B00010100,B00001000,B00010100,B00100010,B01000001},
-angry_bmp[] = {  B00000000,B00011110,B00111100,B01111000,B01110000,B00100000,B00000000,B00000000,B00000000,B00000000,B00100000,B01110000,B01111000,B00111100,B00011110,B00000000},
-angry2_bmp[] = {  B00000000,B00000010,B00000100,B00001000,B00010000,B00100000,B00000000,B00000000,B00000000,B00000000,B00100000,B00010000,B00001000,B00000100,B00000010,B00000000},
-sleep_bmp[] = {  B00000000,B00100010,B00110010,B00101010,B00100110,B00100010,B00000000,B00000000,B00000000,B00000000,B00100010,B00110010,B00101010,B00100110,B00100010,B00000000},
-freetful_bmp[] = {  B00000000,B00100000,B00010000,B00001000,B00000100,B00000010,B00000000,B00000000,B00000000,B00000000,B00000010,B00000100,B00001000,B00010000,B00100000,B00000000},
-love_bmp[] = {  B00000000,B00001100,B00011110,B00111100,B00111100,B00011110,B00001100,B00000000,B00000000,B00001100,B00011110,B00111100,B00111100,B00011110,B00001100,B00000000},
-confused_bmp[] = {  B00000000,B01111100,B10000010,B10111010,B10101010,B10001010,B01111000,B00000000,B00000000,B01111100,B10000010,B10111010,B10101010,B10001010,B01111000,B00000000},
-wave_bmp[] = {  B00000000,B00100000,B00010000,B00001000,B00010000,B00100000,B00010000,B00000000,B00000000,B00100000,B00010000,B00001000,B00010000,B00100000,B00010000,B00000000},
-magic_bmp[] = {  B00000000,B00000000,B01111110,B11111111,B01111110,B00000000,B00000000,B00000000,B00000000,B00000000,B00000000,B01111110,B11111111,B01111110,B00000000,B00000000},
-fail_bmp[] = {  B00000000,B00110000,B01111000,B01111000,B01111100,B00111100,B00001000,B00000000,B00000000,B00001000,B00111100,B01111100,B01111000,B01111000,B00110000,B00000000},
-full_bmp[] =  {   B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111 };
-
 /*             -------- 
-              |  ^  ^  |
+              |  O  O  |
               |--------|
   RIGHT LEG 3 |        | LEFT LEG 2
                -------- 
@@ -64,21 +30,14 @@ RIGHT FOOT 5 |---     ---| LEFT FOOT 4
 #define PIN_Trigger 8 // ultrasound
 #define PIN_Echo 9 // ultrasound
 #define PIN_Buzzer  13 //buzzer
-int statePin = 10;
-int msToDefineConnection = 1500; // some time longer than the pulse
-long highStartTimestamp;
-int lastState = LOW;
-bool confirmedConnected = false;
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void setup(){
-  Serial.begin(9600);
-  BTserial.begin(9600);   
-  pinMode(statePin, INPUT);  
+  Serial.begin(9600);  
+  BTserial.begin(9600);  
   Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);
   Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, A6, PIN_Buzzer, PIN_Trigger, PIN_Echo);
-  ematrix.begin(0x70);  // pass in the address
   Otto.matrixIntensity(1);// set up Matrix display intensity
   //Setup callbacks for SerialCommand commands 
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
@@ -96,21 +55,14 @@ void setup(){
   Otto.sing(S_connection);
   Otto.home();
   Otto.putMouth(smile);
-  ematrix.drawBitmap(0, 0, + logo_bmp , 8, 16, LED_ON);
-  ematrix.writeDisplay();
-  delay(200);
   Otto.sing(S_happy);
-  delay(200);
+    delay(200);
   Otto.putMouth(happyOpen);
-  ematrix.clear();
-  ematrix.drawBitmap(0, 0, + eyes_bmp , 8, 16, LED_ON);
-  ematrix.writeDisplay();
 }
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void loop() {
-  checkIfConnected();
         SCmd.readSerial();    //If Otto is moving yet
         if (Otto.getRestState()==false){  
           move(moveId);
@@ -387,7 +339,7 @@ void move(int moveId){
   if(!manualMode){
     sendFinalAck();
   }
-        BTserial.println("M:END");
+       
 }
 
 //-- Function to receive gesture commands
@@ -412,68 +364,49 @@ void receiveGesture(){
 
     switch (gesture) {
       case 1: //H 1 
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + happy_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoHappy);
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + eyes_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         break;
       case 2: //H 2 
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + happy_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoSuperHappy);
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + happy_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         break;
       case 3: //H 3 
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + sad_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoSad);
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + eyes_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         break;
       case 4: //H 4 
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + sleep_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoSleeping);
         break;
       case 5: //H 5  
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + xx_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoFart);
         break;
       case 6: //H 6 
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + confused_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoConfused);
         break;
       case 7: //H 7 
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + love_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoLove);
         break;
       case 8: //H 8 
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + angry_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoAngry);
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + angry2_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         break;
       case 9: //H 9  
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + freetful_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoFretful);
         break;
       case 10: //H 10
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + magic_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoMagic);
         break;  
       case 11: //H 11
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + wave_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoWave);
         break;   
       case 12: //H 12
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + magic_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoVictory);
         break; 
       case 13: //H 13
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + fail_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoFail);
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + XX_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         break;         
       default:
         break;
     }
 
     sendFinalAck();
-    BTserial.println("H:END");
 }
 
 //-- Function to receive sing commands
@@ -627,44 +560,4 @@ void OttoLowBatteryAlarm(){
           Otto.clearMouth();
           delay(500);    
     }
-}
-
-bool checkIfConnected(){
-  int state = digitalRead(statePin);
-  long now = millis();
-
-  if(state == HIGH){
-    
-    if(confirmedConnected == false){
-
-      if(lastState == LOW){
-        // start the timer for HIGH
-        highStartTimestamp = now;
-        lastState = HIGH;
-      }else{
-        if(now - highStartTimestamp >= msToDefineConnection){
-          Serial.println("C");
-          confirmedConnected = true;
-          // do stuff like control an LED
-          Otto.sing(S_connection);
-          // Empty the buffer
-          while(BTserial.available() > 0) {
-            char t = BTserial.read();
-            Serial.write(t);
-          }
-        }
-      }
-    }
-    
-  }else { // state is LOW
-    if(lastState == HIGH && confirmedConnected == true){
-      Otto.sing(S_disconnection);
-      Serial.println("D");
-      confirmedConnected = false;
-
-    }
-    lastState = LOW;
-  }
-  
-  return confirmedConnected;
 }

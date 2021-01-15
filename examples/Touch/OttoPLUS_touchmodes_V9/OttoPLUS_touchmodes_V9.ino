@@ -48,19 +48,32 @@ void setup(){
   Otto.home();
   Otto.sing(S_happy); // a happy Otto :)
 }
+// touch sensor is in "toggle mode", initial value LOW
+// program expects HIGH value for first touch
+// and then expects LOW value for second touch
+// and then again HIGH and LOW etc.
+//
+  int estado = HIGH;
+  
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void loop() {
-
-   int estado = digitalRead(sensorPin);
- 
-   if (estado == HIGH)
+  
+   if (digitalRead(sensorPin) == estado)
    {
+     if (estado == HIGH)
+     {
+     estado = LOW;
+     }
+     else
+     {
+      estado = HIGH;
+     }
      Otto.sing(S_buttonPushed);
      movement = movement + 1;
+     delay(500);
    }
-
    if (movement == 1)
    {
         if(obstacleDetected){

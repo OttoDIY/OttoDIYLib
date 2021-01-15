@@ -11,17 +11,16 @@ How to install the Arduino IDE and libraries?
 [for more details or other ways visit this link](https://www.arduino.cc/en/Guide/Libraries) 
  
 ## Compatibility:
-Otto Core Libraries is the code to be deployed to the user's Documents\Arduino\libraries directory, including: BatReader, EnableInterrupt, MaxMatrix, Oscillator, Otto, OttoSerialCommand
-Different and similar versions of Otto Core Libraries are currently included in multiple repositories and sub-projects:
+
+Different and similar versions of Otto Libraries are currently included:
 
 Robot  | Library can use
 ------------- | -------------
 DIY  | Otto9
-+ | Otto9
+PLUS | Otto9
 Eyes | Otto9
-Humanoid  | Otto9Humanoid
 Wheels  | Otto9
-Quad | Quad
+Humanoid  | Otto9Humanoid
 
 In order to maintain consistency along the Otto robot remixes we stablished a naming structure: 
 Otto_(followed by the component name and version) for example:
@@ -33,54 +32,70 @@ Otto_(followed by the component name and version) for example:
 * Otto_Matrix9 contains all the matrix functions
 
 Complementary libraries  are independent of Otto(they can work with other projects) therefore are just named like they are, for example:
-* US contains the functions of the ultrasound
+* US contains the functions of the ultrasonic sesnor
 * Bat Reader contains the functions to meassure the battery.
-* All Adafruit libraries can be installed separately
+* All Adafruit libraries can be installed separately so make sure to avoid duplicates
  
- ## Wiring:
+## Wiring:
 We follow these connections in all our robots, buy some Otto do not use all pins so you can play with empty pins to add new sensors or actuators.
 
-SERVOS:
-PIN_YL 2 left leg // or Left Wheel
-PIN_YR 3 right leg // or Righ Wheel
-PIN_RL 4 left foot
-PIN_RR 5 right foot
-PIN_LA 6 Left arm  // for Humanoid only
-PIN_RA 7 Right arm // for Humanoid only
 
-ULTRASONIC:
-PIN_Trigger  8  //TRIGGER pin
-PIN_Echo    9  //ECHO pin
+Servos| Pin
+------------- | -------------
+Left Leg or Wheel |  2 
+Right  Leg or Wheel |  3
+Left Foot | 4 
+Right Foot |  5 
+Left arm for Humanoid  |  6 
+Right arm for Humanoid |  7 
 
-BLUETOOTH:
-STATE pin of bluetooth to 10 // for BLE pairing
-TX pin    of bluetooth to 11
-RX pin    of bluetooth to 12 
+Ultrasoinc | Pin
+------------- | -------------
+Trigger | 8 
+Echo | 9  
 
-BUZZER:
-PIN_Buzzer  13 //BUZZER pin (13)
+Bluetooth | Pin
+------------- | -------------
+STATE |  10  not required
+TX | 11
+RX | 12  
+ENABLE |  not required
+
+Buzzer | Pin
+------------- | -------------
+Positive | 13 
  
-TOUCH SENSOR or PUSH BUTTON 
-PIN_Button   A0 // TOUCH SENSOR Pin, PULL DOWN RESISTOR of 1K REQUIRED to stop false interrupts (interrupt PIN)
+Touch sensor or Button | Pin
+------------- | -------------
+OUT | A0 
 
-LED MATRIX 8x8 for the mouth (MAX7219) :
-CLK_PIN    A1   //Clock
-CS_PIN     A2   //Chip Select
-DIN_PIN    A3   //Data In
+PULL DOWN RESISTOR of 1K REQUIRED to stop false interrupts (interrupt PIN)
 
-LED MATRIX 16x8 for the Eyes (i2C)):
-SDA    A4   // Synchronous Data
-SCL    A5   // Synchronous Clock
-More i2C devices can be added in parallel with a different address
+LED MATRIX 8x8 for the mouth (MAX7219) | Pin
+------------- | -------------
+CLK Clock | A1 
+CS Chip Select | A2  
+DIN Data In | A3 
 
-SOUND SENSOR:
-PIN_NoiseSensor A6  //SOUND SENSOR ANALOG pin
+LED MATRIX 16x8 for the Eyes (i2C)| Pin
+------------- | -------------
+SDA Synchronous Data | A4   
+SCL Synchronous Clock | A5   
 
-BATTERY SENSE:
+More i2C devices with a different address can be added in parallel
+
+Sound sesnor | Pin
+------------- | -------------
+OUT | A6 
+
+Battery sesne | Pin
+------------- | -------------
+3.7V Battery  | A7 
+ 
+
 boolean BATTcheck = true;    // SET TO FALSE IF NOT USING THIS OPTION
-PIN_Battery   A7  //3.7V BATTERY MONITOR ANALOG pin
- 
- ## How to Contribute
+
+ ## How to Contribute:
  Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
 1. Test and if find a problem then post an issue.
 2. Helps us solve the issues or other bugs by commenting
