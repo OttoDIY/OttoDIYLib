@@ -9,7 +9,9 @@ SerialCommand SCmd(BTserial);  //The SerialCommand object
 
 Servo rightServo;
 Servo leftServo;
+Servo gripServo;  
 
+int gripPos;
 int rightSpeed = 0;
 int leftSpeed = 0;
 
@@ -44,9 +46,7 @@ unsigned long int matrix;
 void setup(){
   Serial.begin(9600);  
   BTserial.begin(9600);   
-  Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);
   Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, A6, PIN_Buzzer, PIN_Trigger, PIN_Echo);
-  Otto.matrixIntensity(3);// set up Matrix display intensity
   //Setup callbacks for SerialCommand commands 
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
   SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck
@@ -56,16 +56,15 @@ void setup(){
   //Otto wake up!
   Otto.sing(S_connection);
   Otto.home();
-  Otto.putMouth(smile);
   Otto.sing(S_happy);
   delay(200);
-  Otto.putMouth(happyOpen);
-
     //Set the Intial Positions of Everything
   rightServo.write(90);
   leftServo.write(90);
+  gripServo.write(50);   
   delay(1000);
   //Initialize the positions of everything
+  gripServo.attach(4);
   rightServo.attach(3);
   leftServo.attach(2);
 }
@@ -130,64 +129,64 @@ void move(int moveId){
       motorControl2 (0, 0, 0 ); // stop
       break;
     case 1: //M 1 1000 
-      motorControl2 (-45, -45, 1 ); // front // Otto.walk(1,T,1);
+      motorControl2 (-45, -45, 0.2 ); // front 
       break;
     case 2: //M 2 1000 
-      motorControl2 (45, 45, 1 ); // back // Otto.walk(1,T,-1);
+      motorControl2 (45, 45, 0.2 ); // back 
       break;
     case 3: //M 3 1000 
-      motorControl2 (-45, 45, 0.5 ); // turn left // Otto.turn(1,T,1);
+      motorControl2 (-45, 0, 0.4 ); // turn left 
       break;
     case 4: //M 4 1000 
-      motorControl2 (45, -45, 0.5 ); // turn right // Otto.turn(1,T,-1);
+      motorControl2 (0, -45, 0.4 ); // turn right 
       break;
     case 5: //M 5 1000 30 
-      Otto.updown(1,T,moveSize);
+      gripServo.write(90);
       break;
     case 6: //M 6 1000 30
-      Otto.moonwalker(1,T,moveSize,1);
+      gripServo.write(70);
       break;
     case 7: //M 7 1000 30
-      Otto.moonwalker(1,T,moveSize,-1);
+      gripServo.write(60);
       break;
     case 8: //M 8 1000 30
-      Otto.swing(1,T,moveSize);
+      gripServo.write(40);
       break;
     case 9: //M 9 1000 30 
-      Otto.crusaito(1,T,moveSize,1);
+      gripServo.write(30);
       break;
     case 10: //M 10 1000 30 
-      Otto.crusaito(1,T,moveSize,-1);
+      gripServo.write(110);
       break;
     case 11: //M 11 1000 
-      Otto.jump(1,T);
+      gripServo.write(130);
       break;
     case 12: //M 12 1000 30 
-      Otto.flapping(1,T,moveSize,1);
+      gripServo.write(150);
       break;
     case 13: //M 13 1000 30
-      Otto.flapping(1,T,moveSize,-1);
+      gripServo.write(155);
       break;
     case 14: //M 14 1000 20
-      Otto.tiptoeSwing(1,T,moveSize);
+      gripServo.write(120);
       break;
     case 15: //M 15 500 
-      Otto.bend(1,T,1);
+      gripServo.write(80);
       break;
     case 16: //M 16 500 
-      Otto.bend(1,T,-1);
+      gripServo.write(60);
       break;
     case 17: //M 17 500 
-      Otto.shakeLeg(1,T,1);
+      gripServo.write(140);
       break;
     case 18: //M 18 500 
-      Otto.shakeLeg(1,T,-1);
+      gripServo.write(40);
       break;
     case 19: //M 19 500 20
-      Otto.jitter(1,T,moveSize);
+      gripServo.write(145);
       break;
     case 20: //M 20 500 15
-      Otto.ascendingTurn(1,T,moveSize);
+     gripServo.write(85);
       break;
     default:
         manualMode = true;

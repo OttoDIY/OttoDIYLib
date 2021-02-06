@@ -26,6 +26,7 @@ unsigned long int matrix; // variable to store MATRIX display before we send it 
 void setup() {
   Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);   // set up library Matrix display pins = DIN pin,CS pin, CLK pin, MATRIX orientation 
   Otto.matrixIntensity(1);// set up Matrix display intensity
+
 Serial.begin (9600);
 }
 ///////////////////////////////////////////////////////////////////
@@ -41,6 +42,10 @@ void loop() {
   Otto.clearMouth();// clear the Matrix display so that it is ready for the next image
   matrix = 0b000000000000000000000000000001;// show the first LED bottom RHS 
   Otto.putMouth(matrix, false);  
+    delay(1000);
+   Otto.clearMouth();// clear the Matrix display so that it is ready for the next image
+   matrix = 0b001100001100111111011110001100;
+  Otto.putMouth(matrix, false);      
   delay(1000);// wait for 1 second, this is so that you can see the image on the Matrix for 1 second
   Otto.clearMouth();// clear the Matrix display so that it is ready for the next image
   matrix = 0b001100010010010010010010001100; // show ZERO digit
@@ -72,8 +77,5 @@ void loop() {
       Otto.clearMouth();// clear the Matrix display so that it is ready for the next image
     }
   delay(1000);// wait for 1 second, this is so that you can see the image on the Matrix for 1 second before repeating
- 
+
 }  
-
-
-

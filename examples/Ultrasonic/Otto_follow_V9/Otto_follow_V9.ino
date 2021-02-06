@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Otto_run   sample sketch
+// Otto Follow  example sketch
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-- Otto DIY PLUS APP Firmware version 9 (V9)
 //-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
@@ -48,14 +48,12 @@ void setup() {
   Otto.sing(S_connection);// Otto makes a sound
   Otto.home(); // Otto moves to its ready position
   delay(500); // wait for 500 milliseconds to allow Otto to stop
-// if Pin 7 is LOW then place OTTO's servos in home mode to enable easy assembly, 
-// when you have finished assembling Otto, remove the link between pin 7 and GND
+// if Pin 7 is LOW then place OTTO's servos in home mode to enable easy assembly, when you have finished assembling Otto, remove the link between pin 7 and GND
   while (digitalRead(PIN_ASSEMBLY) == LOW) {
     Otto.home();// Otto moves to its ready position
     Otto.sing(S_happy_short);   // sing every 5 seconds so we know OTTO is still working
     delay(5000);// wait for 5 seconds
   }
-
 }
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
@@ -63,8 +61,7 @@ void setup() {
 void loop() {
   if (obstacleDetected == true){  // if we have nothing close to Otto we will stop, he will will walk if you place an object close to it
     Otto.walk(2,500,1); //change the 500 for lower value to run faster!
-  }
-                              
+  }                           
   delay(100); // wait for 100 milliseconds to allow Otto to settle
          
 //-- Function to read distance sensor & to actualize obstacleDetected variable
@@ -77,9 +74,5 @@ void loop() {
         {
           obstacleDetected = false; // no object closer than 15cm so we stop Otto from walking
           Otto.home(); // here we stop Otto walking and place it in its ready position
-        }
-    
+        }    
 }  
-
-
-

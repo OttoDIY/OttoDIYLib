@@ -54,7 +54,7 @@ void setup(){
 ///////////////////////////////////////////////////////////////////
 void loop() {
   if(obstacleDetected){ 
-               Otto.walk(1,1000,1);  //Otto.walk(1,1000,1) to make Otto follow you!
+               Otto.walk(1,1000,-1);  //Otto.walk(1,1000,1) to make Otto follow you!
              obstacleDetector(); 
              }        
          else{ 

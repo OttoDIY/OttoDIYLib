@@ -82,12 +82,14 @@ void loop() {
           
           if (izqder == true)
           {
-            Otto.turn(4,1000,1);//2 steps turning RIGHT   
+            Otto.walk(2,1000,-1); 
+            Otto.turn(2,1000,1);//2 steps turning RIGHT   
             izqder = false;
           }
           else
           {
-            Otto.turn(4,1000,-1);//2 steps turning LEFT   
+            Otto.walk(2,1000,-1); 
+            Otto.turn(2,1000,-1);//2 steps turning LEFT   
             izqder = true;
           }
           
