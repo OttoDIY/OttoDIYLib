@@ -53,7 +53,7 @@ void setup(){
 // and then expects LOW value for second touch
 // and then again HIGH and LOW etc.
 //
-  int estado = HIGH;
+  int estado = HIGH; //first expected touch value
   
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
@@ -64,11 +64,11 @@ void loop() {
    {
      if (estado == HIGH)
      {
-     estado = LOW;
+     estado = LOW; //toggle expect value
      }
      else
      {
-      estado = HIGH;
+      estado = HIGH; //toggle expect value
      }
      Otto.sing(S_buttonPushed);
      movement = movement + 1;

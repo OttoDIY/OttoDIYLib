@@ -18,23 +18,26 @@ Robot  | Library can use
 ------------- | -------------
 DIY  | Otto9
 PLUS | Otto9
-Eyes | Otto9
+Eyes* | Otto9 
 Wheels  | Otto9
 Humanoid  | Otto9Humanoid
+
+
+*you will need to install [Adafruit_LEDBackpack](https://github.com/adafruit/Adafruit_LED_Backpack) and [Adafruit_GFX](https://github.com/adafruit/Adafruit-GFX-Library)
 
 In order to maintain consistency along the Otto robot remixes we stablished a naming structure: 
 Otto_(followed by the component name and version) for example:
 
-* Otto9 contains all the main functions
-* Otto_gestures9 contains all the gestures functions
-* Otto_mouth9	contains all the mouth functions
-* Otto_sound9 contains all the sound functions
-* Otto_Matrix9 contains all the matrix functions
+* Otto contains all the main functions
+* Otto_gestures contains all the gestures functions
+* Otto_mouth 	contains all the mouth functions
+* Otto_sound contains all the sound functions
+* Otto_Matrix contains all the matrix functions
 
 Complementary libraries  are independent of Otto(they can work with other projects) therefore are just named like they are, for example:
 * US contains the functions of the ultrasonic sesnor
 * Bat Reader contains the functions to meassure the battery.
-* All Adafruit libraries can be installed separately so make sure to avoid duplicates
+* All Adafruit libraries better  be installed separately to avoid duplicates and conflicts
  
 ## Wiring:
 We follow these connections in all our robots, buy some Otto do not use all pins so you can play with empty pins to add new sensors or actuators.
@@ -96,7 +99,7 @@ Battery sesne | Pin
 boolean BATTcheck = true;    // SET TO FALSE IF NOT USING THIS OPTION
 
  ## How to Contribute:
- Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
+Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
 1. Test and if find a problem then post an issue.
 2. Helps us solve the issues or other bugs by commenting
 3. Bring missing libraries from other Otto remixes here.
@@ -104,4 +107,5 @@ You can do this [basically by forking](https://help.github.com/en/articles/fork-
 
 Thanks for your contribution.
 Just make sure to keep consistency in the naming and make a record of the change or improvement made.
-Welcome to the Otto DIY code development team!
+
+Welcome to the [Otto DIY community](https://www.ottodiy.com/)
