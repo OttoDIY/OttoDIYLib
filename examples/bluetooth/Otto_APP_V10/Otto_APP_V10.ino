@@ -6,34 +6,14 @@
 //-----------------------------------------------------------------
 //-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
 //-- in accordance with the GPL Version 2 when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// -- ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen October 2018
-// -- ADDED PIN definitions for ease of use: Jason Snow November 2018
-// -- ADDED Eye Matrix Progmem and control: Jason Snow November 2018
-// -- REMOVED Eye Matrix Progmem and control: Jason Snow AUG 2019
-// -- ADDED Battery meassurementin in mode 3 Jason Snow August 2019
-// -- ADDED changed to original Software serial library Camilo Parra May 2020
-// -- DELETED interrupts and modes to use BTserial Camilo Parra May 2020
-// -- ADDED Eyes compatibility Camilo Parra Feb  2021
 //-------------------------------------------------------------------------
-#include <EEPROM.h>
 #include <SerialCommand.h>//-- Library to manage serial commands
 SoftwareSerial BTserial = SoftwareSerial(11,12); //  TX  RX of the Bluetooth
 SerialCommand SCmd(BTserial);  //The SerialCommand object
 #include <Otto9.h>
 Otto9 Otto;  //This is Otto!
-#include <Wire.h>
 #include "Adafruit_LEDBackpack.h"
 Adafruit_8x16matrix ematrix = Adafruit_8x16matrix(); //I2C 16x8 led matrix
-#include <SerialCommand.h>//-- Library to manage serial commands
-/*             -------- 
-              |  O  O  |
-              |--------|
-  RIGHT LEG 3 |        | LEFT LEG 2
-               -------- 
-               ||     ||
-RIGHT FOOT 5 |---     ---| LEFT FOOT 4    
-*/ 
 // SERVO PINs //////////////////////////////////////////////////////////////////////////////
 #define PIN_YL 2 //servo[0]  left leg
 #define PIN_YR 3 //servo[1]  right leg
@@ -42,6 +22,9 @@ RIGHT FOOT 5 |---     ---| LEFT FOOT 4
 // ULTRASONIC PINs /////////////////////////////////////////////////////////////////////////
 #define PIN_Trigger  8  //TRIGGER pin (8)
 #define PIN_Echo     9  //ECHO pin (9)
+// SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
+// to help assemble Otto's feet and legs - wire link between pin 10 and GND
+#define PIN_ASSEMBLY    10   //ASSEMBLY pin (10) LOW = assembly    HIGH  = normal operation
 // BUZZER PIN //////////////////////////////////////////////////////////////////////////////
 #define PIN_Buzzer  13 //BUZZER pin (13)
 // SOUND SENSOR PIN //////////////////////////////////////////////////////////////////////////
@@ -51,32 +34,21 @@ RIGHT FOOT 5 |---     ---| LEFT FOOT 4
 #define CS_PIN     A2   //CS pin (A2)
 #define CLK_PIN    A1   //CLK pin (A1)
 #define LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
-// BATTERY SENSE PIN //////////////////////////////////////////////////////////////////////////
-boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
-#define PIN_Battery   A7  //3v7 BATTERY MONITOR   ANALOG pin (A7)
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
-// SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
-// to help assemble Otto's feet and legs - wire link between pin 10 and GND
-#define PIN_ASSEMBLY    10   //ASSEMBLY pin (10) LOW = assembly    HIGH  = normal operation
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 const char programID[] = "Otto_APP_V10"; //Each program will have a ID
-const char name_fac = '$'; //Factory name
-const char name_fir = '#'; //First name
 //-- Movement parameters
 int T = 1000;            //Initial duration of movement
 int moveId = 0;          //Number of movement
 int moveSize = 15;       //Asociated with the height of some movements
 volatile bool buttonPushed=false;  //Variable to remember when a button has been pushed
-unsigned long previousMillis = 0;
 int randomDance = 0;
 int randomSteps = 0;
 bool obstacleDetected = false;
-double batteryCHECK = 0;
 unsigned long int matrix;
-unsigned long timerMillis = 0;
 static const uint8_t PROGMEM
 logo_bmp[] = {  B01111110,B10000001,B10111001,B10101001,B10111001,B10010001,B10111001,B10010001,B10010001,B10111001,B10010001,B10111001,B10101001,B10111001,B10000001,B01111110},
 happy_bmp[] = {  B00000000,B00111100,B00000010,B00000010,B00000010,B00000010,B00111100,B00000000,B00000000,B00111100,B00000010,B00000010,B00000010,B00000010,B00111100,B00000000},
@@ -113,19 +85,15 @@ void setup() {
   //Setup callbacks for SerialCommand commands
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
   SCmd.addCommand("L", receiveLED);       //  sendAck & sendFinalAck
-  SCmd.addCommand("T", recieveBuzzer);    //  sendAck & sendFinalAck
+ // SCmd.addCommand("T", recieveBuzzer);    //  sendAck & sendFinalAck
   SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck
   SCmd.addCommand("H", receiveGesture);   //  sendAck & sendFinalAck
   SCmd.addCommand("K", receiveSing);      //  sendAck & sendFinalAck
-  SCmd.addCommand("J", receiveMode);      //  sendAck & sendFinalAck
-  SCmd.addCommand("C", receiveTrims);     //  sendAck & sendFinalAck
-  SCmd.addCommand("G", receiveServo);     //  sendAck & sendFinalAck
-  SCmd.addCommand("R", receiveName);      //  sendAck & sendFinalAck
-  SCmd.addCommand("E", requestName);
-  SCmd.addCommand("D", requestDistance);
-  SCmd.addCommand("N", requestNoise);
-  SCmd.addCommand("B", requestBattery);   // 3v7 lipo battery
-  SCmd.addCommand("I", requestProgramId);
+ // SCmd.addCommand("J", receiveMode);      //  sendAck & sendFinalAck
+ // SCmd.addCommand("C", receiveTrims);     //  sendAck & sendFinalAck
+ // SCmd.addCommand("G", receiveServo);     //  sendAck & sendFinalAck
+ // SCmd.addCommand("D", requestDistance);
+ // SCmd.addCommand("N", requestNoise);
   SCmd.addDefaultHandler(receiveStop);
   //Otto wake up!
   Otto.sing(S_connection);
@@ -147,21 +115,8 @@ void setup() {
   ematrix.clear();
   ematrix.drawBitmap(0, 0, + eyes_bmp , 8, 16, LED_ON);
   ematrix.writeDisplay();
-  //If Otto's name is '#' means that Otto hasn't been baptized
-  //In this case, Otto does a longer greeting
-  //5 = EEPROM address that contains first name character
-  if (EEPROM.read(5) == name_fir) {
-    Otto.jump(1, 700);
-    delay(200);
-    Otto.shakeLeg(1, T, 1);
-    Otto.putMouth(smallSurprise);
-    Otto.swing(2, 800, 20);
-    Otto.home();
-  }
-
   Otto.putMouth(happyOpen);
-  previousMillis = millis();
-// if Pin 10 is LOW then place OTTO's servos in home mode to enable easy assembly, 
+// if Pin 10 is LOW then place Otto's servos in home mode to enable easy assembly, 
 // when you have finished assembling Otto, remove the link between pin 10 and GND
   while (digitalRead(PIN_ASSEMBLY) == LOW) {
     Otto.home();
@@ -182,14 +137,6 @@ void loop() {
 ///////////////////////////////////////////////////////////////////
 //-- Functions --------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
-
-//-- Function to read distance sensor & to actualize obstacleDetected variable
-void obstacleDetector() {
-  int distance = Otto.getDistance();
-  if (distance < 15) obstacleDetected = true;
-  else obstacleDetected = false;
-}
-
 //-- Function to receive Stop command.
 void receiveStop() {
   sendAck();
@@ -671,48 +618,6 @@ void receiveMode() {
   sendFinalAck();
 }
 
-//-- Function to receive Name command
-void receiveName() {
-  //sendAck & stop if necessary
-  sendAck();
-  Otto.home();
-  char newOttoName[11] = "";  //Variable to store data read from Serial.
-  int eeAddress = 5;          //Location we want the data to be in EEPROM.
-  char *arg;
-  arg = SCmd.next();
-  if (arg != NULL) {
-    //Complete newOttoName char string
-    int k = 0;
-    while ((*arg) && (k < 11)) {
-      newOttoName[k] = *arg++;
-      k++;
-    }
-    EEPROM.put(eeAddress, newOttoName);
-  }
-  else
-  {
-    //Otto.putMouth(xMouth);
-    delay(2000);
-    //Otto.clearMouth();
-  }
-  sendFinalAck();
-}
-
-//-- Function to send Otto's name
-void requestName() {
-  Otto.home(); //stop if necessary
-  char actualOttoName[11] = ""; //Variable to store data read from EEPROM.
-  int eeAddress = 5;            //EEPROM address to start reading from
-  //Get the float data from the EEPROM at position 'eeAddress'
-  EEPROM.get(eeAddress, actualOttoName);
-
-  Serial.print(F("&&"));
-  Serial.print(F("E "));
-  Serial.print(actualOttoName);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
 //-- Function to send ultrasonic sensor measure (distance in "cm")
 void requestDistance() {
   Otto.home();  //stop if necessary
@@ -731,28 +636,6 @@ void requestNoise() {
   Serial.print(F("&&"));
   Serial.print(F("N "));
   Serial.print(microphone);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-//-- Function to send battery voltage percent
-void requestBattery() {
-  Otto.home();  //stop if necessary
-  //The first read of the battery is often a wrong reading, so we will discard this value.
-  double batteryLevel = Otto.getBatteryLevel();
-  Serial.print(F("&&"));
-  Serial.print(F("B "));
-  Serial.print(batteryLevel);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-//-- Function to send program ID
-void requestProgramId() {
-  Otto.home();   //stop if necessary
-  Serial.print(F("&&"));
-  Serial.print(F("I "));
-  Serial.print(programID);
   Serial.println(F("%%"));
   Serial.flush();
 }
