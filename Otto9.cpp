@@ -712,11 +712,10 @@ void Otto9::_tone (float noteFrequency, long noteDuration, int silentDuration){
 
       if(silentDuration==0){silentDuration=1;}
 
-      TimerFreeTone(Otto9::pinBuzzer, noteFrequency, noteDuration);
-      //delay(noteDuration);       //REMOVED FOR TimerFreeTone, PUT BACK for TONE       milliseconds to microseconds
+      tone(Otto9::pinBuzzer, noteFrequency, noteDuration);
+      delay(noteDuration);       //milliseconds to microseconds
       //noTone(PIN_Buzzer);
-      
-      delay(silentDuration);     //
+      delay(silentDuration);
 }
 
 

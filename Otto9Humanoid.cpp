@@ -726,11 +726,10 @@ void Otto9Humanoid::_tone (float noteFrequency, long noteDuration, int silentDur
 
       if(silentDuration==0){silentDuration=1;}
 
-      TimerFreeTone(Otto9Humanoid::pinBuzzer, noteFrequency, noteDuration);
-      //delay(noteDuration);       //REMOVED FOR TimerFreeTone, PUT BACK for TONE       milliseconds to microseconds
+      tone(Otto9Humanoid::pinBuzzer, noteFrequency, noteDuration);
+      delay(noteDuration);       //milliseconds to microseconds
       //noTone(PIN_Buzzer);
-      
-      delay(silentDuration);     //REMOVED FOR TimerFreeTone, PUT BACK for TONE
+      delay(silentDuration);
 }
 
 

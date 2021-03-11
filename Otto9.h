@@ -14,7 +14,6 @@
 #include "Otto_mouth9.h"
 #include "Otto_sound9.h"
 #include "Otto_gestures9.h"
-#include <TimerFreeTone.h>
 
 //-- Constants
 #define FORWARD     1
