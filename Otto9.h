@@ -9,7 +9,6 @@
 #include <EEPROM.h>
 #include <US.h>
 
-#include "BatReader9.h"
 #include "Otto_Matrix9.h"
 #include "Otto_mouth9.h"
 #include "Otto_sound9.h"
@@ -73,10 +72,6 @@ class Otto9
     //-- Sensors functions
     float getDistance(); //US sensor
     int getNoise();      //Noise Sensor
-
-    //-- Battery
-    double getBatteryLevel();
-    double getBatteryVoltage();
     
     //-- Mouth & Animations
     void putMouth(unsigned long int mouth, bool predefined = true);
@@ -92,12 +87,10 @@ class Otto9
     void playGesture(int gesture);
     void initMATRIX(int DIN, int CS, int CLK, int rotate);
     void matrixIntensity(int intensity);
-    void initBatLevel(int batteryPIN);
     void setLed(byte X, byte Y, byte value);
     void writeText (const char * s, byte scrollspeed);
   private:
-   
-    BatReader9 battery;
+
     Oscillator servo[4];
     US us;
     Otto_Matrix ledmatrix;

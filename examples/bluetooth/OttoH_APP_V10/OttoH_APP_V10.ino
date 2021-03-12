@@ -42,9 +42,6 @@ Otto9Humanoid Otto;  //This is Otto!
 #define CS_PIN     A2   //CS pin (A2)
 #define CLK_PIN    A1   //CLK pin (A1)
 #define LED_DIRECTION  1// LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
-// BATTERY SENSE PIN //////////////////////////////////////////////////////////////////////////
-//boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
-//#define PIN_Battery   A7  //3v7 BATTERY MONITOR   ANALOG pin (A7)
 // TOUCH SENSOR or PUSH BUTTON /////////////////////////////////////////////////////////////////
 #define PIN_Button   A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
 // SERVO ASSEMBLY PIN   /////////////////////////////////////////////////////////////////////
@@ -53,22 +50,12 @@ Otto9Humanoid Otto;  //This is Otto!
 ///////////////////////////////////////////////////////////////////
 //-- Global Variables -------------------------------------------//
 ///////////////////////////////////////////////////////////////////
-
-const char programID[] = "OttoHUMANOID_V10"; //Each program will have a ID
-const char name_fac = '$'; //Factory name
-const char name_fir = '#'; //First name
 //-- Movement parameters
 int T = 1000;            //Initial duration of movement
 int moveId = 0;          //Number of movement
 int moveSize = 15;       //Asociated with the height of some movements
 volatile bool buttonPushed=false;  //Variable to remember when a button has been pushed
-unsigned long previousMillis = 0;
-int randomDance = 0;
-int randomSteps = 0;
 bool obstacleDetected = false;
-double batteryCHECK = 0;
-boolean BATTcheck = false;    // SET TO FALSE IF NOT USING THIS OPTION
-
 unsigned long int matrix;
 unsigned long timerMillis = 0;
 ///////////////////////////////////////////////////////////////////
@@ -91,9 +78,7 @@ void setup() {
   SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck
   SCmd.addCommand("H", receiveGesture);   //  sendAck & sendFinalAck
   SCmd.addCommand("K", receiveSing);      //  sendAck & sendFinalAck
-  SCmd.addCommand("R", receiveName);      //  sendAck & sendFinalAck
   SCmd.addCommand("D", requestDistance);
-  SCmd.addCommand("I", requestProgramId);
   SCmd.addDefaultHandler(receiveStop);
   
   //Otto wake up!
@@ -111,21 +96,7 @@ void setup() {
   Otto.putMouth(smile);
   Otto.sing(S_happy);
   delay(200);
-
-  //If Otto's name is '#' means that Otto hasn't been baptized
-  //In this case, Otto does a longer greeting
-  //5 = EEPROM address that contains first name character
-  if (EEPROM.read(5) == name_fir) {
-    Otto.jump(1, 700);
-    delay(200);
-    Otto.shakeLeg(1, T, 1);
-    Otto.putMouth(smallSurprise);
-    Otto.swing(2, 800, 20);
-    Otto.home();
-  }
-
   Otto.putMouth(happyOpen);
-  previousMillis = millis();
 // if Pin assembly is LOW then place OTTO's servos in home mode to enable easy assembly, 
 // when you have finished assembling Otto, remove the link in pin assembly
   while (digitalRead(PIN_ASSEMBLY) == LOW) {
@@ -483,44 +454,6 @@ void receiveName() {
   sendFinalAck();
 }
 
-//-- Function to send Otto's name
-void requestName() {
-  Otto.home(); //stop if necessary
-  char actualOttoName[11] = ""; //Variable to store data read from EEPROM.
-  int eeAddress = 5;            //EEPROM address to start reading from
-  //Get the float data from the EEPROM at position 'eeAddress'
-  EEPROM.get(eeAddress, actualOttoName);
-
-  Serial.print(F("&&"));
-  Serial.print(F("E "));
-  Serial.print(actualOttoName);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-
-
-//-- Function to send battery voltage percent
-void requestBattery() {
-  Otto.home();  //stop if necessary
-  //The first read of the battery is often a wrong reading, so we will discard this value.
-  double batteryLevel = Otto.getBatteryLevel();
-  Serial.print(F("&&"));
-  Serial.print(F("B "));
-  Serial.print(batteryLevel);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-//-- Function to send program ID
-void requestProgramId() {
-  Otto.home();   //stop if necessary
-  Serial.print(F("&&"));
-  Serial.print(F("I "));
-  Serial.print(programID);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
 
 //-- Function to send Ack comand (A)
 void sendAck() {
@@ -540,32 +473,6 @@ void sendFinalAck() {
   Serial.flush();
 }
 
-//-- Functions with animatics
-//--------------------------------------------------------
-
-void OttoSleeping_withInterrupts() {
-  int bedPos_0[4] = {100, 80, 60, 120};
-  Otto._moveServos(700, bedPos_0);
-  for (int i = 0; i < 4; i++) {
-    Otto.putAnimationMouth(dreamMouth, 0);
-    Otto.bendTones (100, 200, 1.04, 10, 10);
-    Otto.putAnimationMouth(dreamMouth, 1);
-    Otto.bendTones (200, 300, 1.04, 10, 10);
-    Otto.putAnimationMouth(dreamMouth, 2);
-    Otto.bendTones (300, 500, 1.04, 10, 10);
-    delay(500);
-    Otto.putAnimationMouth(dreamMouth, 1);
-    Otto.bendTones (400, 250, 1.04, 10, 1);
-    Otto.putAnimationMouth(dreamMouth, 0);
-    Otto.bendTones (250, 100, 1.04, 10, 1);
-    delay(500);
-  }
-  Otto.putMouth(lineMouth);
-  Otto.sing(S_cuddly);
-  Otto.home();
-  Otto.putMouth(happyOpen);
-
-}
 //-- Function executed when  button is pushed / Touch sensor VIA INTERRUPT routine
 void ButtonPushed(){ 
     if(!buttonPushed){

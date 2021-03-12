@@ -589,8 +589,7 @@ void receiveMode() {
       Otto.putMouth(three);
       break;
     case 4: //J 4
-      Otto.putMouth(four);
-  if (Otto.getBatteryLevel() < 35) {
+    Otto.putMouth(four);
     Otto.putMouth(thunder);
     Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
     delay(30);
@@ -609,8 +608,7 @@ void receiveMode() {
     Otto.putMouth(matrix, false);
     delay(2000);
     Otto.clearMouth();
-    Otto.putMouth(happyOpen);
-  }    
+    Otto.putMouth(happyOpen); 
       break;
     default:
       break;

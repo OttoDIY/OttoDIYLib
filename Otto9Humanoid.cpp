@@ -56,9 +56,7 @@ ledmatrix.init( DIN, CS, CLK, 1, rotate);   // set up Matrix display
 void Otto9Humanoid::matrixIntensity(int intensity){
 ledmatrix.setIntensity(intensity);
 }
-void Otto9Humanoid::initBatLevel(int batteryPIN){
-  battery.init(batteryPIN);
-}
+//void Otto9Humanoid::initBatLevel(int batteryPIN){battery.init(batteryPIN);}
 
 ///////////////////////////////////////////////////////////////////
 //-- ATTACH & DETACH FUNCTIONS ----------------------------------//
@@ -621,6 +619,7 @@ int Otto9Humanoid::getNoise(){
 //---------------------------------------------------------
 //-- Otto getBatteryLevel: return battery voltage percent
 //---------------------------------------------------------
+/*
 double Otto9Humanoid::getBatteryLevel(){
 
   //The first read of the batery is often a wrong reading, so we will discard this value. 
@@ -655,7 +654,7 @@ double Otto9Humanoid::getBatteryVoltage(){
 
     return batteryLevel;
 }
-
+*/
 
 ///////////////////////////////////////////////////////////////////
 //-- MOUTHS & ANIMATIONS ----------------------------------------//

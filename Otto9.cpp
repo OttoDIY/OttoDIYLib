@@ -63,9 +63,6 @@ ledmatrix.init( DIN, CS, CLK, 1, rotate);   // set up Matrix display
 void Otto9::matrixIntensity(int intensity){
 ledmatrix.setIntensity(intensity);
 }
-void Otto9::initBatLevel(int batteryPIN){
-  battery.init(batteryPIN);
-}
 
 ///////////////////////////////////////////////////////////////////
 //-- ATTACH & DETACH FUNCTIONS ----------------------------------//
@@ -600,45 +597,6 @@ int Otto9::getNoise(){
     noiseLevel = noiseReadings / numReadings;
 
     return noiseLevel;
-}
-
-
-//---------------------------------------------------------
-//-- Otto getBatteryLevel: return battery voltage percent
-//---------------------------------------------------------
-double Otto9::getBatteryLevel(){
-
-  //The first read of the batery is often a wrong reading, so we will discard this value. 
-    double batteryLevel = battery.readBatPercent();
-    double batteryReadings = 0;
-    int numReadings = 10;
-
-    for(int i=0; i<numReadings; i++){
-        batteryReadings += battery.readBatPercent();
-        delay(1); // delay in between reads for stability
-    }
-
-    batteryLevel = batteryReadings / numReadings;
-
-    return batteryLevel;
-}
-
-
-double Otto9::getBatteryVoltage(){
-
-  //The first read of the batery is often a wrong reading, so we will discard this value. 
-    double batteryLevel = battery.readBatVoltage();
-    double batteryReadings = 0;
-    int numReadings = 10;
-
-    for(int i=0; i<numReadings; i++){
-        batteryReadings += battery.readBatVoltage();
-        delay(1); // delay in between reads for stability
-    }
-
-    batteryLevel = batteryReadings / numReadings;
-
-    return batteryLevel;
 }
 
 
