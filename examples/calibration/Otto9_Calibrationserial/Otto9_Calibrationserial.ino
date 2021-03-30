@@ -21,8 +21,8 @@
 */
 // ---------------------- Calibration Sketch & Pins Setup --------- //
 //
-#define OTTO_ARMS   true    // true for Humanoid and Robot Lee only ?!
-#define OTTO_HEAD   true    // true for Robot Lee only ?!
+#define OTTO_ARMS   false    // true for Humanoid and Robot Lee only ?!
+#define OTTO_HEAD   false    // true for Robot Lee only ?!
 // Set the baudrate for serial communication (set also in serial monitor)
 #define BAUD  9600  //  9600 = default speed
 //#define BAUD 19200  // 19200 = double default speed
