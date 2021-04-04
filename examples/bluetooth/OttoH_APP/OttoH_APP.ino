@@ -9,11 +9,7 @@ SerialCommand SCmd(BTserial);  //The SerialCommand object
 int T=1000;              //Initial duration of movement
 int moveId=0;            //Number of movement
 int moveSize=15;         //Asociated with the height of some movements
-unsigned long int matrix;
-#define DIN_PIN A3
-#define CS_PIN A2
-#define CLK_PIN A1
-#define LED_DIRECTION 1
+
 #define PIN_YL 2 // left leg, servo[0]
 #define PIN_YR 3 // right leg, servo[1]
 #define PIN_RL 4 // left foot, servo[2]
@@ -24,6 +20,10 @@ unsigned long int matrix;
 #define PIN_LA 6 //servo[4]  Left arm if enabled
 #define PIN_RA 7 //servo[5]  Right arm if enabled
 #define PIN_NoiseSensor A6  //SOUND SENSOR   ANALOG pin (A6)
+#define DIN_PIN A3
+#define CS_PIN A2
+#define CLK_PIN A1
+#define LED_DIRECTION 1
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -31,9 +31,8 @@ void setup(){
   Serial.begin(9600);  
   BTserial.begin(9600);  
   Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);
- Otto.initHUMANOID(PIN_YL, PIN_YR, PIN_RL, PIN_RR, PIN_LA, PIN_RA, true, PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins
- Otto.matrixIntensity(5);// set up Matrix display intensity
-  //Setup callbacks for SerialCommand commands 
+  Otto.initHUMANOID(PIN_YL, PIN_YR, PIN_RL, PIN_RR, PIN_LA, PIN_RA, true, PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins
+  Otto.matrixIntensity(5);// set up Matrix display intensity
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
   SCmd.addCommand("L", receiveLED);       //  sendAck & sendFinalAck
   SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck
@@ -69,9 +68,7 @@ void receiveStop(){
 //-- Function to receive LED commands
 void receiveLED(){  
     sendAck();    //sendAck & stop if necessary
-    Otto.home();  //Examples of receiveLED Bluetooth commands
-    //L 000000001000010100100011000000000
-    //L 001111111111111111111111111111111 (All LEDs)
+    Otto.home();
     unsigned long int matrix;
     char *arg;
     char *endstr;
@@ -191,6 +188,18 @@ void move(int moveId){
     case 20: //M 20 500 15
       Otto.ascendingTurn(1,T,moveSize);
       break;
+     case 21: //M 21
+      Otto.armsup();
+      break;
+    case 22: //M 22 right arm
+      Otto.armwave(1);
+      break;
+    case 23: //M 23 left arm
+      Otto.armwave(-1);
+      break;
+    case 24: //M 24
+      Otto.armsdown();
+      break;
     default:
         manualMode = true;
       break;
@@ -198,8 +207,7 @@ void move(int moveId){
 
   if(!manualMode){
     sendFinalAck();
-  }
-       
+  }  
 }
 
 //-- Function to receive gesture commands

@@ -1,7 +1,6 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-- Otto DIY APP Firmware Version 11 (V11) with standard baudrate of 9600 for Bluetooth BLE modules.
-//-- This code will have all modes and functions therefore memory is almost full but ignore the alert it works perfectly.
-//-- Designed to work with the Starter Otto or PLUS or Eyes or Humanoid or other biped robots. some of these functions will need a good power source such as a LIPO battery.
+//-- Designed to work with the Otto Eyes 
 //-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
 //-----------------------------------------------------------------
 //-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
@@ -44,11 +43,6 @@ const char programID[] = "OttoE_APP_V11"; //Each program will have a ID
 int T = 1000;            //Initial duration of movement
 int moveId = 0;          //Number of movement
 int moveSize = 15;       //Asociated with the height of some movements
-volatile bool buttonPushed=false;  //Variable to remember when a button has been pushed
-int randomDance = 0;
-int randomSteps = 0;
-bool obstacleDetected = false;
-unsigned long int matrix;
 static const uint8_t PROGMEM
 logo_bmp[] = {  B01111110,B10000001,B10111001,B10101001,B10111001,B10010001,B10111001,B10010001,B10010001,B10111001,B10010001,B10111001,B10101001,B10111001,B10000001,B01111110},
 happy_bmp[] = {  B00000000,B00111100,B00000010,B00000010,B00000010,B00000010,B00111100,B00000000,B00000000,B00111100,B00000010,B00000010,B00000010,B00000010,B00111100,B00000000},
@@ -56,7 +50,6 @@ eyes_bmp[] = {  B00000000,B00111100,B01000010,B01001010,B01000010,B01000010,B001
 sad_bmp[] =  {  B00000000,B00010000,B00010000,B00010000,B00010000,B00010000,B00010000,B00000000,B00000000,B00010000,B00010000,B00010000,B00010000,B00010000,B00010000,B00000000},
 xx_bmp[] =  {  B00000000,B00100010,B00010100,B00001000,B00010100,B00100010,B00000000,B00000000,B00000000,B00000000,B00100010,B00010100,B00001000,B00010100,B00100010,B00000000},
 XX_bmp[] = {  B01000001,B00100010,B00010100,B00001000,B00010100,B00100010,B01000001,B00000000,B00000000,B01000001,B00100010,B00010100,B00001000,B00010100,B00100010,B01000001},
-angry_bmp[] = {  B00000000,B00011110,B00111100,B01111000,B01110000,B00100000,B00000000,B00000000,B00000000,B00000000,B00100000,B01110000,B01111000,B00111100,B00011110,B00000000},
 angry2_bmp[] = {  B00000000,B00000010,B00000100,B00001000,B00010000,B00100000,B00000000,B00000000,B00000000,B00000000,B00100000,B00010000,B00001000,B00000100,B00000010,B00000000},
 sleep_bmp[] = {  B00000000,B00100010,B00110010,B00101010,B00100110,B00100010,B00000000,B00000000,B00000000,B00000000,B00100010,B00110010,B00101010,B00100110,B00100010,B00000000},
 freetful_bmp[] = {  B00000000,B00100000,B00010000,B00001000,B00000100,B00000010,B00000000,B00000000,B00000000,B00000000,B00000010,B00000100,B00001000,B00010000,B00100000,B00000000},
@@ -64,8 +57,7 @@ love_bmp[] = {  B00000000,B00001100,B00011110,B00111100,B00111100,B00011110,B000
 confused_bmp[] = {  B00000000,B01111100,B10000010,B10111010,B10101010,B10001010,B01111000,B00000000,B00000000,B01111100,B10000010,B10111010,B10101010,B10001010,B01111000,B00000000},
 wave_bmp[] = {  B00000000,B00100000,B00010000,B00001000,B00010000,B00100000,B00010000,B00000000,B00000000,B00100000,B00010000,B00001000,B00010000,B00100000,B00010000,B00000000},
 magic_bmp[] = {  B00000000,B00000000,B01111110,B11111111,B01111110,B00000000,B00000000,B00000000,B00000000,B00000000,B00000000,B01111110,B11111111,B01111110,B00000000,B00000000},
-fail_bmp[] = {  B00000000,B00110000,B01111000,B01111000,B01111100,B00111100,B00001000,B00000000,B00000000,B00001000,B00111100,B01111100,B01111000,B01111000,B00110000,B00000000},
-full_bmp[] =  {   B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111 };
+fail_bmp[] = {  B00000000,B00110000,B01111000,B01111000,B01111100,B00111100,B00001000,B00000000,B00000000,B00001000,B00111100,B01111100,B01111000,B01111000,B00110000,B00000000};
 
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
@@ -75,39 +67,16 @@ void setup() {
   Serial.begin(9600);
   BTserial.begin(9600);  
   Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins
-  Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);   // set up Matrix display pins = DIN pin,CS pin, CLK pin, MATRIX orientation 
-  Otto.matrixIntensity(1);// set up Matrix display intensity
   ematrix.begin(0x70);  // pass in the address
-  randomSeed(analogRead(PIN_NoiseSensor));   //Set a random seed
-  pinMode(PIN_ASSEMBLY,INPUT_PULLUP); // - Easy assembly pin - LOW is assembly Mode
-  pinMode(PIN_Button,INPUT); // - ensure pull-down resistors are used
-
-  //Setup callbacks for SerialCommand commands
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
-  SCmd.addCommand("L", receiveLED);       //  sendAck & sendFinalAck
- // SCmd.addCommand("T", recieveBuzzer);    //  sendAck & sendFinalAck
+  //SCmd.addCommand("L", receiveLED);       //  sendAck & sendFinalAck
   SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck
   SCmd.addCommand("H", receiveGesture);   //  sendAck & sendFinalAck
   SCmd.addCommand("K", receiveSing);      //  sendAck & sendFinalAck
- // SCmd.addCommand("J", receiveMode);      //  sendAck & sendFinalAck
- // SCmd.addCommand("C", receiveTrims);     //  sendAck & sendFinalAck
- // SCmd.addCommand("G", receiveServo);     //  sendAck & sendFinalAck
- // SCmd.addCommand("D", requestDistance);
- // SCmd.addCommand("N", requestNoise);
   SCmd.addDefaultHandler(receiveStop);
-  //Otto wake up!
+
   Otto.sing(S_connection);
   Otto.home();
-  // Animation Uuuuuh - A little moment of initial surprise
-  //-----
-  for (int i = 0; i < 2; i++) {
-    for (int i = 0; i < 8; i++) {
-      Otto.putAnimationMouth(littleUuh, i);
-      delay(150);
-    }
-  }
-  //Smile for a happy Otto :)
-  Otto.putMouth(smile);
   Otto.sing(S_happy);
   ematrix.drawBitmap(0, 0, + logo_bmp , 8, 16, LED_ON);
   ematrix.writeDisplay();
@@ -115,14 +84,6 @@ void setup() {
   ematrix.clear();
   ematrix.drawBitmap(0, 0, + eyes_bmp , 8, 16, LED_ON);
   ematrix.writeDisplay();
-  Otto.putMouth(happyOpen);
-// if Pin 10 is LOW then place Otto's servos in home mode to enable easy assembly, 
-// when you have finished assembling Otto, remove the link between pin 10 and GND
-  while (digitalRead(PIN_ASSEMBLY) == LOW) {
-    Otto.home();
-    Otto.sing(S_happy_short);   // sing every 5 seconds so we know OTTO is still working
-    delay(5000);
-  }
 }
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
@@ -133,7 +94,6 @@ void loop() {
           move(moveId);
         }  
     }
-
 ///////////////////////////////////////////////////////////////////
 //-- Functions --------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -162,115 +122,6 @@ void receiveLED() {
     Otto.putMouth(xMouth);
     delay(2000);
     Otto.clearMouth();
-  }
-  sendFinalAck();
-}
-
-//-- Function to receive buzzer commands
-void recieveBuzzer() {
-  //sendAck & stop if necessary
-  sendAck();
-  Otto.home();
-
-  bool error = false;
-  int frec;
-  int duration;
-  char *arg;
-
-  arg = SCmd.next();
-  if (arg != NULL) frec = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) duration = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-  if (error == true) {
-    Otto.putMouth(xMouth);
-    delay(2000);
-    Otto.clearMouth();
-  }
-  else Otto._tone(frec, duration, 1);
-  sendFinalAck();
-}
-
-//-- Function to receive TRims commands
-void receiveTrims() {
-  //sendAck & stop if necessary
-  sendAck();
-  Otto.home();
-  int trim_YL, trim_YR, trim_RL, trim_RR;
-
-  //Definition of Servo Bluetooth command
-  //C trim_YL trim_YR trim_RL trim_RR
-  //Examples of receiveTrims Bluetooth commands
-  //C 20 0 -8 3
-  bool error = false;
-  char *arg;
-  arg = SCmd.next();
-  if (arg != NULL) trim_YL = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) trim_YR = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) trim_RL = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) trim_RR = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-  if (error == true) {
-    Otto.putMouth(xMouth);
-    delay(2000);
-    Otto.clearMouth();
-
-  } else { //Save it on EEPROM
-    Otto.setTrims(trim_YL, trim_YR, trim_RL, trim_RR);
-    Otto.saveTrimsOnEEPROM(); //Uncomment this only for one upload when you finaly set the trims.
-  }
-  sendFinalAck();
-}
-
-//-- Function to receive Servo commands
-void receiveServo() {
-  sendAck();
-  moveId = 30;
-
-  //Definition of Servo Bluetooth command
-  //G  servo_YL servo_YR servo_RL servo_RR
-  //Example of receiveServo Bluetooth commands
-  //G 90 85 96 78
-  bool error = false;
-  char *arg;
-  int servo_YL, servo_YR, servo_RL, servo_RR;
-
-  arg = SCmd.next();
-  if (arg != NULL) servo_YL = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) servo_YR = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) servo_RL = atoi(arg);  // Converts a char string to an integer
-  else error = true;
-
-  arg = SCmd.next();
-  if (arg != NULL) {
-    servo_RR = atoi(arg);  // Converts a char string to an integer
-  }
-  else error = true;
-  if (error == true) {
-    Otto.putMouth(xMouth);
-    delay(2000);
-    Otto.clearMouth();
-  }
-  else { //Update Servo:
-    int servoPos[4] = {servo_YL, servo_YR, servo_RL, servo_RR};
-    Otto._moveServos(200, servoPos);   //Move 200ms
   }
   sendFinalAck();
 }
@@ -421,7 +272,6 @@ void receiveGesture() {
         Otto.playGesture(OttoLove);
         break;
       case 8: //H 8 
-        ematrix.clear(); ematrix.drawBitmap(0, 0, + angry_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         Otto.playGesture(OttoAngry);
         ematrix.clear(); ematrix.drawBitmap(0, 0, + angry2_bmp , 8, 16, LED_ON);  ematrix.writeDisplay();
         break;
@@ -530,114 +380,6 @@ void receiveSing() {
   sendFinalAck();
 }
 
-//-- Function to receive mode selection.
-void receiveMode() {
-  sendAck();
-  Otto.home();
-  //Definition of Mode Bluetooth commands
-  //J ModeID
-  int modeId = 0; 
-  char *arg;
-  arg = SCmd.next();
-  if (arg != NULL) modeId = atoi(arg);
-  else     delay(2000);
-  
-  switch (modeId) {
-    case 0: // J 0
-    Otto.putMouth(0);
-    Otto.sing(S_cuddly);
-    Otto.home();
-      break;
-    case 1: // J 1 
-    Otto.putMouth(one);
-     randomDance = random(5, 21); //5,20
-      if ((randomDance > 14) && (randomDance < 19)) {
-        randomSteps = 1;
-        T = 1600;
-      }
-      else {
-        randomSteps = random(3, 6); //3,5
-        T = 1000;
-      }
-      Otto.putMouth(random(10, 21));
-      for (int i = 0; i < randomSteps; i++) move(randomDance);
-      break;
-    case 2: // J 2 OttoSleeping_withInterrupts
-      Otto.putMouth(two);
-      int bedPos_0[4] = {100, 80, 60, 120};
-  Otto._moveServos(700, bedPos_0);
-  for (int i = 0; i < 4; i++) {
-    Otto.putAnimationMouth(dreamMouth, 0);
-    Otto.bendTones (100, 200, 1.04, 10, 10);
-    Otto.putAnimationMouth(dreamMouth, 1);
-    Otto.bendTones (200, 300, 1.04, 10, 10);
-    Otto.putAnimationMouth(dreamMouth, 2);
-    Otto.bendTones (300, 500, 1.04, 10, 10);
-    delay(500);
-    Otto.putAnimationMouth(dreamMouth, 1);
-    Otto.bendTones (400, 250, 1.04, 10, 1);
-    Otto.putAnimationMouth(dreamMouth, 0);
-    Otto.bendTones (250, 100, 1.04, 10, 1);
-    delay(500);
-  }
-  Otto.putMouth(lineMouth);
-  Otto.sing(S_cuddly);
-  Otto.home();
-  Otto.putMouth(happyOpen);
-      break;
-    case 3: //J 3
-      Otto.putMouth(three);
-      break;
-    case 4: //J 4
-    Otto.putMouth(four);
-    Otto.putMouth(thunder);
-    Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
-    delay(30);
-    Otto.bendTones (2000, 880, 1.02, 8, 3);  //A5 = 880
-    delay(30);
-    Otto.bendTones (880, 2000, 1.04, 8, 3);  //A5 = 880
-    delay(30);
-    Otto.bendTones (2000, 880, 1.02, 8, 3);  //A5 = 880
-    Otto.clearMouth();
-    matrix = 0b00001100010010010010010010011110; // show empty battery symbol
-     Otto.putMouth(matrix, false);
-    delay(2000);
-    Otto.clearMouth();
-     delay(1000);
-    matrix = 0b00001100010010010010010010011110; // show empty battery symbol
-    Otto.putMouth(matrix, false);
-    delay(2000);
-    Otto.clearMouth();
-    Otto.putMouth(happyOpen); 
-      break;
-    default:
-      break;
-  }
-  sendFinalAck();
-}
-
-//-- Function to send ultrasonic sensor measure (distance in "cm")
-void requestDistance() {
-  Otto.home();  //stop if necessary
-  int distance = Otto.getDistance();
-  Serial.print(F("&&"));
-  Serial.print(F("D "));
-  Serial.print(distance);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
-//-- Function to send noise sensor measure
-void requestNoise() {
-  Otto.home();  //stop if necessary
-  int microphone = Otto.getNoise(); //analogRead(PIN_NoiseSensor);
-  Serial.print(F("&&"));
-  Serial.print(F("N "));
-  Serial.print(microphone);
-  Serial.println(F("%%"));
-  Serial.flush();
-}
-
 //-- Function to send Ack comand (A)
 void sendAck() {
   delay(30);
@@ -655,11 +397,3 @@ void sendFinalAck() {
   Serial.println(F("%%"));
   Serial.flush();
 }
-
-//-- Function executed when  button is pushed / Touch sensor VIA INTERRUPT routine
-void ButtonPushed(){ 
-    if(!buttonPushed){
-        buttonPushed=true;
-        Otto.sing(S_connection);
-    } 
-} 

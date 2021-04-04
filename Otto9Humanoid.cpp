@@ -1,6 +1,4 @@
-//----------------------------------------------------------------
-//-- OTTO version 9 
-//-----------------------------------------------------------------
+//-- Otto Humanoid V10
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
@@ -8,10 +6,7 @@
   #include "WProgram.h"
   #include <pins_arduino.h>
 #endif
-
 #include "Otto9Humanoid.h"
-
-////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 void Otto9Humanoid::initHUMANOID(int YL, int YR, int RL, int RR,int LA, int RA, bool load_calibration, int NoiseSensor, int Buzzer, int USTrigger, int USEcho) {
@@ -36,18 +31,13 @@ void Otto9Humanoid::initHUMANOID(int YL, int YR, int RL, int RR,int LA, int RA, 
   
   for (int i = 0; i < 6; i++) servo_position[i] = 90;
 
-  //US sensor init with the pins:
-  us.init(USTrigger, USEcho);
-
-  //Buzzer & noise sensor pins: 
-  pinBuzzer = Buzzer;
+  us.init(USTrigger, USEcho);  //US sensor init with the pins:
+  pinBuzzer = Buzzer; //Buzzer & noise sensor pins: 
   pinNoiseSensor = NoiseSensor;
 
   pinMode(Buzzer,OUTPUT);
   pinMode(NoiseSensor,INPUT);
 }
-
-
 
 //////////////////////////////////////////////////////////
 void Otto9Humanoid::initMATRIX(int DIN, int CS, int CLK, int rotate){
@@ -56,7 +46,6 @@ ledmatrix.init( DIN, CS, CLK, 1, rotate);   // set up Matrix display
 void Otto9Humanoid::matrixIntensity(int intensity){
 ledmatrix.setIntensity(intensity);
 }
-//void Otto9Humanoid::initBatLevel(int batteryPIN){battery.init(batteryPIN);}
 
 ///////////////////////////////////////////////////////////////////
 //-- ATTACH & DETACH FUNCTIONS ----------------------------------//
@@ -103,7 +92,6 @@ void Otto9Humanoid::saveTrimsOnEEPROM() {
       
 }
 
-
 ///////////////////////////////////////////////////////////////////
 //-- BASIC MOTION FUNCTIONS -------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -131,14 +119,14 @@ void Otto9Humanoid::_moveServos(int time, int  servo_target[]) {
 }
 
 
-
 void Otto9Humanoid::oscillateServos(int A[6], int O[6], int T, double phase_diff[6], float cycle=1){
 
   for (int i=0; i<6; i++) {
-    servo[i].SetO(O[i]);
+	servo[i].SetO(O[i]);
     servo[i].SetA(A[i]);
     servo[i].SetT(T);
-    servo[i].SetPh(phase_diff[i]);
+    //servo[i].SetPh(phase_diff[i]);
+	servo[i].SetPh(phase_diff[i]);
   }
   double ref=millis();
    for (double x=ref; x<=T*cycle+ref; x=millis()){
@@ -148,14 +136,12 @@ void Otto9Humanoid::oscillateServos(int A[6], int O[6], int T, double phase_diff
   }
 }
 
-
 void Otto9Humanoid::_execute(int A[6], int O[6], int T, double phase_diff[6], float steps = 1.0){
 
   attachServos();
   if(getRestState()==true){
         setRestState(false);
   }
-
 
   int cycles=(int)steps;    
 
@@ -167,8 +153,6 @@ void Otto9Humanoid::_execute(int A[6], int O[6], int T, double phase_diff[6], fl
   //-- Execute the final not complete cycle    
   oscillateServos(A,O, T, phase_diff,(float)steps-cycles);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////
 //-- HOME = Otto at rest position -------------------------------//
@@ -195,12 +179,9 @@ void Otto9Humanoid::setRestState(bool state){
     isOttoResting = state;
 }
 
-
 ///////////////////////////////////////////////////////////////////
 //-- PREDETERMINED MOTION SEQUENCES -----------------------------//
 ///////////////////////////////////////////////////////////////////
-
-//---------------------------------------------------------
 //-- Otto movement: Jump
 //--  Parameters:
 //--    steps: Number of steps
@@ -208,13 +189,24 @@ void Otto9Humanoid::setRestState(bool state){
 //---------------------------------------------------------
 void Otto9Humanoid::jump(float steps, int T){
 
-  int up[]={90,90,150,30,110,70};
-  _moveServos(T,up);
-  int down[]={90,90,90,90,90,90};
-  _moveServos(T,down);
+    set_A[0] = 90;
+	set_A[1] = 90;
+	set_A[2] = 160;
+	set_A[3] = 20;
+	set_A[4] = 160;
+	set_A[5] = 20;
+	
+  _moveServos(T,set_A);
+  
+    set_A[0] = 90;
+	set_A[1] = 90;
+	set_A[2] = 90;
+	set_A[3] = 90;
+	set_A[4] = 90;
+	set_A[5] = 90;
+	
+  _moveServos(T,set_A);
 }
-
-
 
 //---------------------------------------------------------
 //-- Otto gait: Walking  (forward or backward)    
@@ -232,15 +224,30 @@ void Otto9Humanoid::walk(float steps, int T, int dir){
   //--      -90 : Walk forward
   //--       90 : Walk backward
   //-- Feet servos also have the same offset (for tiptoe a little bit)
-  int A[6]= {30, 30, 20, 20, 90, 90};
-  int O[6] = {0, 0, 4, -4,0 ,0};
-  double phase_diff[6] = {0, 0, DEG2RAD(dir * -90), DEG2RAD(dir * -90), 0, 0};
+  
+  	set_A[0] = 30;
+	set_A[1] = 30;
+	set_A[2] = 20;
+	set_A[3] = 20;
+	set_A[4] = 20;
+	set_A[5] = 20;
+	
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = 4;
+	set_O[3] = -4;
+	set_O[4] = 0;
+	set_O[5] = 0;
+	
+    set_phase_diff[0] = 0;
+	set_phase_diff[1] = 0;
+	set_phase_diff[2] = DEG2RAD(dir * -90);
+	set_phase_diff[3] = DEG2RAD(dir * -90);
+	set_phase_diff[4] = 0;
+	set_phase_diff[5] = 0;
 
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps);  
+  _execute(set_A, set_O, T, set_phase_diff, steps);  
 }
-
-
 
 //---------------------------------------------------------
 //-- Otto gait: Turning (left or right)
@@ -256,23 +263,40 @@ void Otto9Humanoid::turn(float steps, int T, int dir){
   //-- When the right hip servo amplitude is higher, the steps taken by
   //--   the right leg are bigger than the left. So, the robot describes an 
   //--   left arc
-  int A[6]= {30, 30, 20, 20, 90, 90};
-  int O[6] = {0, 0, 4, -4, 0, 0};
-  double phase_diff[6] = {0, 0, DEG2RAD(-90), DEG2RAD(-90), 0, 0}; 
+
+   set_A[0] = 30;
+   set_A[1] = 30;
+   set_A[2] = 20;
+   set_A[3] = 20;
+   set_A[4] = 15;
+   set_A[5] = 15;
+   
+   	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = 4;
+	set_O[3] = -4;
+	set_O[4] = 0;
+	set_O[5] = 0;
+
+	set_phase_diff[0] = 0;
+	set_phase_diff[1] = 0;
+	set_phase_diff[2] = DEG2RAD(-90);
+	set_phase_diff[3] = DEG2RAD(-90);
+	set_phase_diff[4] = 0;
+	set_phase_diff[5] = 0;
+
     
   if (dir == LEFT) {  
-    A[0] = 30; //-- Left hip servo
-    A[1] = 10; //-- Right hip servo
+	  set_A[0] = 30; //-- Left hip servo
+	  set_A[1] = 10; //-- Right hip servo
   }
   else {
-    A[0] = 10;
-    A[1] = 30;
+	  set_A[0] = 10;
+	  set_A[1] = 30;
   }
     
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
+  _execute(set_A, set_O, T, set_phase_diff, steps);
 }
-
 
 //---------------------------------------------------------
 //-- Otto gait: Lateral bend
@@ -283,38 +307,41 @@ void Otto9Humanoid::turn(float steps, int T, int dir){
 //---------------------------------------------------------
 void Otto9Humanoid::bend (int steps, int T, int dir){
 
- //Parameters of all the movements. Default: Left bend
-  int bend1[6]={90, 90, 62, 35, 120, 60}; 
-  int bend2[6]={90, 90, 62, 105, 60, 120};
-  int homes[6]={90, 90, 90, 90, 90, 90};
+  	//Time of the bend movement. Fixed parameter to avoid falls
+	int T2 = 800;
 
-  //Time of one bend, constrained in order to avoid movements too fast.
-  //T=max(T, 600);
+	//Bend movement
+	for (int i = 0; i<steps; i++)
+	{
+		set_A[0] = 90;
+		set_A[1] = 90;
+		set_A[2] = (dir == -1) ? 180-35 : 62;
+		set_A[3] = (dir == -1) ? 180-60 : 35;
+		set_A[4] = 20;
+		set_A[5] = 60;
 
-  //Changes in the parameters if right direction is chosen 
-  if(dir==-1)
-  {
-    bend1[2]=180-35;
-    bend1[3]=180-60;  //Not 65. Otto is unbalanced
-    bend2[2]=180-105;
-    bend2[3]=180-60;
-  }
+		_moveServos(T2 / 2, set_A);
 
-  //Time of the bend movement. Fixed parameter to avoid falls
-  int T2=800; 
+		set_A[0] = 90;
+		set_A[1] = 90;
+		set_A[2] = (dir == -1) ? 180 - 105 : 62;
+		set_A[3] = (dir == -1) ? 180 - 60 : 105;
+		set_A[4] = 60;
+		set_A[5] = 20;
 
-  //Bend movement
-  for (int i=0;i<steps;i++)
-  {
-    _moveServos(T2/2,bend1);
-    _moveServos(T2/2,bend2);
-    delay(T*0.8);
-    _moveServos(500,homes);
-  }
+		_moveServos(T2 / 2, set_A);
+		delay(T*0.8);
 
+		set_A[0] = 90;
+		set_A[1] = 90;
+		set_A[2] = 90;
+		set_A[3] = 90;
+		set_A[4] = 90;
+		set_A[5] = 90;
+
+		_moveServos(500, set_A);
+	}
 }
-
-
 
 //---------------------------------------------------------
 //-- Otto gait: Shake a leg
@@ -325,48 +352,67 @@ void Otto9Humanoid::bend (int steps, int T, int dir){
 //---------------------------------------------------------
 void Otto9Humanoid::shakeLeg (int steps,int T,int dir){
 
- //This variable change the amount of shakes
-  int numberLegMoves=2;
+  //This variable change the amount of shakes
+	const int numberLegMoves = 2;
 
-  //Parameters of all the movements. Default: Right leg
-  int shake_leg1[6]={90, 90, 58, 35, 90, 90};   
-  int shake_leg2[6]={90, 90, 58, 120, 100, 80};
-  int shake_leg3[6]={90, 90, 58, 60, 80, 100};
-  int homes[6]={90, 90, 90, 90, 90, 90};
+	//Time of the bend movement. Fixed parameter to avoid falls
+	const int T2 = 1000;
+	//Time of one shake, constrained in order to avoid movements too fast.            
+	T = T - T2;
+	T = max(T, 200 * numberLegMoves);
 
-  //Changes in the parameters if left leg is chosen
-  if(dir==-1)      
-  {
-    shake_leg1[2]=180-35;
-    shake_leg1[3]=180-58;
-    shake_leg2[2]=180-120;
-    shake_leg2[3]=180-58;
-    shake_leg3[2]=180-60;
-    shake_leg3[3]=180-58;
-  }
-  
-  //Time of the bend movement. Fixed parameter to avoid falls
-  int T2=1000;    
-  //Time of one shake, constrained in order to avoid movements too fast.            
-  T=T-T2;
-  T=max(T,200*numberLegMoves);  
+	for (int j = 0; j<steps; j++)
+	{
+		//Bend movement
+		set_A[0] = 90;
+		set_A[1] = 90;
+		set_A[2] = (dir == -1) ? 180 - 35 : 58;
+		set_A[3] = (dir == -1) ? 180 - 58 : 35;
+		set_A[4] = 90;
+		set_A[5] = 90;
 
-  for (int j=0; j<steps;j++)
-  {
-  //Bend movement
-  _moveServos(T2/2,shake_leg1);
-  _moveServos(T2/2,shake_leg2);
-  
-    //Shake movement
-    for (int i=0;i<numberLegMoves;i++)
-    {
-    _moveServos(T/(2*numberLegMoves),shake_leg3);
-    _moveServos(T/(2*numberLegMoves),shake_leg2);
-    }
-    _moveServos(500,homes); //Return to home position
-  }
-  
-  delay(T);
+		_moveServos(T2 / 2, set_A);
+		
+		set_A[0] = 90;
+		set_A[1] = 90;
+		set_A[2] = (dir == -1) ? 180 - 120 : 58;
+		set_A[3] = (dir == -1) ? 180 - 58 : 120;
+		set_A[4] = 100;
+		set_A[5] = 80;
+
+		_moveServos(T2 / 2, set_A);
+		
+		//Shake movement
+		for (int i = 0; i<numberLegMoves; i++)
+		{
+			set_A[0] = 90;
+			set_A[1] = 90;
+			set_A[2] = (dir == -1) ? 180 - 60 : 58;
+			set_A[3] = (dir == -1) ? 180 - 58 : 60;
+			set_A[4] = 80;
+			set_A[5] =100;
+			
+			_moveServos(T / (2 * numberLegMoves), set_A);
+			
+			set_A[0] = 90;
+			set_A[1] = 90;
+			set_A[2] = (dir == -1) ? 180 - 120 : 58;
+			set_A[3] = (dir == -1) ? 180 - 58 : 120;
+			set_A[4] = 100;
+			set_A[5] = 80;
+			_moveServos(T / (2 * numberLegMoves), set_A);
+		}
+		
+		set_A[0] = 90;
+		set_A[1] = 90;
+		set_A[2] = 90;
+		set_A[3] = 90;
+		set_A[4] = 90;
+		set_A[5] = 90;
+		_moveServos(500, set_A); //Return to home position
+		
+	}
+	delay(T);
 }
 
 //---------------------------------------------------------
@@ -383,51 +429,113 @@ void Otto9Humanoid::updown(float steps, int T, int h){
   //-- Feet amplitude and offset are the same
   //-- Initial phase for the right foot is -90, so that it starts
   //--   in one extreme position (not in the middle)
-  int A[6]= {0, 0, h, h, h, h};
-  int O[6] = {0, 0, h, -h, h, -h};
-  double phase_diff[6] = {0, 0, DEG2RAD(-90), DEG2RAD(90),DEG2RAD(-90), DEG2RAD(90) };
-  
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
+
+  	set_A[0] = 0;
+	set_A[1] = 0;
+	set_A[2] = h;
+	set_A[3] = h;
+	set_A[4] = h;
+	set_A[5] = h;
+		
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = h;
+	set_O[3] = -h;
+	set_O[4] = h;
+	set_O[5] = -h;
+	
+	set_phase_diff[0] = 0;
+	set_phase_diff[1] = 0;
+	set_phase_diff[2] = DEG2RAD(-90);
+	set_phase_diff[3] = DEG2RAD(90);
+	set_phase_diff[4] = DEG2RAD(-90);
+	set_phase_diff[5] = DEG2RAD(90);
+
+  _execute(set_A, set_O, T, set_phase_diff, steps); 
 }
 //---------------------------------------------------------
 //-- Otto movement: Hands up
-
 //---------------------------------------------------------
 
-void Otto9Humanoid::handsup(){
-
+void Otto9Humanoid::armsup(){
   
-  int homes[6]={90, 90, 90, 90, 20, 160}; //
-    _moveServos(500,homes);   //Move the servos in half a second
+   	set_A[0] = 90;
+	set_A[1] = 90;
+	set_A[2] = 90;
+	set_A[3] = 90;
+	set_A[4] = 20;
+	set_A[5] = 160;
+    _moveServos(750,set_A);   //Move the servos
+
+}
+
+void Otto9Humanoid::armsdown(){
+  
+   	set_A[0] = 90;
+	set_A[1] = 90;
+	set_A[2] = 90;
+	set_A[3] = 90;
+	set_A[4] = 160;
+	set_A[5] = -20;
+    _moveServos(750,set_A);   //Move the servos in half a second
 
 }
 
 ///////////////////////////////////////////////////
-void Otto9Humanoid::handwave(int dir){
+void Otto9Humanoid::armwave(int dir){
 //-- Wave , either left or right
-//-- 
+
  if(dir==-1)      
   {
+    set_A[0] = 0;
+	set_A[1] = 0;
+	set_A[2] = 0;
+	set_A[3] = 0;
+	set_A[4] = 30;
+	set_A[5] = 0;
+	
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = 0;
+	set_O[3] = 0;
+	set_O[4] = -30;
+	set_O[5] = -40;
   
-  int A[6]= {0, 0, 0, 0, 30, 0}; // left hand wave
-  int O[6] = {0, 0, 0, 0, -30, -40};
-  double phase_diff[6] = {0, 0, 0, 0, DEG2RAD(0),0};
-    //-- Let's oscillate the servos!
-  _execute(A, O, 500, phase_diff, 5); 
+  	set_phase_diff[0] = 0;
+	set_phase_diff[1] = 0;
+	set_phase_diff[2] = 0;
+	set_phase_diff[3] = 0;
+	set_phase_diff[4] = DEG2RAD(0);
+	set_phase_diff[5] = 0;
+
+  _execute(set_A, set_O, 500, set_phase_diff, 5); 
   }
   if(dir==1)      
   {
-  
-  int A[6]= {0, 0, 0, 0, 0, 30}; // right hand wave
-  int O[6] = {0, 0, 0, 0, 40, 60};
-  double phase_diff[6] = {0, 0, 0, 0, 0, DEG2RAD(0)};
-    //-- Let's oscillate the servos!
-  _execute(A, O, 500, phase_diff, 1); 
+    set_A[0] = 0;
+	set_A[1] = 0;
+	set_A[2] = 0;
+	set_A[3] = 0;
+	set_A[4] = 0;
+	set_A[5] = 30;
+	
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = 0;
+	set_O[3] = 0;
+	set_O[4] = 40;
+	set_O[5] = 60;
+	
+	set_phase_diff[0] = 0;
+	set_phase_diff[1] = 0;
+	set_phase_diff[2] = 0;
+	set_phase_diff[3] = 0;
+	set_phase_diff[4] = 0;
+	set_phase_diff[5] = DEG2RAD(0);
+
+  _execute(set_A, set_O, 500, set_phase_diff, 5); 
   }  
 }
-
-
 
 //---------------------------------------------------------
 //-- Otto movement: swinging side to side
@@ -440,14 +548,30 @@ void Otto9Humanoid::swing(float steps, int T, int h){
 
   //-- Both feets are in phase. The offset is half the amplitude
   //-- It causes the robot to swing from side to side
-  int A[6]= {0, 0, h, h, h, h};
-  int O[6] = {0, 0, h/2, -h/2, h, -h};
-  double phase_diff[6] = {0, 0, DEG2RAD(0), DEG2RAD(0), DEG2RAD(0), DEG2RAD(0)};
-  
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
-}
 
+    set_A[0] = 0;
+	set_A[1] = 0;
+	set_A[2] = h;
+	set_A[3] = h;
+	set_A[4] = h;
+	set_A[5] = h;
+	
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] =  h/2;
+	set_O[3] = -h/2;
+	set_O[4] = h;
+	set_O[5] = -h;
+	
+	set_phase_diff[0] = 0;
+	set_phase_diff[1] = 0;
+	set_phase_diff[2] = DEG2RAD(0);
+	set_phase_diff[3] = DEG2RAD(0);
+	set_phase_diff[4] = DEG2RAD(0);
+	set_phase_diff[5] = DEG2RAD(0);
+  
+  _execute(set_A, set_O, T, set_phase_diff, steps); 
+}
 
 //---------------------------------------------------------
 //-- Otto movement: swinging side to side without touching the floor with the heel
@@ -460,12 +584,29 @@ void Otto9Humanoid::tiptoeSwing(float steps, int T, int h){
 
   //-- Both feets are in phase. The offset is not half the amplitude in order to tiptoe
   //-- It causes the robot to swing from side to side
-  int A[6]= {0, 0, h, h, h, h};
-  int O[6] = {0, 0, h, -h, h, -h};
-  double phase_diff[6] = {0, 0, 0, 0, 0, 0};
+
+    set_A[0] = 0;
+	set_A[1] = 0;
+	set_A[2] = h;
+	set_A[3] = h;
+	set_A[4] = h;
+	set_A[5] = h;
+	
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = h;
+	set_O[3] = -h;
+	set_O[4] = h;
+	set_O[5] = -h;
+
+	set_phase_diff[0] = 0;
+	set_phase_diff[1] = 0;
+	set_phase_diff[2] = 0;
+	set_phase_diff[3] = 0;
+	set_phase_diff[4] = 0;
+	set_phase_diff[5] = 0;
   
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
+  _execute(set_A, set_O, T, set_phase_diff, steps); 
 }
 
 //---------------------------------------------------------
@@ -483,12 +624,29 @@ void Otto9Humanoid::jitter(float steps, int T, int h){
   //--   in one extreme position (not in the middle)
   //-- h is constrained to avoid hit the feets
   h=min(25,h);
-  int A[6]= {h, h, 0, 0, 0, 0};
-  int O[6] = {0, 0, 0, 0, 0, 0};
-  double phase_diff[6] = {DEG2RAD(-90), DEG2RAD(90), 0, 0, 0, 0};
   
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
+    set_A[0] = h;
+	set_A[1] = h;
+	set_A[2] = 0;
+	set_A[3] = 0;
+	set_A[4] = 0;
+	set_A[5] = 0;
+	
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = 0;
+	set_O[3] = 0;
+	set_O[4] = 0;
+	set_O[5] = 0;
+	
+	set_phase_diff[0] = DEG2RAD(-90);
+	set_phase_diff[1] = DEG2RAD(90);
+	set_phase_diff[2] = 0;
+	set_phase_diff[3] = 0;
+	set_phase_diff[4] = 0;
+	set_phase_diff[5] = 0;
+  
+  _execute(set_A, set_O, T, set_phase_diff, steps); 
 }
 
 //---------------------------------------------------------
@@ -505,12 +663,29 @@ void Otto9Humanoid::ascendingTurn(float steps, int T, int h){
   //--   in one extreme position (not in the middle)
   //-- h is constrained to avoid hit the feets
   h=min(13,h);
-  int A[6]= {h, h, h, h, 40, 40};
-  int O[6] = {0, 0, h+4, -h+4,0,0};
-  double phase_diff[6] = {DEG2RAD(-90), DEG2RAD(90), DEG2RAD(-90), DEG2RAD(90), 0, 0};
   
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
+    set_A[0] = h;
+	set_A[1] = h;
+	set_A[2] = h;
+	set_A[3] = h;
+	set_A[4] = 40;
+	set_A[5] = 40;
+	
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = h+4;
+	set_O[3] = -h+4;
+	set_O[4] = 0;
+	set_O[5] = 0;
+
+	set_phase_diff[0] = DEG2RAD(-90);
+	set_phase_diff[1] = DEG2RAD(90);
+	set_phase_diff[2] =  DEG2RAD(-90);
+	set_phase_diff[3] =  DEG2RAD(90);
+	set_phase_diff[4] = 0;
+	set_phase_diff[5] = 0;
+  
+  _execute(set_A, set_O, T, set_phase_diff, steps); 
 }
 
 //---------------------------------------------------------
@@ -533,14 +708,29 @@ void Otto9Humanoid::moonwalker(float steps, int T, int h, int dir){
   //--  Both amplitudes are equal. The offset is half the amplitud plus a little bit of
   //-   offset so that the robot tiptoe lightly
  
-  int A[6]= {0, 0, h, h, h, h};
-  int O[6] = {0, 0, h/2+2, -h/2 -2, -h, h};
-  int phi = -dir * 90;
-  double phase_diff[6] = {0, 0, DEG2RAD(phi), DEG2RAD(-60 * dir + phi), DEG2RAD(phi), DEG2RAD(phi)};
+    set_A[0] = 0;
+	set_A[1] = 0;
+	set_A[2] = h;
+	set_A[3] = h;
+	set_A[4] = h;
+	set_A[5] = h;
 
-  
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
+    set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] =h / 2 + 2;
+	set_O[3] = -h / 2 - 2;
+	set_O[4] = -h;
+	set_O[5] = h;
+	
+	const int phi = -dir * 90;
+	set_phase_diff[0] = 0;
+	set_phase_diff[1] = 0;
+	set_phase_diff[2] =  DEG2RAD(phi);
+	set_phase_diff[3] =  DEG2RAD(-60 * dir + phi);
+	set_phase_diff[4] = DEG2RAD(phi);
+	set_phase_diff[5] = DEG2RAD(phi);
+
+	_execute(set_A, set_O, T, set_phase_diff, steps);  
 }
 
 //----------------------------------------------------------
@@ -553,12 +743,29 @@ void Otto9Humanoid::moonwalker(float steps, int T, int h, int dir){
 //-----------------------------------------------------------
 void Otto9Humanoid::crusaito(float steps, int T, int h, int dir){
 
-  int A[6]= {25, 25, h, h, 0, 0};
-  int O[6] = {0, 0, h/2+ 4, -h/2 - 4, 0, 0};
-  double phase_diff[6] = {90, 90, DEG2RAD(0), DEG2RAD(-60 * dir), 0, 0};
-  
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
+    set_A[0] = 25;
+	set_A[1] = 25;
+	set_A[2] = h;
+	set_A[3] = h;
+	set_A[4] = 0;
+	set_A[5] = 0;
+
+	
+	set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = h/2+ 4;
+	set_O[3] = -h/2 - 4;
+	set_O[4] = 0;
+	set_O[5] = 0;
+
+	set_phase_diff[0] = 90;
+	set_phase_diff[1] = 90;
+	set_phase_diff[2] =  DEG2RAD(0);
+	set_phase_diff[3] =  DEG2RAD(-60 * dir);
+	set_phase_diff[4] = 0;
+	set_phase_diff[5] = 0;
+	
+  _execute(set_A, set_O, T, set_phase_diff, steps); 
 }
 
 
@@ -572,14 +779,30 @@ void Otto9Humanoid::crusaito(float steps, int T, int h, int dir){
 //---------------------------------------------------------
 void Otto9Humanoid::flapping(float steps, int T, int h, int dir){
 
-  int A[6]= {12, 12, h, h, 0, 0};
-  int O[6] = {0, 0, h - 10, -h + 10, 0, 0};
-  double phase_diff[6] = {DEG2RAD(0), DEG2RAD(180), DEG2RAD(-90 * dir), DEG2RAD(90 * dir), 0, 0};
-  
-  //-- Let's oscillate the servos!
-  _execute(A, O, T, phase_diff, steps); 
-}
+    set_A[0] = 12;
+	set_A[1] = 12;
+	set_A[2] = h;
+	set_A[3] = h;
+	set_A[4] = 0;
+	set_A[5] = 0;
 
+	
+    set_O[0] = 0;
+	set_O[1] = 0;
+	set_O[2] = h - 10;
+	set_O[3] = -h + 10;
+	set_O[4] = 0;
+	set_O[5] = 0;
+	
+	set_phase_diff[0] = DEG2RAD(0);
+	set_phase_diff[1] = DEG2RAD(180);
+	set_phase_diff[2] =  DEG2RAD(-90 * dir);
+	set_phase_diff[3] =  DEG2RAD(90 * dir);
+	set_phase_diff[4] = 0;
+	set_phase_diff[5] = 0;
+
+  _execute(set_A, set_O, T, set_phase_diff, steps); 
+}
 
 ///////////////////////////////////////////////////////////////////
 //-- SENSORS FUNCTIONS  -----------------------------------------//
@@ -592,7 +815,6 @@ float Otto9Humanoid::getDistance(){
 
   return us.read();
 }
-
 
 //---------------------------------------------------------
 //-- Otto getNoise: return Otto's noise sensor measure
@@ -615,47 +837,6 @@ int Otto9Humanoid::getNoise(){
     return noiseLevel;
 }
 
-
-//---------------------------------------------------------
-//-- Otto getBatteryLevel: return battery voltage percent
-//---------------------------------------------------------
-/*
-double Otto9Humanoid::getBatteryLevel(){
-
-  //The first read of the batery is often a wrong reading, so we will discard this value. 
-    double batteryLevel = battery.readBatPercent();
-    double batteryReadings = 0;
-    int numReadings = 10;
-
-    for(int i=0; i<numReadings; i++){
-        batteryReadings += battery.readBatPercent();
-        delay(1); // delay in between reads for stability
-    }
-
-    batteryLevel = batteryReadings / numReadings;
-
-    return batteryLevel;
-}
-
-
-double Otto9Humanoid::getBatteryVoltage(){
-
-  //The first read of the batery is often a wrong reading, so we will discard this value. 
-    double batteryLevel = battery.readBatVoltage();
-    double batteryReadings = 0;
-    int numReadings = 10;
-
-    for(int i=0; i<numReadings; i++){
-        batteryReadings += battery.readBatVoltage();
-        delay(1); // delay in between reads for stability
-    }
-
-    batteryLevel = batteryReadings / numReadings;
-
-    return batteryLevel;
-}
-*/
-
 ///////////////////////////////////////////////////////////////////
 //-- MOUTHS & ANIMATIONS ----------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -663,12 +844,10 @@ void Otto9Humanoid::setLed(byte X, byte Y, byte value){
   ledmatrix.setDot( X,  Y, value);
 }
 
-
 // EXAMPLE putAnimationMouth(dreamMouth,0);
 void Otto9Humanoid::putAnimationMouth(unsigned long int aniMouth, int index){
 
 ledmatrix.writeFull(PROGMEM_getAnything (&Gesturetable[aniMouth][index]));
-
 }
 
 //EXAMPLE putMouth(smile);
@@ -711,7 +890,6 @@ void Otto9Humanoid::writeText(const char * s, byte scrollspeed){
      }
   * s++;
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -727,10 +905,9 @@ void Otto9Humanoid::_tone (float noteFrequency, long noteDuration, int silentDur
 
       tone(Otto9Humanoid::pinBuzzer, noteFrequency, noteDuration);
       delay(noteDuration);       //milliseconds to microseconds
-      //noTone(PIN_Buzzer);
+      noTone(pinBuzzer);
       delay(silentDuration);
 }
-
 
 void Otto9Humanoid::bendTones (float initFrequency, float finalFrequency, float prop, long noteDuration, int silentDuration){
 
@@ -753,7 +930,6 @@ void Otto9Humanoid::bendTones (float initFrequency, float finalFrequency, float 
       }
   }
 }
-
 
 void Otto9Humanoid::sing(int songName){
   switch(songName){
@@ -866,8 +1042,6 @@ void Otto9Humanoid::sing(int songName){
 
   }
 }
-
-
 
 ///////////////////////////////////////////////////////////////////
 //-- GESTURES ---------------------------------------------------//
