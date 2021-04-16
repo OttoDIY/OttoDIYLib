@@ -266,7 +266,7 @@ void Otto9::walk(float steps, int T, int dir){
 void Otto9::turn(float steps, int T, int dir){
 
   //-- Same coordination than for walking (see Otto::walk)
-  //-- The Amplitudes of the hip's oscillators are not igual
+  //-- The Amplitudes of the hip's oscillators are not equal
   //-- When the right hip servo amplitude is higher, the steps taken by
   //--   the right leg are bigger than the left. So, the robot describes an 
   //--   left arc
