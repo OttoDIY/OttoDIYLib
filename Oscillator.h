@@ -43,7 +43,7 @@ class Oscillator
     
     //-- Oscillators parameters
     unsigned int _A;  //-- Amplitude (degrees)
-    unsigned int _O;  //-- Offset (degrees)
+    int _O;  //-- Offset (degrees)
     unsigned int _T;  //-- Period (miliseconds)
     double _phase0;   //-- Phase (radians)
     
