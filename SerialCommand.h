@@ -75,7 +75,7 @@ class SerialCommand
 	public:
 		SerialCommand();      // Constructor
 		#ifndef SERIALCOMMAND_HARDWAREONLY
-		SerialCommand(SoftwareSerial &SoftSer);  // Constructor for using SoftwareSerial objects
+		SerialCommand(Stream &SoftSer);  // Constructor for using SoftwareSerial objects
 		#endif
 
 		void clearBuffer();   // Sets the command buffer to all '\0' (nulls)
@@ -101,7 +101,7 @@ class SerialCommand
 		void (*defaultHandler)();           // Pointer to the default handler function 
 		int usingSoftwareSerial;            // Used as boolean to see if we're using SoftwareSerial object or not
 		#ifndef SERIALCOMMAND_HARDWAREONLY 
-		SoftwareSerial *SoftSerial;         // Pointer to a user-created SoftwareSerial object
+		Stream *_serialPort;         // Pointer to a user-created SoftwareSerial object
 		#endif
 };
 

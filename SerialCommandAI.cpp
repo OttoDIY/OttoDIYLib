@@ -47,10 +47,10 @@ SerialCommandAI::SerialCommandAI()
 
 #ifndef SERIALCOMMAND_HARDWAREONLY
 // Constructor to use a SoftwareSerial object
-SerialCommandAI::SerialCommandAI(SoftwareSerial &_SoftSer)
+SerialCommandAI::SerialCommandAI(Stream &_ser)
 {
 	usingSoftwareSerial=1; 
-	SoftSerial = &_SoftSer;
+	_serialPort = &_ser;
 	strncpy(delim,"|",MAXDELIMETER);  // strtok_r needs a null-terminated string
 	term='\r';   // return character, default terminator for commands
 	numCommand=0;    // Number of callback handlers installed
@@ -89,7 +89,7 @@ void SerialCommandAI::readSerial()
 	#ifdef SERIALCOMMAND_HARDWAREONLY
 	while (Serial.available() > 0) 
 	#else
-	while ((usingSoftwareSerial==0 && Serial.available() > 0) || (usingSoftwareSerial==1 && SoftSerial->available() > 0) )
+	while ((usingSoftwareSerial==0 && Serial.available() > 0) || (usingSoftwareSerial==1 && _serialPort->available() > 0) )
 	#endif
 	{
 		int i; 
@@ -100,7 +100,7 @@ void SerialCommandAI::readSerial()
 		} else {
 			#ifndef SERIALCOMMAND_HARDWAREONLY
 			// SoftwareSerial port
-			inChar = SoftSerial->read();   // Read single available character, there may be more waiting
+			inChar = _serialPort->read();   // Read single available character, there may be more waiting
 			#endif
 		}
 		#ifdef SERIALCOMMANDDEBUG
