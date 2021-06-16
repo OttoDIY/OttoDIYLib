@@ -12,7 +12,6 @@
   #include <pins_arduino.h>
 #endif
 #include "Oscillator.h"
-#include <Servo.h>
 
 //-- This function returns true if another sample
 //-- should be taken (i.e. the TS time has passed since
@@ -24,7 +23,7 @@ bool Oscillator::next_sample()
   _currentMillis = millis();
  
   //-- Check if the timeout has passed
-  if(_currentMillis - _previousMillis > _TS) {
+  if(_currentMillis - _previousMillis > _samplingPeriod) {
     _previousMillis = _currentMillis;   
 
     return true;
@@ -46,18 +45,18 @@ void Oscillator::attach(int pin, bool rev)
       _servo.write(90);
 
       //-- Initialization of oscilaltor parameters
-      _TS=30;
-      _T=2000;
-      _N = _T/_TS;
-      _inc = 2*M_PI/_N;
+      _samplingPeriod=30;
+      _period=2000;
+      _numberSamples = _period/_samplingPeriod;
+      _inc = 2*M_PI/_numberSamples;
 
       _previousMillis=0;
 
       //-- Default parameters
-      _A=45;
+      _amplitude=45;
       _phase=0;
       _phase0=0;
-      _O=0;
+      _offset=0;
       _stop=false;
 
       //-- Reverse mode
@@ -81,11 +80,11 @@ void Oscillator::detach()
 void Oscillator::SetT(unsigned int T)
 {
   //-- Assign the new period
-  _T=T;
+  _period=T;
   
   //-- Recalculate the parameters
-  _N = _T/_TS;
-  _inc = 2*M_PI/_N;
+  _numberSamples = _period/_samplingPeriod;
+  _inc = 2*M_PI/_numberSamples;
 };
 
 /*******************************/
@@ -112,7 +111,7 @@ void Oscillator::refresh()
       //-- If the oscillator is not stopped, calculate the servo position
       if (!_stop) {
         //-- Sample the sine function and set the servo pos
-         _pos = round(_A * sin(_phase + _phase0) + _O);
+         _pos = round(_amplitude * sin(_phase + _phase0) + _offset);
 	       if (_rev) _pos=-_pos;
          _servo.write(_pos+90+_trim);
       }

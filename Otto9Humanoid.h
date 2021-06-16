@@ -3,7 +3,11 @@
 #ifndef Otto9Humanoid_h
 #define Otto9Humanoid_h
 
+#ifdef ARDUINO_ARCH_ESP32
+#include <ESP32Servo.h>
+#else
 #include <Servo.h>
+#endif
 #include <Oscillator.h>
 #include <EEPROM.h>
 #include <US.h>

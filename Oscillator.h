@@ -8,7 +8,11 @@
 #ifndef Oscillator_h
 #define Oscillator_h
 
+#ifdef ARDUINO_ARCH_ESP32
+#include <ESP32Servo.h>
+#else
 #include <Servo.h>
+#endif
 
 //-- Macro for converting from degrees to radians
 #ifndef DEG2RAD
@@ -22,10 +26,10 @@ class Oscillator
     void attach(int pin, bool rev =false);
     void detach();
     
-    void SetA(unsigned int A) {_A=A;};
-    void SetO(unsigned int O) {_O=O;};
+    void SetA(unsigned int amplitude) {_amplitude=amplitude;};
+    void SetO(int offset) {_offset=offset;};
     void SetPh(double Ph) {_phase0=Ph;};
-    void SetT(unsigned int T);
+    void SetT(unsigned int period);
     void SetTrim(int trim){_trim=trim;};
     int getTrim() {return _trim;};
     void SetPosition(int position); 
@@ -42,18 +46,18 @@ class Oscillator
     Servo _servo;
     
     //-- Oscillators parameters
-    unsigned int _A;  //-- Amplitude (degrees)
-    int _O;  //-- Offset (degrees)
-    unsigned int _T;  //-- Period (miliseconds)
-    double _phase0;   //-- Phase (radians)
+    unsigned int _amplitude;  //-- Amplitude (degrees)
+    int _offset;  //-- Offset (degrees)
+    unsigned int _period;  //-- Period (miliseconds)
+    double _phase0;   //-- Phase (radians)  
     
     //-- Internal variables
     int _pos;         //-- Current servo pos
     int _trim;        //-- Calibration offset
     double _phase;    //-- Current phase
     double _inc;      //-- Increment of phase
-    double _N;        //-- Number of samples
-    unsigned int _TS; //-- sampling period (ms)
+    double _numberSamples;        //-- Number of samples
+    unsigned int _samplingPeriod; //-- sampling period (ms)
     
     long _previousMillis; 
     long _currentMillis;
