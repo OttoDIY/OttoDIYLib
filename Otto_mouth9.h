@@ -72,8 +72,4 @@ const unsigned long int Mouthtable[NUMBER_OF_ELEMENTS] PROGMEM = {
 #define culito       		    	29
 #define angry 				30  
                
-               
-
 #endif
-
-

@@ -19,7 +19,7 @@ Otto_Matrix::Otto_Matrix()
 
 void Otto_Matrix::init(byte _data, byte _load, byte _clock, byte _num, int _rotation)
 {
-   data = _data;
+  data = _data;
   load = _load;
   clock = _clock;
   num = _num;
@@ -31,12 +31,19 @@ void Otto_Matrix::init(byte _data, byte _load, byte _clock, byte _num, int _rota
     for (int i=0; i<80; i++)
     CHARbuffer[i] = 0;
     
-	pinMode(data,  OUTPUT);
-	pinMode(clock, OUTPUT);
-	pinMode(load,  OUTPUT);
-	digitalWrite(clock, HIGH); 
+#if defined(ESP32)
+    SPI.begin ( clock,  -1,  data, load);
+    SPI.setDataMode(SPI_MODE0);
+    SPI.setClockDivider(SPI_CLOCK_DIV128);
+    SPI.setHwCs(true);
+#else
+    pinMode(data,  OUTPUT);
+    pinMode(clock, OUTPUT);
+    pinMode(load, OUTPUT);
+    digitalWrite(clock, HIGH); 
+#endif
 
-	setCommand(max7219_reg_scanLimit, 0x07);      
+        setCommand(max7219_reg_scanLimit, 0x07);      
 	setCommand(max7219_reg_decodeMode, 0x00);  // using an led matrix (not digits)
 	setCommand(max7219_reg_shutdown, 0x01);    // not in shutdown mode
 	setCommand(max7219_reg_displayTest, 0x00); // no display test
@@ -66,6 +73,9 @@ void Otto_Matrix::clearMatrix()
 
 void Otto_Matrix::setCommand(byte command, byte value)
 {
+#if defined(ESP32)
+    SPI.transfer16(command << 8 | value);
+#else
 	digitalWrite(load, LOW);    
 	for (int i=0; i<num; i++) 
 	{
@@ -74,6 +84,7 @@ void Otto_Matrix::setCommand(byte command, byte value)
 	}
 	digitalWrite(load, LOW);
 	digitalWrite(load, HIGH);
+#endif
 }
 
 
@@ -81,8 +92,21 @@ void Otto_Matrix::setColumn(byte col, byte value)
 {
 	int n = col / 8;
 	int c = col % 8;
+#if defined(ESP32)
+    for (int i=0; i<num; i++)
+    {
+	if (i == n)
+        {
+	    SPI.transfer16((c + 1) << 8 | value);
+	}
+	//else
+	//{
+	//    SPI.transfer16(0);
+	//}
+    }
+#else
 	digitalWrite(load, LOW);    
-	for (int i=0; i<num; i++) 
+        for (int i=0; i<num; i++) 
 	{
 		if (i == n)
 		{
@@ -97,12 +121,20 @@ void Otto_Matrix::setColumn(byte col, byte value)
 	}
 	digitalWrite(load, LOW);
 	digitalWrite(load, HIGH);
+#endif
 	
 	buffer[col] = value;
 }
 
 void Otto_Matrix::setColumnAll(byte col, byte value)
 {
+#if defined(ESP32)
+    for (int i=0; i<num; i++) 
+    {
+	SPI.transfer16((col + 1) << 8 | value);
+	buffer[col * i] = value;
+    }
+#else
 	digitalWrite(load, LOW);    
 	for (int i=0; i<num; i++) 
 	{
@@ -112,6 +144,7 @@ void Otto_Matrix::setColumnAll(byte col, byte value)
 	}
 	digitalWrite(load, LOW);
 	digitalWrite(load, HIGH);
+#endif
 }
 
 void Otto_Matrix::setDot(byte col, byte row, byte value)
@@ -120,8 +153,21 @@ void Otto_Matrix::setDot(byte col, byte row, byte value)
 
 	int n = col / 8;
 	int c = col % 8;
+#if defined(ESP32)
+    for (int i=0; i<num; i++) 
+    {
+	if (i == n)
+	{
+	    SPI.transfer16((c + 1) << 8 | buffer[col]);
+	}
+	else
+	{
+	    SPI.transfer16(0);
+	}
+    }
+#else
 	digitalWrite(load, LOW);    
-	for (int i=0; i<num; i++) 
+        for (int i=0; i<num; i++) 
 	{
 		if (i == n)
 		{
@@ -136,6 +182,7 @@ void Otto_Matrix::setDot(byte col, byte row, byte value)
 	}
 	digitalWrite(load, LOW);
 	digitalWrite(load, HIGH);
+#endif
 }
 
 // routine for OTTO and ZOWI, for the 6 x 5 matrix
