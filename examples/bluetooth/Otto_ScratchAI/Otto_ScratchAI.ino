@@ -52,7 +52,7 @@
 #include <EEPROM.h>
 #include <string.h>
 #include <SerialCommandAI.h> // Library to manage serial commands
-#include <Otto9.h>
+#include <Otto.h>
 #ifdef EYES_MATRIX
     #include "Adafruit_LEDBackpack.h"
 #endif
@@ -74,7 +74,7 @@
     #endif
 #endif
 
-Otto9 Otto;  // This is Otto!
+Otto Otto;  // This is Otto!
 
 /**
  * Reserved PINs
@@ -85,10 +85,10 @@ Otto9 Otto;  // This is Otto!
 /**
  * Servo PINs
  */
-#define PIN_LEG_LEFT    2 // servo[0]  left leg
-#define PIN_LEG_RIGHT   3 // servo[1]  right leg
-#define PIN_FOOT_LEFT   4 // servo[2]  left foot
-#define PIN_FOOT_RIGHT  5 // servo[3]  right foot
+#define LeftLeg 2 
+#define RightLeg 3
+#define LeftFoot 4 
+#define RightFoot 5 
 #define PIN_ARM_LEFT    6 // servo[4]  Left arm
 #define PIN_ARM_RIGHT   7 // servo[5]  Right arm
 
@@ -102,7 +102,7 @@ Otto9 Otto;  // This is Otto!
 /**
  * Buzzer PIN
  */
-#define PIN_BUZZER      13 // BUZZER pin (13)
+#define Buzzer  13 
 
 /**
  * Ultrasonic PINs
@@ -244,8 +244,7 @@ void setup() {
     pinMode(PIN_BLE_STATE, INPUT);
 
     // Otto initialization
-    Otto.init(PIN_LEG_LEFT, PIN_LEG_RIGHT, PIN_FOOT_LEFT, PIN_FOOT_RIGHT, true, PIN_NOISE, PIN_BUZZER, PIN_US_TRIGGER,
-              PIN_US_ECHO); // Set the servo pins and ultrasonic pins
+  Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
 
     // Mouth LED Matrix initialization
 #ifdef MOUTH_MATRIX
@@ -373,7 +372,6 @@ void setup() {
 void loop() {
     checkIfTouched();
     checkIfConnected();
-    obstacleDetector();
     SCmd.readSerial();    // If Otto is moving yet
     if (Otto.getRestState() == false) {
         move(moveID);
@@ -387,17 +385,6 @@ void loop() {
 /**
  * Function to read distance sensor & to actualize obstacleDetected variable
  */
-void obstacleDetector() {
-#ifdef ULTRASONIC_SENSOR
-    int distance = Otto.getDistance();
-    if ((distance < 15) && !obstacleDetected) {
-        obstacleDetected = true;
-        BTserial.println("U:ACK");
-    } else {
-        obstacleDetected = false;
-    }
-#endif
-}
 
 /**
  * Function to receive Stop command.
@@ -1186,39 +1173,7 @@ void requestName() {
     Serial.flush();
 }
 
-/**
- * Function to send ultrasonic sensor measure (distance in "cm")
- */
-void requestDistance() {
-#ifdef ULTRASONIC_SENSOR
-    Otto.home();  // stop if necessary
-    int distance = Otto.getDistance();
-    Serial.print(F("&&"));
-    Serial.print(F("D "));
-    Serial.print(distance);
-    BTserial.print("D:");
-    BTserial.println(distance);
-    Serial.println(F("%%"));
-    Serial.flush();
-#endif
-}
 
-/**
- * Function to send noise sensor measure
- */
-void requestNoise() {
-#ifdef NOISE_SENSOR
-    Otto.home();  // stop if necessary
-    int microphone = Otto.getNoise(); // analogRead(PIN_NOISE);
-    Serial.print(F("&&"));
-    Serial.print(F("N "));
-    Serial.print(microphone);
-    BTserial.print("N:");
-    BTserial.println(microphone);
-    Serial.println(F("%%"));
-    Serial.flush();
-#endif
-}
 
 /**
  * Function to send program ID

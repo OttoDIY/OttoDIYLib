@@ -1,5 +1,5 @@
-#include <Otto9.h>
-Otto9 Otto;
+#include <Otto.h>
+Otto Otto;
 #include <SerialCommand.h>//-- Library to manage serial commands
 SoftwareSerial BTserial = SoftwareSerial(11,12); //  TX  RX of the Bluetooth
 SerialCommand SCmd(BTserial);  //The SerialCommand object
@@ -35,18 +35,16 @@ unsigned long int matrix;
 #define CS_PIN A2
 #define CLK_PIN A1
 #define LED_DIRECTION 1
-#define PIN_YL 2 // left leg, servo[0]
-#define PIN_YR 3 // right leg, servo[1]
-#define PIN_RL 4 // left foot, servo[2]
-#define PIN_RR 5 // right foot, servo[3]
-#define PIN_Trigger 8 // ultrasound
-#define PIN_Echo 9 // ultrasound
-#define PIN_Buzzer  13 //buzzer
+#define LeftLeg 2 
+#define RightLeg 3
+#define LeftFoot 4 
+#define RightFoot 5 
+#define Buzzer  13 
 
 void setup(){
   Serial.begin(9600);  
   BTserial.begin(9600);   
-  Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, A6, PIN_Buzzer, PIN_Trigger, PIN_Echo);
+  Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
   //Setup callbacks for SerialCommand commands 
   SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
   SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck

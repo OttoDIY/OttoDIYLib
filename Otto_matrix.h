@@ -5,11 +5,11 @@
  * Adapted for OTTO version 9 use
  */
 
-#ifndef _Otto_Matrix9_H_
-#define _Otto_Matrix9_H_
+#ifndef _Otto_matrix_H_
+#define _Otto_matrix_H_
 
 #include "Arduino.h"
-#include "Otto_gestures9.h"
+#include "Otto_gestures.h"
 
 #if defined(ESP32)
 # include <SPI.h>

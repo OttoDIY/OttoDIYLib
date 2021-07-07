@@ -1,7 +1,7 @@
 //----------------------------------------------------------------
 //-- Otto Happy Birthday
 //-- With this code Otto will walk 5 steps and then sing the happy birthday
-//-- April 2019: Designed to work with the basic Otto but could be compatible with PLUS or Humanoid or other biped robots
+//-- https://www.ottodiy.com/
 /******************************************************************************************************
   Make sure to have installed all libraries: https://wikifactory.com/+OttoDIY/otto-diy
   Otto DIY invests time and resources providing open source code and hardware, 
@@ -10,18 +10,13 @@
   BSD license, all text above must be included in any redistribution
  *******************************************************************/
 //-----------------------------------------------------------------
-#include <Servo.h> 
-#include <Oscillator.h>
-#include <US.h>
-#include <Otto9.h>
-Otto9 Otto;  //This is Otto!
-#define PIN_YL 2 //servo[0]  left leg
-#define PIN_YR 3 //servo[1]  right leg
-#define PIN_RL 4 //servo[2]  left foot
-#define PIN_RR 5 //servo[3]  right foot
-#define PIN_Trigger  8  //TRIGGER pin (8)
-#define PIN_Echo     9  //ECHO pin (9)
-#define PIN_Buzzer  13 //BUZZER pin (13)
+#include <Otto.h>
+Otto Otto;
+#define LeftLeg 2 
+#define RightLeg 3
+#define LeftFoot 4 
+#define RightFoot 5 
+#define Buzzer  13 
 int speakerPin = 13;
 int length = 28; // the number of notes
 char notes[] = "GGAGcB GGAGdc GGxecBA yyecdc";
@@ -62,7 +57,7 @@ for (int i = 0; i < 17; i++) {
 }
 
 void setup() {
-  Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, A6, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins and Buzzer pin
+    Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
 pinMode(speakerPin, OUTPUT);
 }
 

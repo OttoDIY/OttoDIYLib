@@ -1,7 +1,5 @@
 //----------------------------------------------------------------
 //-- Otto All moves test
-//-- This code will make Otto make all functions, you can reorganize moves, sounds or gestures
-//-- April 2019: Designed to work with the basic Otto but could be compatible with PLUS or Humanoid or other biped robots
 /******************************************************************************************************
   Make sure to have installed all libraries: https://github.com/OttoDIY/OttoDIYLib
   Otto DIY invests time and resources providing open source code and hardware, 
@@ -9,26 +7,24 @@
   BSD license, all text above must be included in any redistribution
  *******************************************************************/
 //-----------------------------------------------------------------
-#include <Otto9.h>
-Otto9 Otto;  //This is Otto!
+#include <Otto.h>
+Otto Otto;  //This is Otto!
 //----------------------------------------------------------------------
-#define PIN_YL 2 //Left leg
-#define PIN_YR 3 //Right leg
-#define PIN_RL 4 //Left foot
-#define PIN_RR 5 //Right foot
-#define PIN_Trigger  8  //TRIGGER pin
-#define PIN_Echo     9  //ECHO pin
-#define PIN_Buzzer  13  //BUZZER pin
-#define DIN_PIN A3 // Data In
-#define CS_PIN A2  // Chip Select
-#define CLK_PIN A1 // Clock
-#define LED_DIRECTION 1 // 8x8 LED MATRIX orientation  Top  = 1, Bottom = 2, Left = 3, Right = 4 
+#define LeftLeg 2 
+#define RightLeg 3
+#define LeftFoot 4 
+#define RightFoot 5 
+#define Buzzer  13 
+#define DIN A3 // Data In pin
+#define CS A2  // Chip Select pin
+#define CLK A1 // Clock pin
+#define Orientation 1 // 8x8 LED Matrix orientation  Top  = 1, Bottom = 2, Left = 3, Right = 4 
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
 void setup(){
-  Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, A6, PIN_Buzzer, PIN_Trigger, PIN_Echo); //Set the servo pins and ultrasonic pins and Buzzer pin
-  Otto.initMATRIX( DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);
+  Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
+  Otto.initMATRIX( DIN, CS, CLK, Orientation);
   Otto.sing(S_connection); //Otto wake up!
   Otto.home();
     delay(50);

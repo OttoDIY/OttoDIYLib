@@ -1,16 +1,17 @@
 //----------------------------------------------------------------
 //-- Otto Dance U Can't Touch This by Ada Sarp Şahin
-//-- Made for Otto DIY project
+//-- https://www.ottodiy.com/
 //-----------------------------------------------------------------
-#include <US.h>
-#include <Oscillator.h>
-#include <Otto9.h>
-#include <Servo.h>
-Otto9 Otto;
-
+#include <Otto.h>
+Otto Otto;
+#define LeftLeg 2 
+#define RightLeg 3
+#define LeftFoot 4 
+#define RightFoot 5 
+#define Buzzer  13 
 
 void setup() {
-  Otto.init(2, 3, 4, 5, true, A6, 13, 8, 9); //Set the servo pins and ultrasonic pins and Buzzer pin
+  Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
   Otto.sing(S_connection); //Otto wake up!
   Otto.home();
   delay(50);

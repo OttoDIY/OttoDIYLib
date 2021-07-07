@@ -1,22 +1,12 @@
-//----------------------------------------------------------------
-//-- OTTO version 9 
-//-----------------------------------------------------------------
-#ifndef Otto9_h
-#define Otto9_h
-
-#ifdef ARDUINO_ARCH_ESP32
-#include <ESP32Servo.h>
-#else
+#ifndef Otto_h
+#define Otto_h
 #include <Servo.h>
-#endif
 #include <Oscillator.h>
 #include <EEPROM.h>
-#include <US.h>
-
-#include "Otto_Matrix9.h"
-#include "Otto_mouth9.h"
-#include "Otto_sound9.h"
-#include "Otto_gestures9.h"
+#include "Otto_sounds.h"
+#include "Otto_gestures.h"
+#include "Otto_mouths.h"
+#include "Otto_matrix.h"
 
 //-- Constants
 #define FORWARD     1
@@ -27,16 +17,12 @@
 #define MEDIUM      15
 #define BIG         30
 
-
-
-
-class Otto9
+class Otto
 {
   public:
 
     //-- Otto initialization
-    void init(int YL, int YR, int RL, int RR, bool load_calibration, int NoiseSensor, int Buzzer, int USTrigger, int USEcho);
-    void initDC(int NoiseSensor, int Buzzer, int USTrigger, int USEcho);
+    void init(int YL, int YR, int RL, int RR, bool load_calibration, int Buzzer);
     //-- Attach & detach functions
     void attachServos();
     void detachServos();
@@ -54,7 +40,7 @@ class Otto9
     void home();
     bool getRestState();
     void setRestState(bool state);
-    
+
     //-- Predetermined Motion Functions
     void jump(float steps=1, int T = 2000);
 
@@ -73,10 +59,6 @@ class Otto9
     void crusaito(float steps=1, int T=900, int h=20, int dir=FORWARD);
     void flapping(float steps=1, int T=1000, int h=20, int dir=FORWARD);
 
-    //-- Sensors functions
-    float getDistance(); //US sensor
-    int getNoise();      //Noise Sensor
-    
     //-- Mouth & Animations
     void putMouth(unsigned long int mouth, bool predefined = true);
     void putAnimationMouth(unsigned long int anim, int index);
@@ -96,15 +78,13 @@ class Otto9
   private:
 
     Oscillator servo[4];
-    US us;
     Otto_Matrix ledmatrix;
     int servo_pins[4];
     int servo_trim[4];
     int servo_position[4];
 
     int pinBuzzer;
-    int pinNoiseSensor;
-    
+
     unsigned long final_time;
     unsigned long partial_time;
     float increment[4];
@@ -118,5 +98,3 @@ class Otto9
 };
 
 #endif
-
-

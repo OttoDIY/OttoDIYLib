@@ -1,14 +1,7 @@
 //----------------------------------------------------------------
 //-- Otto Dance smooth criminal
 //-- This code will make Otto dance play the by Michael Jackson song at the same time and see it in action
-//-- April 2019: Designed to work with the basic Otto but could be compatible with PLUS or Humanoid or other biped robots
-/******************************************************************************************************
-  Make sure to have installed all libraries: https://wikifactory.com/+OttoDIY/otto-diy
-  Otto DIY invests time and resources providing open source code and hardware, 
-  please support by purchasing kits from (https://www.ottodiy.com)
-  
-  BSD license, all text above must be included in any redistribution
- *******************************************************************/
+//-- https://www.ottodiy.com/
 //-----------------------------------------------------------------
 #include <Servo.h>
 #include <Oscillator.h>

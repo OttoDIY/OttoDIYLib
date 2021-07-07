@@ -1,6 +1,5 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//-- Otto DIY APP Firmware Version 11 (V11) with standard baudrate of 9600 for Bluetooth BLE modules.
-//-- Designed to work with the starter Otto or PLUS or other biped robots.
+//-- Otto DIY App Firmware Version 13 with standard baudrate of 9600 for Bluetooth BLE modules.
 //-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
 //-----------------------------------------------------------------
 //-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
@@ -12,26 +11,23 @@
 #include <SerialCommand.h>
 SoftwareSerial BTserial = SoftwareSerial(11,12);
 SerialCommand SCmd(BTserial);
-#include <Otto9.h>
-Otto9 Otto;
+#include <Otto.h>
+Otto Otto;
 
 #define N_SERVOS 4
-#define PIN_YL 2 // left leg, servo[0]
-#define PIN_YR 3 // right leg, servo[1]
-#define PIN_RL 4 // left foot, servo[2]
-#define PIN_RR 5 // right foot, servo[3]
-#define PIN_Trigger  8
-#define PIN_Echo     9
-#define PIN_Buzzer  13
-#define PIN_NoiseSensor A6
-#define DIN_PIN    A3
-#define CS_PIN     A2
-#define CLK_PIN    A1
-#define LED_DIRECTION  1
+#define LeftLeg 2 
+#define RightLeg 3
+#define LeftFoot 4 
+#define RightFoot 5 
+#define Buzzer  13 
+#define DIN A3 // Data In pin
+#define CS A2  // Chip Select pin
+#define CLK A1 // Clock pin
+#define Orientation 1 // 8x8 LED Matrix orientation  Top  = 1, Bottom = 2, Left = 3, Right = 4 
 #define PIN_Button   A0
 #define PIN_ASSEMBLY    10
 
-const char programID[] = "Otto_APP_V11";
+const char programID[] = "Otto_APP_V13";
 const char name_fac = '$';
 const char name_fir = '#';
 int T = 1000;
@@ -43,8 +39,6 @@ int randomDance = 0;
 int randomSteps = 0;
 bool obstacleDetected = false;
 unsigned long int matrix;
-void obstacleDetector() 
-{ int distance = Otto.getDistance(); if (distance < 15) obstacleDetected = true; else obstacleDetected = false; }
 void receiveStop() 
 { sendAck(); Otto.home(); sendFinalAck(); }
 void receiveLED()
@@ -67,10 +61,7 @@ void receiveName()
 { sendAck(); Otto.home(); char newOttoName[11] = ""; int eeAddress = 5; char *arg; arg = SCmd.next(); if (arg != NULL) { int k = 0; while ((*arg) && (k < 11)) { newOttoName[k] = *arg++; k++; } EEPROM.put(eeAddress, newOttoName); } else { delay(2000); } sendFinalAck(); }
 void requestName() 
 { Otto.home(); char actualOttoName[11] = ""; int eeAddress = 5; EEPROM.get(eeAddress, actualOttoName); Serial.print(F("&&")); Serial.print(F("E ")); Serial.print(actualOttoName); Serial.println(F("%%")); Serial.flush(); }
-void requestDistance()
-{ Otto.home(); int distance = Otto.getDistance(); Serial.print(F("&&")); Serial.print(F("D ")); Serial.print(distance); Serial.println(F("%%")); Serial.flush(); }
-void requestNoise() 
-{ Otto.home(); int microphone = Otto.getNoise(); Serial.print(F("&&")); Serial.print(F("N ")); Serial.print(microphone); Serial.println(F("%%")); Serial.flush(); }
+
 void requestProgramId() 
 { Otto.home(); Serial.print(F("&&")); Serial.print(F("I ")); Serial.print(programID); Serial.println(F("%%")); Serial.flush(); }
 void sendAck() 
@@ -82,14 +73,12 @@ void ButtonPushed()
 
 void setup() {
   Serial.begin(9600);
-BTserial.begin(9600);
-
-Otto.init(PIN_YL, PIN_YR, PIN_RL, PIN_RR, true, PIN_NoiseSensor, PIN_Buzzer, PIN_Trigger, PIN_Echo);
-Otto.initMATRIX(DIN_PIN, CS_PIN, CLK_PIN, LED_DIRECTION);
-Otto.matrixIntensity(7);
-randomSeed(analogRead(PIN_NoiseSensor));
-pinMode(PIN_ASSEMBLY, INPUT_PULLUP);
-pinMode(PIN_Button, INPUT);
+  BTserial.begin(9600);
+  Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
+  Otto.initMATRIX( DIN, CS, CLK, Orientation);
+  Otto.matrixIntensity(7);
+  pinMode(PIN_ASSEMBLY, INPUT_PULLUP);
+  pinMode(PIN_Button, INPUT);
 
 SCmd.addCommand("S", receiveStop);
 SCmd.addCommand("L", receiveLED);
@@ -101,8 +90,6 @@ SCmd.addCommand("C", receiveTrims);
 SCmd.addCommand("G", receiveServo);
 SCmd.addCommand("R", receiveName);
 SCmd.addCommand("E", requestName);
-SCmd.addCommand("D", requestDistance);
-SCmd.addCommand("N", requestNoise);
 SCmd.addCommand("I", requestProgramId);
 SCmd.addDefaultHandler(receiveStop);
 

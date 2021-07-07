@@ -1,13 +1,7 @@
 //----------------------------------------------------------------
 //-- Otto Align
-//-- This code will make the servo motors to find the "center" position for assembly
-//-- March 2020: Designed to work with the Otto Humanoid but could be compatible with Otto DIY, PLUS or other biped robots
-/******************************************************************************************************
-  Otto DIY invests time and resources providing open source code and hardware, 
-  please support by purchasing kits from (https://www.ottodiy.com)
-  
-  BSD license, all text above must be included in any redistribution
- *******************************************************************/
+//-- This code will make 6 servo motors to find the "center" position for assembly
+//-- https://www.ottodiy.com/
 //-----------------------------------------------------------------
 #include <Servo.h>
 //-- First step: Configure the pins where the servos are attached

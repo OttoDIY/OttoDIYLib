@@ -7,7 +7,7 @@
 
 
 #include "Arduino.h"
-#include "Otto_Matrix9.h"
+#include "Otto_matrix.h"
 
 Otto_Matrix::Otto_Matrix() 
 {
