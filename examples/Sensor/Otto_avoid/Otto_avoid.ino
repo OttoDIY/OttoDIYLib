@@ -34,7 +34,7 @@ void setup() {
 }
 
 void loop() {
-    if (ultrasound() >= 15) {
+    if (ultrasound() <= 15) {
       Otto.sing(S_surprise);
       Otto.playGesture(OttoConfused);
       Otto.walk(2,1000,-1); // BACKWARD x2

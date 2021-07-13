@@ -1,5 +1,7 @@
-#ifndef Otto_h
-#define Otto_h
+//-- Otto Humanoid V10
+
+#ifndef OttoHumanoid_h
+#define OttoHumanoid_h
 
 #ifdef ARDUINO_ARCH_ESP32
 #include <ESP32Servo.h>
@@ -8,10 +10,12 @@
 #endif
 #include <Oscillator.h>
 #include <EEPROM.h>
+#include <US.h>
+
+#include "Otto_Matrix.h"
+#include "Otto_mouths.h"
 #include "Otto_sounds.h"
 #include "Otto_gestures.h"
-#include "Otto_mouths.h"
-#include "Otto_matrix.h"
 
 //-- Constants
 #define FORWARD     1
@@ -22,30 +26,30 @@
 #define MEDIUM      15
 #define BIG         30
 
-class Otto
+class OttoHumanoid
 {
   public:
 
     //-- Otto initialization
-    void init(int YL, int YR, int RL, int RR, bool load_calibration, int Buzzer);
+    void initHUMANOID(int YL, int YR, int RL, int RR,int LA, int RA, bool load_calibration, int NoiseSensor, int Buzzer, int USTrigger, int USEcho);
+    void initDC(int NoiseSensor, int Buzzer, int USTrigger, int USEcho);
     //-- Attach & detach functions
     void attachServos();
     void detachServos();
 
     //-- Oscillator Trims
-    void setTrims(int YL, int YR, int RL, int RR);
+    void setTrims(int YL, int YR, int RL, int RR,int LA, int RA);
     void saveTrimsOnEEPROM();
 
     //-- Predetermined Motion Functions
     void _moveServos(int time, int  servo_target[]);
-    void _moveSingle(int position,int  servo_number);
-    void oscillateServos(int A[4], int O[4], int T, double phase_diff[4], float cycle);
+    void oscillateServos(int A[6], int O[6], int T, double phase_diff[6], float cycle);
 
     //-- HOME = Otto at rest position
     void home();
     bool getRestState();
     void setRestState(bool state);
-
+    
     //-- Predetermined Motion Functions
     void jump(float steps=1, int T = 2000);
 
@@ -63,7 +67,14 @@ class Otto
     void moonwalker(float steps=1, int T=900, int h=20, int dir=LEFT);
     void crusaito(float steps=1, int T=900, int h=20, int dir=FORWARD);
     void flapping(float steps=1, int T=1000, int h=20, int dir=FORWARD);
+    void armsup();
+    void armsdown();
+    void armwave(int dir =RIGHT);
 
+    //-- Sensors functions
+    float getDistance(); //US sensor
+    int getNoise();      //Noise Sensor
+    
     //-- Mouth & Animations
     void putMouth(unsigned long int mouth, bool predefined = true);
     void putAnimationMouth(unsigned long int anim, int index);
@@ -81,24 +92,30 @@ class Otto
     void setLed(byte X, byte Y, byte value);
     void writeText (const char * s, byte scrollspeed);
   private:
-
-    Oscillator servo[4];
+   
+    Oscillator servo[6];
+    US us;
     Otto_Matrix ledmatrix;
-    int servo_pins[4];
-    int servo_trim[4];
-    int servo_position[4];
+    int servo_pins[6];
+    int servo_trim[6];
+    int servo_position[6];
+	int set_A[6];
+	int set_O[6];
+	double set_phase_diff[6];
 
     int pinBuzzer;
-
+    int pinNoiseSensor;
+    
     unsigned long final_time;
     unsigned long partial_time;
-    float increment[4];
+    float increment[6];
 
     bool isOttoResting;
+    bool isHUMANOID;
 
     unsigned long int getMouthShape(int number);
     unsigned long int getAnimShape(int anim, int index);
-    void _execute(int A[4], int O[4], int T, double phase_diff[4], float steps);
+    void _execute(int A[6], int O[6], int T, double phase_diff[6], float steps);
 
 };
 

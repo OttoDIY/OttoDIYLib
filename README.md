@@ -12,28 +12,22 @@ This repository have all the main [Otto DIY robot](https://www.ottodiy.com/) lib
  
 ## Compatibility:
 
-Robot  | Library can use
-------------- | -------------
-DIY  | Otto9
-PLUS | Otto9
-Eyes* | Otto9 
-Humanoid  | Otto9Humanoid
-Wheels  | Servo
+We are making the libraries more modular and simple than ever, so that you can expand your robot functionallities as you go or you can change components based on your needs or the type of robot you want to make.
+You can use both AVR boards like Arduino Nano or Arduino UNO and also ESP8266 or ESP32 boards by changing the definition of the pins.
 
-*For Eyes you will need to install Multiple dependant Libraries  [Adafruit_LEDBackpack](https://github.com/adafruit/Adafruit_LED_Backpack) and [Adafruit_GFX](https://github.com/adafruit/Adafruit-GFX-Library)
+All our bipedal robots are compatible with this libraries.
 
-* Otto contains all the main functions
+* Otto.h and Otto.cpp contains all the main functions
 * Otto_gestures contains all the gestures functions
-* Otto_mouth 	contains all the mouth functions
-* Otto_sound contains all the sound functions
-* Otto_Matrix contains all the matrix functions
+* Otto_mouths contains all the mouth functions
+* Otto_sounds contains all the sound functions
+* Otto_matrix contains all the matrix functions
 * US contains the functions of the ultrasonic sesnor
-* SerialCommand is for Bluetooth communication
+* SerialCommand is for Bluetooth communication vis Software serial
 * Oscillator is the main algorithm for the servos ¨smooth¨ movement
  
 ## Wiring:
-These are the default connections we follow in all our robots, but some Otto remixes do not use all pins or interchange them according to their needs, you can do that too, play with the pins and add new sensors, more motors, displays, LEDs and so on.
-
+These are the default connections fir AVR Arduino boards, but some Otto remixes do not use all pins or interchange them according to their needs, you can do that too, play with the pins and add new sensors, more motors, displays, LEDs and so on.
 
 Servos| Pin
 ------------- | -------------
@@ -92,30 +86,31 @@ You can do this [basically by forking](https://help.github.com/en/articles/fork-
 Please add a change log and your contact into file header.
 
 Big thanks to all our contributors 
-@JavierIH
-@Obijuan
-@jarsoftelectrical
-@stembotvn
-@sfranzyshen
-@tehniq3
-@logix5
-@DiegoSSJ
-@loreman
-@justinotherguy
-@bhm93
-@wendtbw
-@agomezgar
-@BodoMinea
-@chico
-@PinkDev1
-@MXZZ
-@Pawka
-@per1234
-@FedericoBusero
-@hulkco
-@mishafarms
-@nisha-appanah
-@pabloevaristo
-@ProgrammerBruce
+- @JavierIH
+- @Obijuan
+- @jarsoftelectrical
+- @stembotvn
+- @sfranzyshen
+- @tehniq3
+- @logix5
+- @DiegoSSJ
+- @loreman
+- @justinotherguy
+- @bhm93
+- @wendtbw
+- @agomezgar
+- @BodoMinea
+- @chico
+- @PinkDev1
+- @MXZZ
+- @Pawka
+- @per1234
+- @FedericoBusero
+- @hulkco
+- @mishafarms
+- @nisha-appanah
+- @pabloevaristo
+- @ProgrammerBruce
+- @Nca78 
 
 Welcome to the [Otto DIY community](http://builders.ottodiy.com/)

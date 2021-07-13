@@ -4,17 +4,13 @@
 //-----------------------------------------------------------------
 //-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
 //-- in accordance with the GPL Version 2 when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
-//-------------------------------------------------------------------------
-#include <Servo.h>
-#include <Oscillator.h>
-#include <EEPROM.h>
+//---------------------
 #include <SerialCommand.h>
 SoftwareSerial BTserial = SoftwareSerial(11,12);
 SerialCommand SCmd(BTserial);
 #include <Otto.h>
 Otto Otto;
 
-#define N_SERVOS 4
 #define LeftLeg 2 
 #define RightLeg 3
 #define LeftFoot 4 
@@ -27,17 +23,10 @@ Otto Otto;
 #define PIN_Button   A0
 #define PIN_ASSEMBLY    10
 
-const char programID[] = "Otto_APP_V13";
-const char name_fac = '$';
-const char name_fir = '#';
 int T = 1000;
 int moveId = 0;
 int moveSize = 15;
 volatile bool buttonPushed=false;
-
-int randomDance = 0;
-int randomSteps = 0;
-bool obstacleDetected = false;
 unsigned long int matrix;
 void receiveStop() 
 { sendAck(); Otto.home(); sendFinalAck(); }
@@ -57,13 +46,6 @@ void receiveGesture()
 { sendAck(); Otto.home();  int gesture = 0; char *arg; arg = SCmd.next(); if (arg != NULL) gesture = atoi(arg); else     delay(2000); switch (gesture) { case 1: Otto.playGesture(OttoHappy); break; case 2: Otto.playGesture(OttoSuperHappy); break; case 3: Otto.playGesture(OttoSad); break; case 4: Otto.playGesture(OttoSleeping); break; case 5: Otto.playGesture(OttoFart); break; case 6: Otto.playGesture(OttoConfused); break; case 7: Otto.playGesture(OttoLove); break; case 8: Otto.playGesture(OttoAngry); break; case 9: Otto.playGesture(OttoFretful); break; case 10: Otto.playGesture(OttoMagic); break; case 11: Otto.playGesture(OttoWave); break; case 12: Otto.playGesture(OttoVictory); break; case 13: Otto.playGesture(OttoFail); break; default: break; } sendFinalAck(); }
 void receiveSing() 
 { sendAck(); Otto.home(); int sing = 0; char *arg; arg = SCmd.next(); if (arg != NULL) sing = atoi(arg); else     delay(2000); switch (sing) { case 1: Otto.sing(S_connection); break; case 2: Otto.sing(S_disconnection); break; case 3: Otto.sing(S_surprise); break; case 4: Otto.sing(S_OhOoh); break; case 5: Otto.sing(S_OhOoh2); break; case 6: Otto.sing(S_cuddly); break; case 7: Otto.sing(S_sleeping); break; case 8: Otto.sing(S_happy); break; case 9: Otto.sing(S_superHappy); break; case 10: Otto.sing(S_happy_short); break; case 11: Otto.sing(S_sad); break; case 12: Otto.sing(S_confused); break; case 13: Otto.sing(S_fart1); break; case 14: Otto.sing(S_fart2); break; case 15: Otto.sing(S_fart3); break; case 16: Otto.sing(S_mode1); break; case 17: Otto.sing(S_mode2); break; case 18: Otto.sing(S_mode3); break; case 19: Otto.sing(S_buttonPushed); break; default: break; } sendFinalAck(); }
-void receiveName() 
-{ sendAck(); Otto.home(); char newOttoName[11] = ""; int eeAddress = 5; char *arg; arg = SCmd.next(); if (arg != NULL) { int k = 0; while ((*arg) && (k < 11)) { newOttoName[k] = *arg++; k++; } EEPROM.put(eeAddress, newOttoName); } else { delay(2000); } sendFinalAck(); }
-void requestName() 
-{ Otto.home(); char actualOttoName[11] = ""; int eeAddress = 5; EEPROM.get(eeAddress, actualOttoName); Serial.print(F("&&")); Serial.print(F("E ")); Serial.print(actualOttoName); Serial.println(F("%%")); Serial.flush(); }
-
-void requestProgramId() 
-{ Otto.home(); Serial.print(F("&&")); Serial.print(F("I ")); Serial.print(programID); Serial.println(F("%%")); Serial.flush(); }
 void sendAck() 
 { delay(30); Serial.print(F("&&")); Serial.print(F("A")); Serial.println(F("%%")); Serial.flush(); }
 void sendFinalAck() 
@@ -88,9 +70,6 @@ SCmd.addCommand("H", receiveGesture);
 SCmd.addCommand("K", receiveSing);
 SCmd.addCommand("C", receiveTrims);
 SCmd.addCommand("G", receiveServo);
-SCmd.addCommand("R", receiveName);
-SCmd.addCommand("E", requestName);
-SCmd.addCommand("I", requestProgramId);
 SCmd.addDefaultHandler(receiveStop);
 
 Otto.sing(S_connection);
@@ -104,14 +83,6 @@ for (int i = 0; i < 2; i++) {
 Otto.putMouth(smile);
 Otto.sing(S_happy);
 delay(200);
-if (EEPROM.read(5) == name_fir) {
-  Otto.jump(1, 700);
-  delay(200);
-  Otto.shakeLeg(1, T, 1);
-  Otto.putMouth(smallSurprise);
-  Otto.swing(2, 800, 20);
-  Otto.home();
-}
 Otto.putMouth(happyOpen);
 
 while (digitalRead(PIN_ASSEMBLY) == LOW) {
