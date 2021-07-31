@@ -1,335 +1,91 @@
-/**
- * Otto DIY Scratch AI firmware with standard baudrate of 9600 for BLE Bluetooth modules.
- * Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https:// www.ottodiy.com)
- * If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be
- * included in any redistribution in accordance with the GPL Version 2 when your application is distributed. See http:// www.gnu.org/copyleft/gpl.html
- *
- * ADDED Progmem for MOUTHS and GESTURES: Paul Van De Veen October 2018
- * ADDED PIN definitions for ease of use: Jason Snow November 2018
- * ADDED Battery meassurementin in mode 3 Jason Snow August 2019
- * ADDED changed to original Software serial library Camilo Parra May 2020
- * DELETED interrupts and modes to use BTserial Camilo Parra May 2020
- * ADDED BLE communication for Scratch AI Jorge Gonzalez August 2020 https:// ottoschool.com/scratch/
- * ADDED LEDs Neo pixel control for fun by Jorge Gonzalez August 2020
- * ADDED LEDs RF 433Mhz to control remote 4 Relay module by Jorge Gonzalez November 2020
- * CHANGED name of SerialCommand libraries so that this code needs dont interfeer with App code by Camilo Parra March 2021
- *
- *
- *                     Otto Biped                                          Otto Humanoid  
- *                     ╭──────╮                                            ╭──────╮
- *                     │  O   O  │                                           │  O   O  │
- *                     ├─────┤                       RIGHT ARM 7  ━┭───┤  ╭───╮  ├───┮━  LEFT ARM 6
- *                     │         │                                  ━└───┼──╯     ╰──┼───┘━
- *     RIGHT LEG  3    ├─┬─┬─┤    LEFT LEG  2                             ├─┬─┬─┤
- *                     ├─┤  ├─┤                      RIGHT LEG 3           ├─┤  ├─┤     LEFT LEG 2
- *     RIGHT FOOT 5  ━━┷━━┙    ┕━━┷━━  LEFT FOOT 4                              ━━┷━━┙   ┕━━┷━━
- *                                                                 RIGHT FOOT 5       LEFT FOOT 4                
- *
- * Otto Modules
- *
- * To include code to the module installed in your Otto, uncomment the corresponding line.
- * Remember that the more components you add, the larger the compiled code will be.
- * Each Otto model has different components, for example:
- * Otto Humanoid has two additional servos and an 8x8 LED matrix for his mouth,
- * while Otto Eyes has a 16x8 matrix for his eyes.
- */
-
-#define BLUETOOTH          // Uncomment this line to include code to Bluetooth module
-//#define EYES_MATRIX        // Uncomment this line to include code to 16x8 LED matrix
-#define MOUTH_MATRIX       // Uncomment this line to include code to 8x8 LED matrix
-#define TOUCH_SENSOR       // Uncomment this line to include code to touch sensor
-#define NOISE_SENSOR       // Uncomment this line to include code to noise sensor
-#define ULTRASONIC_SENSOR  // Uncomment this line to include code to ultrasonic sensor
-#define BUZZER             // Uncomment this line to include code to buzzer
-#define SERVOS             // Uncomment this line to include code to servos
-// #define FUNNY_LED          // Uncomment this line to include code to Funny led
-// #define RADIO_FREQUENCY    // Uncomment this line to include code to legs servos
-// #define RADIO_HEAD     // Uncomment this line if using RadioHead library
-// #define VIRTUAL_WIRE   // Uncomment this line if using VirtualWire library
-// #define RC_SWITCH      // Uncomment this line if using rc-switch library
-// #define RF_TRANSMITTER // Uncomment this line if using RFTransmitter
+#define BLUETOOTH      
+#define MOUTH_MATRIX     
+#define TOUCH_SENSOR     
+#define NOISE_SENSOR  
+#define ULTRASONIC_SENSOR 
+#define BUZZER            
+#define SERVOS       
 
 #include <EEPROM.h>
 #include <string.h>
-#include <SerialCommandAI.h> // Library to manage serial commands
+#include <SerialCommandAI.h> 
 #include <Otto.h>
-#ifdef EYES_MATRIX
-    #include "Adafruit_LEDBackpack.h"
-#endif
-#ifdef RADIO_FREQUENCY
-    #ifdef RF_TRANSMITTER
-        #include <RFTransmitter.h>
-    #endif
-    #ifdef RADIO_HEAD
-        #include <RH_ASK.h>
-        #ifdef RH_HAVE_HARDWARE_SPI
-            #include <SPI.h> // Not actually used but needed to compile
-        #endif
-    #endif
-    #ifdef VIRTUAL_WIRE
-        #include <VirtualWire.h>
-    #endif
-    #ifdef RC_SWITCH
-        #include <RCSwitch.h>
-    #endif
-#endif
+Otto Otto; 
 
-Otto Otto;  // This is Otto!
-
-/**
- * Reserved PINs
- */
 #define PIN_RX          0
 #define PIN_TX          1
-
-/**
- * Servo PINs
- */
 #define LeftLeg 2 
 #define RightLeg 3
 #define LeftFoot 4 
 #define RightFoot 5 
-#define PIN_ARM_LEFT    6 // servo[4]  Left arm
-#define PIN_ARM_RIGHT   7 // servo[5]  Right arm
-
-/**
- * RF 433Mhz Module
- */
-#define RF_SPEED     1000
-#define PIN_RF_TX       6 // Check conflict with arms in Otto Humanoid
-#define PIN_RF_RX       7 // Check conflict with arms in Otto Humanoid
-
-/**
- * Buzzer PIN
- */
+#define PIN_ARM_LEFT    6 
+#define PIN_ARM_RIGHT   7 
 #define Buzzer  13 
-
-/**
- * Ultrasonic PINs
- */
-#define PIN_US_TRIGGER  8 // TRIGGER pin (8)
-#define PIN_US_ECHO     9 // ECHO pin (9)
-
-/**
- * BT/BLE Module PINs
- */
-#define PIN_BLE_STATE  10 // optional
+#define PIN_US_TRIGGER  8 
+#define PIN_US_ECHO     9 
+#define PIN_BLE_STATE  10 
 #define PIN_BLE_TX     11
 #define PIN_BLE_RX     12
-#define PIN_BLE_ENABLE 13 // optional
+#define PIN_BLE_ENABLE 13 
+#define PIN_BUTTON     A0 
+#define PIN_MOUTH_CLK  A1 
+#define PIN_MOUTH_CS   A2 
+#define PIN_MOUTH_DIN  A3 
+#define LED_DIRECTION   1 
+#define PIN_NOISE      A6  
 
-/**
- * Touch Sensor or Push Button
- */
-#define PIN_BUTTON     A0 // TOUCH SENSOR Pin (A0) PULL DOWN RESISTOR MAYBE REQUIRED to stop false interrupts (interrupt PIN)
+SoftwareSerial BTserial = SoftwareSerial(PIN_BLE_TX, PIN_BLE_RX); 
+SerialCommandAI SCmd(BTserial); 
 
-/**
- * Mouth LED Matrix PINs
- */
-#define PIN_MOUTH_CLK  A1 // CLK pin (A1)
-#define PIN_MOUTH_CS   A2 // CS  pin (A2)
-#define PIN_MOUTH_DIN  A3 // DIN pin (A3)
-#define LED_DIRECTION   1 // LED MATRIX CONNECTOR position (orientation) 1 = top 2 = bottom 3 = left 4 = right  DEFAULT = 1
+const char programID[] = "OttoScratchAI-v1"; 
+const char factory_name = '$'; 
+const char first_name = '#';
 
-/**
- * Sound Sensor PIN
- */
-#define PIN_NOISE      A6  // SOUND SENSOR   ANALOG pin (A6)
-
-/**
- * Eyes LED Matrix PINs
- */
-#define SCL // CLOCK
-#define SDA // DATA
-
-/**
- * Global Variable1
- */
-
-SoftwareSerial BTserial = SoftwareSerial(PIN_BLE_TX, PIN_BLE_RX); //  TX  RX of the Bluetooth
-SerialCommandAI SCmd(BTserial);  // The SerialCommand object
-
-const char programID[] = "OttoScratchAI-v1"; // Each program will have a ID
-const char factory_name = '$'; // Factory name
-const char first_name = '#'; // First name
-
-/**
- * Eyes LED Matrix
- */
-#ifdef EYES_MATRIX
-    Adafruit_8x16matrix eyesMatrix = Adafruit_8x16matrix();
-#endif
-
-/**
- * RF 433Mhz Module
- */
-#ifdef RADIO_FREQUENCY
-    #ifdef RF_TRANSMITTER
-        RFTransmitter transmitter(PIN_RF_TX, 1);
-    #endif
-    #ifdef RADIO_HEAD
-        RH_ASK driver(RF_SPEED, PIN_RF_RX, PIN_RF_TX, 0);
-    #endif
-    #ifdef RC_SWITCH
-        RCSwitch rcSwitch = RCSwitch();
-    #endif
-#endif
-
-/**
- * Movement parameters
- */
-int duration = 1000;     // Initial duration of movement
-int moveID = 0;          // Number of movement
-int moveSize = 15;       // Associated with the height of some movements
-int steps = 1;           // Number of steps
-
-/**
- * Button
- */
-volatile bool buttonPushed = false;  // Variable to remember when a button has been pushed
+int duration = 1000;    
+int moveID = 0;        
+int moveSize = 15;     
+int steps = 1;         
+bool buttonPushed = false; 
 bool obstacleDetected = false;
-
-/**
- * LEDs Matrix 8x8 MAX7219ENG
- */
 unsigned long int mouthMatrix;
-
-/**
- * LED Matrix images 8x16
- */
-#ifdef EYES_MATRIX
-static const uint8_t PROGMEM
-logo_bmp[]     = { B01111110,B10000001,B10111001,B10101001,B10111001,B10010001,B10111001,B10010001,B10010001,B10111001,B10010001,B10111001,B10101001,B10111001,B10000001,B01111110},
-happy_bmp[]    = { B00000000,B00111100,B00000010,B00000010,B00000010,B00000010,B00111100,B00000000,B00000000,B00111100,B00000010,B00000010,B00000010,B00000010,B00111100,B00000000},
-eyes_bmp[]     = { B00000000,B00111100,B01111110,B01100110,B01100110,B01111110,B00111100,B00000000,B00000000,B00111100,B01111110,B01100110,B01100110,B01111110,B00111100,B00000000},
-touch_bmp[]    = { B00000000,B00111100,B01110010,B01110010,B01111110,B01111110,B00111100,B00000000,B00000000,B00111100,B01110010,B01110010,B01111110,B01111110,B00111100,B00000000},
-sad_bmp[]      = { B00000000,B00110000,B01111000,B01001100,B01001110,B01111110,B00111100,B00000000,B00000000,B00111100,B01111110,B01001110,B01001100,B01111000,B00110000,B00000000},
-xx_bmp[]       = { B00000000,B00100010,B00010100,B00001000,B00010100,B00100010,B00000000,B00000000,B00000000,B00000000,B00100010,B00010100,B00001000,B00010100,B00100010,B00000000},
-XX_bmp[]       = { B01000001,B00100010,B00010100,B00001000,B00010100,B00100010,B01000001,B00000000,B00000000,B01000001,B00100010,B00010100,B00001000,B00010100,B00100010,B01000001},
-angry_bmp[]    = { B00000000,B00111100,B01111110,B01100110,B01100100,B01111000,B00110000,B00000000,B00000000,B00110000,B01111000,B01100100,B01100110,B01111110,B00111100,B00000000},
-angry2_bmp[]   = { B00000000,B00000010,B00000100,B00001000,B00010000,B00100000,B00000000,B00000000,B00000000,B00000000,B00100000,B00010000,B00001000,B00000100,B00000010,B00000000},
-sleep_bmp[]    = { B00000000,B00100010,B00110010,B00101010,B00100110,B00100010,B00000000,B00000000,B00000000,B00000000,B00100010,B00110010,B00101010,B00100110,B00100010,B00000000},
-freetful_bmp[] = { B00000000,B00111100,B01100110,B01100110,B01111100,B01111000,B00110000,B00000000,B00000000,B00111100,B01100110,B01100110,B01111100,B01111000,B00110000,B00000000},
-love_bmp[]     = { B00000000,B00001100,B00011110,B00111100,B00111100,B00011110,B00001100,B00000000,B00000000,B00001100,B00011110,B00111100,B00111100,B00011110,B00001100,B00000000},
-confused_bmp[] = { B00000000,B01111100,B10000010,B10111010,B10101010,B10001010,B01111000,B00000000,B00000000,B01111100,B10000010,B10111010,B10101010,B10001010,B01111000,B00000000},
-wave_bmp[]     = { B00000000,B00100000,B00010000,B00001000,B00010000,B00100000,B00010000,B00000000,B00000000,B00100000,B00010000,B00001000,B00010000,B00100000,B00010000,B00000000},
-magic_bmp[]    = { B00000000,B00000000,B01111110,B11111111,B01111110,B00000000,B00000000,B00000000,B00000000,B00000000,B00000000,B01111110,B11111111,B01111110,B00000000,B00000000},
-fail_bmp[]     = { B00000000,B00110000,B01111000,B01111000,B01111100,B00111100,B00001000,B00000000,B00000000,B00001000,B00111100,B01111100,B01111000,B01111000,B00110000,B00000000},
-full_bmp[]     = { B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111};
-#endif
-
-/**
- * BLE Connection status
- */
-int msToDefineConnection = 1500; // some time longer than the pulse
+int msToDefineConnection = 1500; 
 long highStartTimestamp;
 int lastConnState = LOW;
 bool confirmedConnected = false;
-
-/**
- * Touch Sensor
- */
 int lastTouchState = LOW;
 int currentTouchState;
 
-/**
- * Setup
- */
 void setup() {
-    // Serial communication initialization
     Serial.begin(9600);
-
-    // Bluetooth communication initialization
     BTserial.begin(9600);
     pinMode(PIN_BLE_STATE, INPUT);
-
-    // Otto initialization
-  Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
-
-    // Mouth LED Matrix initialization
+    Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer);
 #ifdef MOUTH_MATRIX
-    Otto.initMATRIX(PIN_MOUTH_DIN, PIN_MOUTH_CS, PIN_MOUTH_CLK, LED_DIRECTION);   // set up Matrix display pins = DIN pin,CS pin, CLK pin, MATRIX orientation
-    Otto.matrixIntensity(5); // set up Matrix display intensity
+    Otto.initMATRIX(PIN_MOUTH_DIN, PIN_MOUTH_CS, PIN_MOUTH_CLK, LED_DIRECTION);  
+    Otto.matrixIntensity(5); 
 #endif
 
-    // Eyes LED Matrix initialization
-#ifdef EYES_MATRIX
-    eyesMatrix.begin(0x70); // pass in the address
-    eyesMatrix.setBrightness(0);
-    //eyesMatrix.setRotation(1);
-#endif
-
-    // Touch Sensor initialization
 #ifdef TOUCH_SENSOR
     pinMode(PIN_BUTTON, INPUT); // - ensure pull-down resistors are used
 #endif
-
-    // RF 433Mhx Module initialization
-#ifdef RADIO_FREQUENCY
-    #ifdef VIRTUAL_WIRE
-        vw_set_tx_pin(PIN_RF_TX);
-        vw_set_rx_pin(PIN_RF_RX);
-        vw_setup(RF_SPEED);	 // Bits per sec
-        if (!driver.init())
-            Serial.println("init failed");
-    #endif
-    #ifdef RC_SWITCH
-        // Transmitter is connected to Arduino Pin #10  
-        rcSwitch.enableTransmit(PIN_RF_TX);
-        // Optional set protocol (default is 1, will work for most outlets)
-        rcSwitch.setProtocol(1);
-        // Optional set pulse length.
-        //rcSwitch.setPulseLength(350);  // Default 350 us
-        // Optional set number of transmission repetitions.
-        //rcSwitch.setRepeatTransmit(4); // Default 4
-    #endif
-#endif
-
-
-    // Setup callbacks for SerialCommand to Actuators
-    SCmd.addCommand("S", receiveStop);      //  sendAck & sendFinalAck
-    SCmd.addCommand("L", receiveMouth);     //  sendAck & sendFinalAck
-    SCmd.addCommand("O", receiveEyes);      //  sendAck & sendFinalAck
-    SCmd.addCommand("T", receiveBuzzer);    //  sendAck & sendFinalAck
-    SCmd.addCommand("K", receiveSing);      //  sendAck & sendFinalAck
-    SCmd.addCommand("H", receiveGesture);   //  sendAck & sendFinalAck
-    SCmd.addCommand("M", receiveMovement);  //  sendAck & sendFinalAck
-    SCmd.addCommand("C", receiveTrims);     //  sendAck & sendFinalAck
-    SCmd.addCommand("G", receiveServo);     //  sendAck & sendFinalAck
-    SCmd.addCommand("R", receiveName);      //  sendAck & sendFinalAck
-    SCmd.addCommand("F", receiveRelay);     //  sendAck & sendFinalAck
-    SCmd.addCommand("X", receiveText);     //  sendAck & sendFinalAck
-
-    // Setup callbacks for SerialCommand to Sensors
-    //SCmd.addCommand("E", requestName);
-    //SCmd.addCommand("D", requestDistance);
-    //SCmd.addCommand("N", requestNoise);
-    //SCmd.addCommand("I", requestProgramId);
-
+  
+    SCmd.addCommand("S", receiveStop);      
+    SCmd.addCommand("L", receiveMouth);  
+    SCmd.addCommand("T", receiveBuzzer);   
+    SCmd.addCommand("K", receiveSing);    
+    SCmd.addCommand("H", receiveGesture);  
+    SCmd.addCommand("M", receiveMovement);  
+    SCmd.addCommand("C", receiveTrims);    
+    SCmd.addCommand("G", receiveServo);    
+    SCmd.addCommand("R", receiveName);     
+    SCmd.addCommand("F", receiveRelay); 
     SCmd.addDefaultHandler(receiveStop);
-
-    // Otto wake up!
+    
     Otto.sing(S_connection);
     Otto.home();
-    // Animation Uuuuuh - A little moment of initial surprise
-    for (int i = 0; i < 2; i++) {
-        for (int i = 0; i < 8; i++) {
-#ifdef MOUTH_MATRIX
-            Otto.putAnimationMouth(littleUuh, i);
-#endif
-            delay(150);
-        }
-    }
-    // Smile for a happy Otto :)
-#ifdef MOUTH_MATRIX
-    Otto.putMouth(smile);
-#endif
     Otto.sing(S_happy);
     delay(200);
 
-    // If Otto's name is '#' means that Otto hasn't been baptized
-    // In this case, Otto does a longer greeting
-    // 5 = EEPROM address that contains first name character
     if (EEPROM.read(5) == first_name) {
         Otto.jump(1, 700);
         delay(200);
@@ -344,31 +100,9 @@ void setup() {
 #ifdef MOUTH_MATRIX
     Otto.putMouth(happyOpen);
 #endif
-
     Otto.home();
-#ifdef EYES_MATRIX
-    eyesMatrix.setTextSize(1);
-    eyesMatrix.setTextWrap(false);  // we dont want text to wrap so it scrolls nicely
-    eyesMatrix.setTextColor(LED_ON);
-    eyesMatrix.setRotation(1);
-    for (int8_t x=7; x>=-90; x--) {
-      eyesMatrix.clear();
-      eyesMatrix.setCursor(x,0);
-      eyesMatrix.print("Otto Scratch AI");
-      eyesMatrix.writeDisplay();
-      delay(50);
-    }
-    eyesMatrix.setRotation(0);
-
-    eyesMatrix.clear();
-    eyesMatrix.drawBitmap(0, 0, +eyes_bmp, 8, 16, LED_ON);
-    eyesMatrix.writeDisplay();
-#endif
 }
 
-/**
- * Main Loop
- */
 void loop() {
     checkIfTouched();
     checkIfConnected();
@@ -378,26 +112,12 @@ void loop() {
     }
 }
 
-/**
- * Functions
- */
-
-/**
- * Function to read distance sensor & to actualize obstacleDetected variable
- */
-
-/**
- * Function to receive Stop command.
- */
 void receiveStop() {
     sendAck();
     Otto.home();
     sendFinalAck();
 }
 
-/**
- * Function to receive LED commands
- */
 void receiveMouth() {
 #ifdef MOUTH_MATRIX
     // sendAck & stop if necessary
@@ -427,104 +147,6 @@ void receiveMouth() {
 #endif
 }
 
-/**
- * Function to receive Eyes Matrix LED commands
- */
-void receiveEyes() {
-#ifdef EYES_MATRIX
-    Serial.println("receiveEyes");
-    // sendAck & stop if necessary
-    sendAck();
-    Otto.home();
-    // Examples of receiveMouth Bluetooth commands
-    // O FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    char *arg;
-    uint8_t image_bmp[16];
-    arg = SCmd.next();
-    Serial.print("arg=");
-    Serial.println(arg);
-    if (arg != NULL) {
-        hex2dec(arg, image_bmp);
-        eyesMatrix.clear();
-        eyesMatrix.drawBitmap(0, 0, +image_bmp, 8, 16, LED_ON);
-        eyesMatrix.writeDisplay();
-    } else {
-        //Otto.
-        delay(2000);
-        //Otto.
-    }
-    sendFinalAck();
-    BTserial.println("O:ACK");
-#endif
-}
-
-/**
- * Function to receive Eyes Matrix LED commands
- */
-void receiveText() {
-#ifdef EYES_MATRIX
-    Serial.println("receiveText");
-    // sendAck & stop if necessary
-    sendAck();
-    Otto.home();
-    // Examples of receiveMouth Bluetooth commands
-    // X|Otto Scratch AI
-    char *arg;
-    arg = SCmd.next();
-    uint8_t  msgLength = strlen(arg) * 6;
-    Serial.print("msgLenght: ");
-    Serial.println(msgLength);
-
-    if (arg != NULL) {
-/*
-        eyesMatrix.setTextSize(1);
-        eyesMatrix.setTextWrap(false);  // we dont want text to wrap so it scrolls nicely
-        eyesMatrix.setTextColor(LED_ON);
-        eyesMatrix.setRotation(1);
-        for (int8_t x=16; x>=-msgLength; x--) {
-          eyesMatrix.clear();
-          eyesMatrix.setCursor(x,0);
-          eyesMatrix.print(arg);
-          eyesMatrix.writeDisplay();
-          delay(50);
-        }
-        eyesMatrix.setRotation(0);
-        Otto.home();
-*/
-
-        eyesMatrix.setTextSize(1);
-        eyesMatrix.setTextWrap(false);  // we dont want text to wrap so it scrolls nicely
-        eyesMatrix.setTextColor(LED_ON);
-        eyesMatrix.setRotation(1);
-
-        char subbuff[17];
-        int i = 0;
-        do {
-           memcpy( subbuff, &arg[i], 17);
-           subbuff[16] = '\0';
-
-           for (int8_t x=0; x>=-4; x--) {
-             eyesMatrix.clear();
-             eyesMatrix.setCursor(x,0);
-             eyesMatrix.print(subbuff);
-             eyesMatrix.writeDisplay();
-             delay(50);
-           }
-        } while (arg[i++] != '\0');
-           eyesMatrix.setRotation(0);
-    } else {
-        //Otto.
-        delay(2000);
-        //Otto.
-    }
-    sendFinalAck();
-    BTserial.println("X:ACK");
-#endif
-}
-
-/**
- *Function to receive buzzer commands
- */
 void receiveBuzzer() {
 #ifdef BUZZER
     // sendAck & stop if necessary
@@ -605,18 +227,10 @@ void receiveTrims() {
 #endif
 }
 
-/**
- * Function to receive Servo commands
- */
 void receiveServo() {
 #ifdef SERVOS
     sendAck();
     moveID = 30;
-
-    // Definition of Servo Bluetooth command
-    // G  servoLegLeft servoLegRight servoFootLeft servoFootRight
-    // Example of receiveServo Bluetooth commands
-    // G 90 85 96 78
     bool error = false;
     char *arg;
     int servoLegLeft, servoLegRight, servoFootLeft, servoFootRight;
@@ -653,9 +267,6 @@ void receiveServo() {
 #endif
 }
 
-/**
- * Function to receive movement commands
- */
 void receiveMovement() {
 #ifdef SERVOS
     sendAck();
@@ -1294,32 +905,5 @@ bool checkIfConnected() {
         lastConnState = LOW;
     }
     return confirmedConnected;
-#endif
-}
-
-/**
- *
- */
-void hex2dec(char *hex, uint8_t *image_bmp) {
-#ifdef EYES_MATRIX
-    char sub[3];
-    uint8_t dec;
-    int i = 0;
-    int j = 0;
-    for (i = 0 ; i < 32; i = i + 4) {
-        sub[0] = hex[i];
-        sub[1] = hex[i + 1];
-        sub[2] = '\0';
-        dec = strtoul(sub, NULL, 16);
-        image_bmp[j++] = dec;
-        printf("Number: %s -  %d\n", sub, dec);
-    };
-    for (i = 2 ; i < 32; i = i + 4) {
-        sub[0] = hex[i];
-        sub[1] = hex[i + 1];
-        sub[2] = '\0';
-        dec = strtoul(sub, NULL, 16);
-        image_bmp[j++] = dec;
-    };
 #endif
 }

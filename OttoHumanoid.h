@@ -12,7 +12,7 @@
 #include <EEPROM.h>
 #include <US.h>
 
-#include "Otto_Matrix.h"
+#include "Otto_matrix.h"
 #include "Otto_mouths.h"
 #include "Otto_sounds.h"
 #include "Otto_gestures.h"
