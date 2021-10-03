@@ -82,19 +82,40 @@ void Otto::_moveServos(int time, int  servo_target[]) {
         setRestState(false);
   }
 
+  final_time =  millis() + time;
   if(time>10){
-    for (int i = 0; i < 4; i++) increment[i] = ((servo_target[i]) - servo[i].getPosition()) / (time / 10.0);
-    final_time =  millis() + time;
+    for (int i = 0; i < 4; i++) increment[i] = (servo_target[i] - servo[i].getPosition()) / (time / 10.0);
 
     for (int iteration = 1; millis() < final_time; iteration++) {
       partial_time = millis() + 10;
-      for (int i = 0; i < 4; i++) servo[i].SetPosition(servo[i].getPosition() + (iteration * increment[i]));
+      for (int i = 0; i < 4; i++) servo[i].SetPosition(servo[i].getPosition() + increment[i]);
       while (millis() < partial_time); //pause
     }
   }
   else{
     for (int i = 0; i < 4; i++) servo[i].SetPosition(servo_target[i]);
+    while (millis() < final_time); //pause
   }
+
+  // final adjustment to the target. if servo speed limiter is turned on, reaching to the goal may take longer than 
+  // requested time.
+  bool f = true;
+  while(f) {
+    f = false;
+    for (int i = 0; i < 4; i++) {
+      if (servo_target[i] != servo[i].getPosition()) {
+        f = true;
+        break;
+      }
+    }
+    if (f) {
+      for (int i = 0; i < 4; i++) {
+        servo[i].SetPosition(servo_target[i]);
+      }
+      partial_time = millis() + 10;
+      while (millis() < partial_time); //pause
+    }
+  };
 }
 
 void Otto::_moveSingle(int position, int servo_number) {
