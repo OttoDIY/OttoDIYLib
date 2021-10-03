@@ -1071,13 +1071,7 @@ void Otto::playGesture(int gesture){
   }
 } 
 
-void Otto::enableServoLimit() {
-  for (int i = 0; i < 4; i++) {
-    servo[i].SetLimiter(SERVO_LIMIT_DEFAULT);
-  }
-}
-
-void Otto::adjustServoLimit(int diff_limit) {
+void Otto::enableServoLimit(int diff_limit) {
   for (int i = 0; i < 4; i++) {
     servo[i].SetLimiter(diff_limit);
   }

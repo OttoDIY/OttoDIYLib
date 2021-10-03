@@ -85,8 +85,7 @@ class Otto
     void writeText (const char * s, byte scrollspeed);
 
     // -- Servo limiter
-    void enableServoLimit();
-    void adjustServoLimit(int limit);
+    void enableServoLimit(int diff_limit = SERVO_LIMIT_DEFAULT);
     void disableServoLimit();
 
   private:
