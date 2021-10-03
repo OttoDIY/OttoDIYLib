@@ -44,6 +44,7 @@ void Oscillator::attach(int pin, bool rev)
       _servo.attach(pin);
       _pos = 90; 
       _servo.write(90);
+      _previousServoCommandMillis = millis();
 
       //-- Initialization of oscilaltor parameters
       _samplingPeriod=30;
@@ -127,10 +128,18 @@ void Oscillator::refresh()
 
 void Oscillator::write(int position) 
 {
-  if (_diff_limit > 0 && abs(position - _pos) > _diff_limit) {
-    _pos += position < _pos ? -_diff_limit : _diff_limit;
-  } else {
-    _pos = position;
+  long currentMillis = millis();
+  if (_diff_limit > 0) {
+    int limit =  max(1,(((int)(currentMillis - _previousServoCommandMillis)) * _diff_limit) / 1000);
+    if (abs(position - _pos) > limit) {
+      _pos += position < _pos ? -limit : limit;
+    } else {
+      _pos = position;
+    }
   }
+  else {
+      _pos = position;
+  }    
+  _previousServoCommandMillis = currentMillis;
   _servo.write(_pos + _trim);
 }

@@ -77,6 +77,7 @@ class Oscillator
     //    because of the high current consumed by servo motors.
     //    set 0 for disabling the limiter
     int  _diff_limit;  
+    long _previousServoCommandMillis;
 };
 
 #endif

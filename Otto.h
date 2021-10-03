@@ -22,8 +22,8 @@
 #define MEDIUM      15
 #define BIG         30
 
-// -- Servo delta limit default
-#define SERVO_LIMIT_DEFAULT 6
+// -- Servo delta limit default. degree / sec
+#define SERVO_LIMIT_DEFAULT 240
 
 class Otto
 {
@@ -85,7 +85,7 @@ class Otto
     void writeText (const char * s, byte scrollspeed);
 
     // -- Servo limiter
-    void enableServoLimit(int diff_limit = SERVO_LIMIT_DEFAULT);
+    void enableServoLimit(int speed_limit_degree_per_sec = SERVO_LIMIT_DEFAULT);
     void disableServoLimit();
 
   private:
