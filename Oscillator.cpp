@@ -42,6 +42,7 @@ void Oscillator::attach(int pin, bool rev)
 
     //-- Attach the servo and move it to the home position
       _servo.attach(pin);
+      _pos = 90; 
       _servo.write(90);
 
       //-- Initialization of oscilaltor parameters
@@ -93,7 +94,7 @@ void Oscillator::SetT(unsigned int T)
 
 void Oscillator::SetPosition(int position)
 {
-  _servo.write(position+_trim);
+  write(position);
 };
 
 
@@ -111,9 +112,9 @@ void Oscillator::refresh()
       //-- If the oscillator is not stopped, calculate the servo position
       if (!_stop) {
         //-- Sample the sine function and set the servo pos
-         _pos = round(_amplitude * sin(_phase + _phase0) + _offset);
-	       if (_rev) _pos=-_pos;
-         _servo.write(_pos+90+_trim);
+         int pos = round(_amplitude * sin(_phase + _phase0) + _offset);
+	       if (_rev) pos=-pos;
+         write(pos+90);
       }
 
       //-- Increment the phase
@@ -122,4 +123,14 @@ void Oscillator::refresh()
       _phase = _phase + _inc;
 
   }
+}
+
+void Oscillator::write(int position) 
+{
+  if (_diff_limit > 0 && abs(position - _pos) > _diff_limit) {
+    _pos += position < _pos ? -_diff_limit : _diff_limit;
+  } else {
+    _pos = position;
+  }
+  _servo.write(_pos + _trim);
 }

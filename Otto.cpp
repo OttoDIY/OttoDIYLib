@@ -25,8 +25,6 @@ void Otto::init(int YL, int YR, int RL, int RR, bool load_calibration, int Buzze
     }
   }
 
-  for (int i = 0; i < 4; i++) servo_position[i] = 90;
-
   //Buzzer pin:
   pinBuzzer = Buzzer;
   pinMode(Buzzer,OUTPUT);
@@ -85,19 +83,18 @@ void Otto::_moveServos(int time, int  servo_target[]) {
   }
 
   if(time>10){
-    for (int i = 0; i < 4; i++) increment[i] = ((servo_target[i]) - servo_position[i]) / (time / 10.0);
+    for (int i = 0; i < 4; i++) increment[i] = ((servo_target[i]) - servo[i].getPosition()) / (time / 10.0);
     final_time =  millis() + time;
 
     for (int iteration = 1; millis() < final_time; iteration++) {
       partial_time = millis() + 10;
-      for (int i = 0; i < 4; i++) servo[i].SetPosition(servo_position[i] + (iteration * increment[i]));
+      for (int i = 0; i < 4; i++) servo[i].SetPosition(servo[i].getPosition() + (iteration * increment[i]));
       while (millis() < partial_time); //pause
     }
   }
   else{
     for (int i = 0; i < 4; i++) servo[i].SetPosition(servo_target[i]);
   }
-  for (int i = 0; i < 4; i++) servo_position[i] = servo_target[i];
 }
 
 void Otto::_moveSingle(int position, int servo_number) {
@@ -1073,3 +1070,21 @@ void Otto::playGesture(int gesture){
 
   }
 } 
+
+void Otto::enableServoLimit() {
+  for (int i = 0; i < 4; i++) {
+    servo[i].SetLimiter(SERVO_LIMIT_DEFAULT);
+  }
+}
+
+void Otto::adjustServoLimit(int diff_limit) {
+  for (int i = 0; i < 4; i++) {
+    servo[i].SetLimiter(diff_limit);
+  }
+}
+
+void Otto::disableServoLimit() {
+  for (int i = 0; i < 4; i++) {
+    servo[i].DisableLimiter();
+  }
+}

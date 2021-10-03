@@ -22,6 +22,9 @@
 #define MEDIUM      15
 #define BIG         30
 
+// -- Servo delta limit default
+#define SERVO_LIMIT_DEFAULT 6
+
 class Otto
 {
   public:
@@ -80,13 +83,18 @@ class Otto
     void matrixIntensity(int intensity);
     void setLed(byte X, byte Y, byte value);
     void writeText (const char * s, byte scrollspeed);
+
+    // -- Servo limiter
+    void enableServoLimit();
+    void adjustServoLimit(int limit);
+    void disableServoLimit();
+
   private:
 
     Oscillator servo[4];
     Otto_Matrix ledmatrix;
     int servo_pins[4];
     int servo_trim[4];
-    int servo_position[4];
 
     int pinBuzzer;
 
