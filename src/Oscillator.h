@@ -22,7 +22,7 @@
 class Oscillator
 {
   public:
-    Oscillator(int trim=0) {_trim=trim;};
+    Oscillator(int trim=0) {_trim=trim; _diff_limit = 0; };
     void attach(int pin, bool rev =false);
     void detach();
     
@@ -31,15 +31,19 @@ class Oscillator
     void SetPh(double Ph) {_phase0=Ph;};
     void SetT(unsigned int period);
     void SetTrim(int trim){_trim=trim;};
+    void SetLimiter(int diff_limit) { _diff_limit = diff_limit; };
+    void DisableLimiter() { _diff_limit = 0; };
     int getTrim() {return _trim;};
     void SetPosition(int position); 
     void Stop() {_stop=true;};
     void Play() {_stop=false;};
     void Reset() {_phase=0;};
     void refresh();
-    
+    int getPosition() { return _pos;}
+
   private:
     bool next_sample();  
+    void write(int position);
     
   private:
     //-- Servo that is attached to the oscillator
@@ -67,6 +71,13 @@ class Oscillator
 
     //-- Reverse mode
     bool _rev;
+
+    // -- Limit of the angle delta send to servos
+    //    This is for smooth movement and preventing Ardino to crash 
+    //    because of the high current consumed by servo motors.
+    //    set 0 for disabling the limiter
+    int  _diff_limit;  
+    long _previousServoCommandMillis;
 };
 
 #endif
