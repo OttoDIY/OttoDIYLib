@@ -1,15 +1,12 @@
 //----------------------------------------------------------------
 //-- Otto All moves test
-/******************************************************************************************************
-  Make sure to have installed all libraries: https://github.com/OttoDIY/OttoDIYLib
-  Otto DIY invests time and resources providing open source code and hardware, 
-  please support by purchasing kits from (https://www.ottodiy.com) 
-  BSD license, all text above must be included in any redistribution
- *******************************************************************/
+//-- Otto DIY invests time and resources providing open source code and hardware, 
+//-- please support by purchasing kits from https://www.ottodiy.com/
+//-- Make sure to have installed all libraries: https://github.com/OttoDIY/OttoDIYLib
 //-----------------------------------------------------------------
 #include <Otto.h>
 Otto Otto;  //This is Otto!
-//----------------------------------------------------------------------
+
 #define LeftLeg 2 
 #define RightLeg 3
 #define LeftFoot 4 
@@ -19,6 +16,7 @@ Otto Otto;  //This is Otto!
 #define CS A2  // Chip Select pin
 #define CLK A1 // Clock pin
 #define Orientation 1 // 8x8 LED Matrix orientation  Top  = 1, Bottom = 2, Left = 3, Right = 4 
+
 ///////////////////////////////////////////////////////////////////
 //-- Setup ------------------------------------------------------//
 ///////////////////////////////////////////////////////////////////
@@ -30,6 +28,7 @@ void setup(){
     delay(50);
   Otto.playGesture(OttoHappy);
 }
+
 ///////////////////////////////////////////////////////////////////
 //-- Principal Loop ---------------------------------------------//
 ///////////////////////////////////////////////////////////////////

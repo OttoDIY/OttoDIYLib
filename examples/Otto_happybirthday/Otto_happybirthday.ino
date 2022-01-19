@@ -1,22 +1,19 @@
 //----------------------------------------------------------------
 //-- Otto Happy Birthday
 //-- With this code Otto will walk 5 steps and then sing the happy birthday
-//-- https://www.ottodiy.com/
-/******************************************************************************************************
-  Make sure to have installed all libraries: https://wikifactory.com/+OttoDIY/otto-diy
-  Otto DIY invests time and resources providing open source code and hardware, 
-  please support by purchasing kits from (https://www.ottodiy.com)
-  
-  BSD license, all text above must be included in any redistribution
- *******************************************************************/
+//-- Otto DIY invests time and resources providing open source code and hardware, 
+//-- please support by purchasing kits from https://www.ottodiy.com/
+//-- Make sure to have installed all libraries: https://github.com/OttoDIY/OttoDIYLib
 //-----------------------------------------------------------------
 #include <Otto.h>
 Otto Otto;
+
 #define LeftLeg 2 
 #define RightLeg 3
 #define LeftFoot 4 
 #define RightFoot 5 
 #define Buzzer  13 
+
 int speakerPin = 13;
 int length = 28; // the number of notes
 char notes[] = "GGAGcB GGAGdc GGxecBA yyecdc";

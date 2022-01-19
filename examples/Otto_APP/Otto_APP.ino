@@ -1,9 +1,11 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //-- Otto DIY App Firmware Version 13 with standard baudrate of 9600 for Bluetooth BLE modules.
-//-- Otto DIY invests time and resources providing open source code and hardware,  please support by purchasing kits from (https://www.ottodiy.com)
+//-- Otto DIY invests time and resources providing open source code and hardware,  
+//-- please support by purchasing kits from (https://www.ottodiy.com)
+//-- Make sure to have installed all libraries: https://github.com/OttoDIY/OttoDIYLib
 //-----------------------------------------------------------------
 //-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
-//-- in accordance with the GPL Version 2 when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
+//-- in accordance with the GPL when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
 //---------------------
 #include <SerialCommand.h>
 SoftwareSerial BTserial = SoftwareSerial(11,12);
