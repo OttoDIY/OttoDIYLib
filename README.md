@@ -1,20 +1,22 @@
 # Otto DIY Robot Arduino Libraries
-======================
+
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![version](https://img.shields.io/badge/version-1.0-blue)
 
 This repository have all the main [Otto DIY robot](https://www.ottodiy.com/) libraries for Arduino compatible boards
-:star: Star us on GitHub â€” it helps!
+
+:star: Star us on GitHub, it helps!
 
 ## Installation:
 
 1. [Download the .zip Otto libraries here](https://github.com/OttoDIY/OttoDIYLib/archive/master.zip)
 2. Open Arduino IDE and navigate to Sketch > Include Library > Add .ZIP Library. At the top of the drop down list, select the option to ¨Add .ZIP Library¨.
-3. You will be prompted to select the library. Navigate to the .zip file's location, that you just downloaded and open it.
+3. Navigate to the .zip file's location, that you just downloaded and open it.
 4. In the main window you will see in the bottom back area a message that it has been installed. 
 5. To verify they are properly installed, go to Sketch > Include Library menu. You should now see the library at the bottom of the drop-down menu. 
+
 That means it is ready to use Otto example codes! you can find them in File > Examples > OttoDIYLib
-[for more details or other way to install libraries visit this link](https://www.arduino.cc/en/Guide/Libraries) 
+[for more details or other ways to install libraries visit this link](https://www.arduino.cc/en/Guide/Libraries) 
 
 ## Compatible Hardware
 
@@ -30,7 +32,7 @@ That means it is ready to use Otto example codes! you can find them in File > Ex
  
 ## Structure
 
-This works with any biped robot that uses 4 motors in the legs as Otto.
+Base set of libraries for any biped robot that uses 4 motors in the legs as Otto.
 
 * Otto.h and Otto.cpp contains all the main functions
 * Otto_gestures contains all the gestures functions
@@ -67,12 +69,13 @@ It is best to place the servo motors in their home position after initialization
 ```
 void setup() {
    Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer);
-    Otto.home(); // this function makes the servos move to the center position, Otto standing in the neutral position.
+    Otto.home(); 
 }
 ```
+The home  function makes the servos move to the center position, Otto standing in the neutral position.
 
 ## Predetermined Functions:
-Otto has a set of functions that make the programming a breeze, many preconfigured movements are available in the library: 
+Many preconfigured movements are available in the library: 
 
 ### Movements:
 These are actions that involve the use of the 4 servo motors with the oscillation library combined in synergy and with smooth movements. you can change the values inside the pratensis ()  to alter the speed, direction, and size of the movements.
@@ -83,10 +86,15 @@ Otto.walk(steps, T, dir);
 Otto.walk(2, 1000, 1); 
 ```
 In this example (2 is the number of steps, T is "TIME" in milliseconds  , dir is the direction in this case 1 for forward  or -1 backward)
+
 STEPS are just how many times you want to repeat that movement without the need of further coding or adding additional rows.
+
 TIME translated in milliseconds with “T” meaning “period of time”.For a higher T value is slower the movement, do values between 500 to 3000
+
 For example changing T value: Slow=2000 Normal=1000 Fast= 500
+
 The last number is for DIRECTION with 1 is forward or left, -1 is backward or right
+
 ```
 Otto.turn(steps, T, dir);
 ```
@@ -114,6 +122,7 @@ Otto.moonwalker(3, 1000, 25,1);
 ```
 Otto.moonwalker(steps, T, h, dir); 
 (# of steps, T, h, 1 to the left or -1 to the right)
+
  h, you can try change between 15 and 40
 
 ```
@@ -190,7 +199,6 @@ Otto.bendTones (100, 200, 1.04, 10, 10);
   ### Gestures:
 Finally, our favorite, This is a combination of the 2 previous functions we learnt sing + walk
 Their goal is to express emotions by combining sounds with movements at the same time and if you have the LED matrix you can show them in the robot mouth!
-As you see it’s very simple, but what it does is quite advanced.
 
   ```
   Otto.playGesture(gesture);
@@ -209,14 +217,14 @@ As you see it’s very simple, but what it does is quite advanced.
 - Otto.playGesture(OttoMagic);
 - Otto.playGesture(OttoFail);
 
- ## How to Contribute:
-Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
-1. Test and if find a problem then post an issue.
-2. Helps us solve the issues or other bugs.
-3. Improve and optimize the curren libraries.
-You can do this [basically by forking](https://help.github.com/en/articles/fork-a-repo), committing modifications and then [pulling requests](https://help.github.com/en/articles/about-pull-requests).Please add a change log and your contact into file header.
+As you see it’s very simple, but what it does is quite advanced.
 
-Thanks for your contribution in advance.
+## License
+
+The OttoDIYLib is licensed under the terms of the GPL Open Source
+license and is available for free.
+
+Welcome to the [Otto DIY community](http://builders.ottodiy.com/)
 
 Big thanks to all our contributors 
 - @JavierIH
@@ -247,9 +255,11 @@ Big thanks to all our contributors
 - @Nca78 
 - @dleval
 
-## License
+ ## How to Contribute:
+Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
+1. Test and if find a problem then post an issue.
+2. Helps us solve the issues or other bugs.
+3. Improve and optimize the current libraries.
+You can do this [basically by forking](https://help.github.com/en/articles/fork-a-repo), committing modifications and then [pulling requests](https://help.github.com/en/articles/about-pull-requests).Please add a change log and your contact into file header.
 
-The OttoDIYLib is licensed under the terms of the GPL Open Source
-license and is available for free.
-
-Welcome to the [Otto DIY community](http://builders.ottodiy.com/)
+Thanks for your contribution in advance.
