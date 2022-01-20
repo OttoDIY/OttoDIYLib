@@ -8,7 +8,7 @@
 //-- in accordance with the GPL when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
 //---------------------
 #include <SerialCommand.h>
-SoftwareSerial BTserial = SoftwareSerial(11,12);
+SoftwareSerial BTserial = SoftwareSerial(11,12); // RX pin to 12 and TX pin to 11 on the board
 SerialCommand SCmd(BTserial);
 #include <Otto.h>
 Otto Otto;
@@ -94,5 +94,6 @@ delay(5000);}
 }
 
 void loop() {
-  SCmd.readSerial();     if (Otto.getRestState()==false){ move(moveId); }
+  SCmd.readSerial();     
+  if (Otto.getRestState()==false){ move(moveId); }
 }

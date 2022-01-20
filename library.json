@@ -1,6 +1,6 @@
 {
   "name": "OttoDIYLib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official Arduino library for controlling original Otto DIY bipedal robots",
   "keywords": "otto, ottodiy, robot, servo",
   "repository": {
