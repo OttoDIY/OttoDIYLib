@@ -1,7 +1,7 @@
 # Otto DIY Robot Arduino Libraries
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-![version](https://img.shields.io/badge/version-1.0-blue)
+![version](https://img.shields.io/badge/version-13.0-blue)
 
 This repository have all the main [Otto DIY robot](https://www.ottodiy.com/) libraries for Arduino compatible boards
 
@@ -17,6 +17,8 @@ This repository have all the main [Otto DIY robot](https://www.ottodiy.com/) lib
 
 That means it is ready to use Otto example codes! you can find them in File > Examples > OttoDIYLib
 [for more details or other ways to install libraries visit this link](https://www.arduino.cc/en/Guide/Libraries) 
+
+You can also find this library in the Arduino Manager as Otto DIYLib for quick installation, (do not use other non compatible libraries.)
 
 ## Compatible Hardware
 
