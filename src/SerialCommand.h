@@ -17,6 +17,8 @@ Oct 2013 - SerialCommand object can be created using a SoftwareSerial object, fo
            a SoftwareSerial port in the project.  sigh.   See Example Sketch for usage. 
 Oct 2013 - Conditional compilation for the SoftwareSerial support, in case you really, really
            hate it and want it removed.  
+Jun 2022 - Using MAXDELIMETER as maximum length of serial command added when calling addCommand
+		   order to reduce the usage of dynamic memory/RAM footprint.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -62,7 +64,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string.h>
 
-
 #define SERIALCOMMANDBUFFER 35
 #define MAXSERIALCOMMANDS	16
 #define MAXDELIMETER 2
@@ -93,7 +94,7 @@ class SerialCommand
 		char *token;                        // Returned token from the command buffer as returned by strtok_r
 		char *last;                         // State variable used by strtok_r during processing
 		typedef struct _callback {
-			char command[SERIALCOMMANDBUFFER];
+			char command[MAXDELIMETER];
 			void (*function)();
 		} SerialCommandCallback;            // Data structure to hold Command/Handler function key-value pairs
 		int numCommand;
