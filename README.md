@@ -71,7 +71,7 @@ It is best to place the servo motors in their home position after initialization
 ```cpp
 void setup() {
    Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer);
-    Otto.home();
+   Otto.home();
 }
 ```
 The `home()` function makes the servos move to the center position, Otto standing in the neutral position.
