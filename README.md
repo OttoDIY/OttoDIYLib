@@ -10,15 +10,15 @@ This repository have all the main [Otto DIY robot](https://www.ottodiy.com/) lib
 ## Installation:
 
 1. [Download the .zip Otto libraries here](https://github.com/OttoDIY/OttoDIYLib/archive/master.zip)
-2. Open Arduino IDE and navigate to Sketch > Include Library > Add .ZIP Library. At the top of the drop down list, select the option to ¨Add .ZIP Library¨.
+2. Open Arduino IDE and navigate to Sketch > Include Library > Add .ZIP Library. At the top of the drop down list, select the option to "Add .ZIP Library".
 3. Navigate to the .zip file's location, that you just downloaded and open it.
-4. In the main window you will see in the bottom back area a message that it has been installed. 
-5. To verify they are properly installed, go to Sketch > Include Library menu. You should now see the library at the bottom of the drop-down menu. 
+4. In the main window you will see in the bottom back area a message that it has been installed.
+5. To verify they are properly installed, go to Sketch > Include Library menu. You should now see the library at the bottom of the drop-down menu.
 
 That means it is ready to use Otto example codes! you can find them in File > Examples > OttoDIYLib
-[for more details or other ways to install libraries visit this link](https://www.arduino.cc/en/Guide/Libraries) 
+[for more details or other ways to install libraries visit this link](https://www.arduino.cc/en/Guide/Libraries)
 
-You can also find this library in the Arduino Manager as Otto DIYLib for quick installation, (do not use other non compatible libraries.)
+You can also find this library in the Arduino Manager as `Otto DIYLib` for quick installation, (do not use other non compatible libraries).
 
 ## Compatible Hardware
 
@@ -31,22 +31,22 @@ You can also find this library in the Arduino Manager as Otto DIYLib for quick i
 - Arduino Nano Every
 - ESP8266
 - ESP32
- 
+
 ## Structure
 
 Base set of libraries for any biped robot that uses 4 motors in the legs as Otto.
 
-* Otto.h and Otto.cpp contains all the main functions
-* Otto_gestures contains all the gestures functions
-* Otto_mouths contains all the mouth functions
-* Otto_sounds contains all the sound functions
-* Otto_matrix contains all the matrix functions
-* Oscillator is the main algorithm for the servos ¨smooth¨ movement
-* SerialCommand is for Bluetooth communication vis Software serial
+* `Otto.h` and `Otto.cpp` contains all the main functions
+* `Otto_gestures.h` contains all the gestures functions
+* `Otto_mouths.h` contains all the mouth functions
+* `Otto_sounds.h` contains all the sound functions
+* `Otto_matrix.h` contains all the matrix functions
+* `Oscillator.h` is the main algorithm for the servos "smooth" movement
+* `SerialCommand.c` is for Bluetooth communication vis Software serial
 
 ### Adding library
 
-```
+```cpp
 #include <Otto.h>
 Otto Otto;
 ```
@@ -55,7 +55,7 @@ Otto Otto;
 
 These are the default signal connections for the servos and buzzer for AVR Arduino boards in the examples, you can alternatively connect them in different pins if you also change the pin number.
 
-```
+```cpp
 #define LeftLeg 2 // left leg pin
 #define RightLeg 3 // right leg pin
 #define LeftFoot 4 // left foot pin
@@ -68,109 +68,127 @@ These are the default signal connections for the servos and buzzer for AVR Ardui
 When starting the program, the 'init' function must be called with the use of servo motor calibration as a parameter. <br/>
 It is best to place the servo motors in their home position after initialization with 'home' function.
 
-```
+```cpp
 void setup() {
    Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer);
-    Otto.home(); 
+    Otto.home();
 }
 ```
-The home  function makes the servos move to the center position, Otto standing in the neutral position.
+The `home()` function makes the servos move to the center position, Otto standing in the neutral position.
 
 ## Predetermined Functions:
-Many preconfigured movements are available in the library: 
+Many preconfigured movements are available in the library:
 
 ### Movements:
-These are actions that involve the use of the 4 servo motors with the oscillation library combined in synergy and with smooth movements. you can change the values inside the pratensis ()  to alter the speed, direction, and size of the movements.
+These are actions that involve the use of the 4 servo motors with the oscillation library combined in synergy and with smooth movements. You can change the values inside the pratensis `()` to alter the speed, direction, and size of the movements.
 
 #### Walk function
-Otto.walk(steps, T, dir); 
-```
-Otto.walk(2, 1000, 1); 
-```
-In this example (2 is the number of steps, T is "TIME" in milliseconds  , dir is the direction in this case 1 for forward  or -1 backward)
 
-STEPS are just how many times you want to repeat that movement without the need of further coding or adding additional rows.
+```cpp
+Otto.walk(steps, time, dir);
+```
+- `steps` are just how many times you want to repeat that movement without the need of further coding or adding additional rows.
+- `time` (noted as `T` below) translated in milliseconds is the duration of the movement. For a higher time value is slower the movement, try values between 500 to 3000.
+- `dir` is the direction: `1` for forward or `-1` backward
 
-TIME translated in milliseconds with “T” meaning “period of time”.For a higher T value is slower the movement, do values between 500 to 3000
+Example:
+```cpp
+Otto.walk(2, 1000, 1);
+```
+In this example `2` is the number of steps, `1000` is "TIME" in milliseconds and it will walk forward.
 
 For example changing T value: Slow=2000 Normal=1000 Fast= 500
 
-The last number is for DIRECTION with 1 is forward or left, -1 is backward or right
-
-```
+```cpp
 Otto.turn(steps, T, dir);
 ```
 (# of steps, T, to the left or -1 to the right)
+
+```cpp
+Otto.bend (steps, T, dir);
 ```
-Otto.bend (steps, T, dir); 
-```
+
 (# of steps, T, 1 bends to the left or -1 to the right)
-```
+
+```cpp
 Otto.shakeLeg (steps, T, dir);
 ```
 (# of steps, T, 1 bends to the left or -1 to the right)
-```
-Otto.jump(steps, T); 
+
+```cpp
+Otto.jump(steps, T);
 ```
 (# of steps up, T) this one does not have a dir parameter
 Otto doesn't really jump ;P
 
 ### Dances:
-Similar to movements but more fun! you can adjust a new parameter h "height or size of the movements" to make the dance more interesting.
 
+Similar to movements but more fun! you can adjust a new parameter `h` "height or size of the movements" to make the dance more interesting.
 
+```cpp
+Otto.moonwalker(steps, T, h, dir);
 ```
-Otto.moonwalker(3, 1000, 25,1); 
-```
-Otto.moonwalker(steps, T, h, dir); 
 (# of steps, T, h, 1 to the left or -1 to the right)
 
- h, you can try change between 15 and 40
+`h`: you can try change between 15 and 40
 
+
+Example:
+```cpp
+Otto.moonwalker(3, 1000, 25,1);
 ```
+
+```cpp
 Otto.crusaito(steps, T, h, dir);
 ```
 (# of steps, T, h, 1 to the left or -1 to the right)
- h, you can try change between 20 to 50
-```
+
+`h`: you can try change between 20 to 50
+
+```cpp
 Otto.flapping(steps, T, h, dir);
 ```
 (# of steps, T, h, 1 to the front or -1 to the back)
-h, you can try change between 10 to 30
-```
+
+`h`: you can try change between 10 to 30
+
+```cpp
 Otto.swing(steps, T, h);
-``` 
-h, you can try change between 0 to 50
 ```
+`h`: you can try change between 0 to 50
+
+```cpp
 Otto.tiptoeSwing(steps, T, h);
 ```
-h, you can try change between 0 to 50
-```
+`h`: you can try change between 0 to 50
+
+```cpp
 Otto.jitter(steps, T, h);
 ```
-h, you can try change between 5 to 25
-```
+`h`: you can try change between 5 to 25
+
+```cpp
 Otto.updown(steps, T, h);  
 ```
-h, you can try change between 0 to 90
-```
+`h`: you can try change between 0 to 90
+
+```cpp
 Otto.ascendingTurn(steps, T, h);
 ```
-h, you can try change between 5 to 15
+`h`: you can try change between 5 to 15
 
 ### Sounds:
-
 
 ```
 Otto.sing(songName);
 ```
-By just changing what is inside the () we can change the sounds easily to 19 different ones. 
+By just changing what is inside the () we can change the sounds easily to 19 different ones.
 Simple as copying and pasting in a new row to make the sounds as many times as you like.
 
 - S_connection
 - S_disconnection
 - S_buttonPushed
-- S_mode1 
+- S_mode1
 - S_mode2
 - S_mode3
 - S_surprise
@@ -188,36 +206,38 @@ Simple as copying and pasting in a new row to make the sounds as many times as y
 - S_fart3
 
 Otto can emit several sounds with the 'sing' function:
- ```
+```cpp
 Otto._tone(10, 3, 1);
- ```
+```
+
 (noteFrequency, noteDuration, silentDuration)
- ```
+
+```cpp
 Otto.bendTones (100, 200, 1.04, 10, 10);
- ```
+```
 (initFrequency, finalFrequency, prop, noteDuration, silentDuration)
 
- 
-  ### Gestures:
+
+### Gestures:
 Finally, our favorite, This is a combination of the 2 previous functions we learnt sing + walk
 Their goal is to express emotions by combining sounds with movements at the same time and if you have the LED matrix you can show them in the robot mouth!
 
-  ```
-  Otto.playGesture(gesture);
-  ```
-- Otto.playGesture(OttoHappy);
-- Otto.playGesture(OttoSuperHappy);
-- Otto.playGesture(OttoSad);
-- Otto.playGesture(OttoVictory); 
-- Otto.playGesture(OttoAngry); 
-- Otto.playGesture(OttoSleeping);
-- Otto.playGesture(OttoFretful);
-- Otto.playGesture(OttoLove);
-- Otto.playGesture(OttoConfused);        
-- Otto.playGesture(OttoFart);
-- Otto.playGesture(OttoWave);
-- Otto.playGesture(OttoMagic);
-- Otto.playGesture(OttoFail);
+```cpp
+Otto.playGesture(gesture);
+```
+- `Otto.playGesture(OttoHappy);`
+- `Otto.playGesture(OttoSuperHappy);`
+- `Otto.playGesture(OttoSad);`
+- `Otto.playGesture(OttoVictory);`
+- `Otto.playGesture(OttoAngry);`
+- `Otto.playGesture(OttoSleeping);`
+- `Otto.playGesture(OttoFretful);`
+- `Otto.playGesture(OttoLove);`
+- `Otto.playGesture(OttoConfused);`
+- `Otto.playGesture(OttoFart);`
+- `Otto.playGesture(OttoWave);`
+- `Otto.playGesture(OttoMagic);`
+- `Otto.playGesture(OttoFail);`
 
 As you see it’s very simple, but what it does is quite advanced.
 
@@ -228,7 +248,7 @@ license and is available for free.
 
 Welcome to the [Otto DIY community](http://builders.ottodiy.com/)
 
-Big thanks to all our contributors 
+Big thanks to all our contributors
 - @JavierIH
 - @Obijuan
 - @jarsoftelectrical
@@ -254,14 +274,14 @@ Big thanks to all our contributors
 - @nisha-appanah
 - @pabloevaristo
 - @ProgrammerBruce
-- @Nca78 
+- @Nca78
 - @dleval
 
- ## How to Contribute:
+## How to Contribute:
 Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
 1. Test and if find a problem then post an issue.
 2. Helps us solve the issues or other bugs.
-3. Improve and optimize the current libraries.
+3. Improve and optimise the current libraries.
 You can do this [basically by forking](https://help.github.com/en/articles/fork-a-repo), committing modifications and then [pulling requests](https://help.github.com/en/articles/about-pull-requests).Please add a change log and your contact into file header.
 
 Thanks for your contribution in advance.
