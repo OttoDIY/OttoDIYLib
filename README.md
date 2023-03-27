@@ -248,7 +248,7 @@ license and is available for free.
 
 Welcome to the Otto DIY community
 
-https://discord.com/api/guilds/691410809586450483/widget.json
+<a href="https://discord.gg/CZZytnw"><img src="https://discord.com/api/guilds/691410809586450483/widget.json" width="25%"></a>
 
 Big thanks to all our contributors
 - @JavierIH
