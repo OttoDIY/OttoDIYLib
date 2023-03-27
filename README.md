@@ -246,7 +246,8 @@ As you see it’s very simple, but what it does is quite advanced.
 The OttoDIYLib is licensed under the terms of the GPL Open Source
 license and is available for free.
 
-Welcome to the [Otto DIY community](http://builders.ottodiy.com/)
+Welcome to the [Otto DIY community]
+<a href="https://discord.gg/CZZytnw"><img src="https://discordapp.com/api/guilds/473448917040758787/widget.png?style=banner2" width="25%"></a>
 
 Big thanks to all our contributors
 - @JavierIH
@@ -276,12 +277,13 @@ Big thanks to all our contributors
 - @ProgrammerBruce
 - @Nca78
 - @dleval
+- @coliss86
 
 ## How to Contribute:
 Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
 1. Test and if find a problem then post an issue.
 2. Helps us solve the issues or other bugs.
-3. Improve and optimise the current libraries.
+3. Improve the code.
 You can do this [basically by forking](https://help.github.com/en/articles/fork-a-repo), committing modifications and then [pulling requests](https://help.github.com/en/articles/about-pull-requests).Please add a change log and your contact into file header.
 
 Thanks for your contribution in advance.
