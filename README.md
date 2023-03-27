@@ -246,8 +246,9 @@ As you see it’s very simple, but what it does is quite advanced.
 The OttoDIYLib is licensed under the terms of the GPL Open Source
 license and is available for free.
 
-Welcome to the [Otto DIY community]
-<a href="https://discord.gg/CZZytnw"><img src="https://discordapp.com/api/guilds/473448917040758787/widget.png?style=banner2" width="25%"></a>
+Welcome to the Otto DIY community
+
+<iframe src="https://discord.com/widget?id=691410809586450483&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
 Big thanks to all our contributors
 - @JavierIH
