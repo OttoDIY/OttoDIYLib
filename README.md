@@ -248,7 +248,7 @@ license and is available for free.
 
 Welcome to the Otto DIY community
 
-<a href="https://discord.gg/CZZytnw"><img src="https://discord.com/api/guilds/691410809586450483/widget.json" width="25%"></a>
+<a href="https://discord.gg/CZZytnw"><img src="https://images.squarespace-cdn.com/content/v1/5cd3e3917046805e4d6700e3/1560193788834-KYURUXVSZAIE4XX1ZB2F/ke17ZwdGBToddI8pDm48kK6MRMHcYvpidTm-7i2qDf_lfiSMXz2YNBs8ylwAJx2qLijIv1YpVq4N1RMuCCrb3iJz4vYg48fcPCuGX417dnbl3kVMtgxDPVlhqW83Mmu6GipAUbdvsXjVksOX7D692AoyyEsAbPHhHcQMU6bWQFI/join_discord_button_small.png" width="25%"></a>
 
 Big thanks to all our contributors
 - @JavierIH
