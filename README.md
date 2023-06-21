@@ -279,6 +279,7 @@ Big thanks to all our contributors
 - @Nca78
 - @dleval
 - @coliss86
+- @namepatrik
 
 ## How to Contribute:
 Contributing to this software is warmly welcomed. There are 3 ways you can contribute to this project:
