@@ -12,9 +12,15 @@ Otto Otto;  //This is Otto!
 #define LeftFoot 4 
 #define RightFoot 5 
 #define Buzzer  13 
-#define DIN A3 // Data In pin
-#define CS A2  // Chip Select pin
-#define CLK A1 // Clock pin
+#if defined(ARDUINO_ARCH_ESP32)
+  #define DIN 8  // Data In pin
+  #define CS  9  // Chip Select pin
+  #define CLK 10 // Clock pin
+#else
+  #define DIN A3 // Data In pin
+  #define CS  A2  // Chip Select pin
+  #define CLK A1 // Clock pin
+#endif
 #define Orientation 1 // 8x8 LED Matrix orientation  Top  = 1, Bottom = 2, Left = 3, Right = 4 
 
 ///////////////////////////////////////////////////////////////////
