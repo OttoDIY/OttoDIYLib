@@ -5,12 +5,12 @@
   "keywords": "otto, ottodiy, robot, servo",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OttoDIY/OttoDIYLib"
+    "url": "https://github.com/OttoDIY-org/OttoDIYLib"
   },
   "authors": [
     {
       "name": "Otto DIY community",
-      "url": "https://github.com/OttoDIY",
+      "url": "https://github.com/OttoDIY-org",
       "maintainer": true
     }
   ],
