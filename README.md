@@ -3,13 +3,13 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![version](https://img.shields.io/badge/version-13.0-blue)
 
-This repository have all the main [Otto DIY robot](https://www.ottodiy.org/) libraries for Arduino compatible boards
+This repository have all the main [Otto DIY robot](https://www.ottodiy.com/) libraries for Arduino compatible boards
 
 :star: Star us on GitHub, it helps!
 
 ## Installation:
 
-1. Download the .zip Otto libraries 
+1.[Download the .zip Otto libraries here](https://github.com/OttoDIY/OttoDIYLib/archive/master.zip)
 2. Open Arduino IDE and navigate to Sketch > Include Library > Add .ZIP Library. At the top of the drop down list, select the option to "Add .ZIP Library".
 3. Navigate to the .zip file's location, that you just downloaded and open it.
 4. In the main window you will see in the bottom back area a message that it has been installed.
