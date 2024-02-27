@@ -21,7 +21,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************************/
 
-#if defined(ARDUINO) && ARDUINO >= 100
+#ifdef ARDUINO && ARDUINO >= 100
 #include "Arduino.h"
 #else
 #include "WProgram.h"
@@ -29,6 +29,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "SerialCommand.h"
 #include <string.h>
+
+#ifndef SERIALCOMMAND_HARDWAREONLY
+#ifndef ARDUINO_ARCH_ESP32
+#include <SoftwareSerial.h>
+#endif
+#endif
 
 // Constructor makes sure some things are set. 
 SerialCommand::SerialCommand()
