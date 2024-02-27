@@ -7,23 +7,45 @@
 //-- If you wish to use this software under Open Source Licensing, you must contribute all your source code to the community and all text above must be included in any redistribution
 //-- in accordance with the GPL when your application is distributed. See http://www.gnu.org/copyleft/gpl.html
 //---------------------
-#include <SerialCommand.h>
-SoftwareSerial BTserial = SoftwareSerial(11,12); // RX pin to 12 and TX pin to 11 on the board
-SerialCommand SCmd(BTserial);
+#define Buzzerr 10
+#define LeftLeg   2 
+#define RightLeg  3
+#define LeftFoot  4 
+#define RightFoot 5 
+
+#include "SerialCommand.h"
+
+#if defined(ARDUINO_ARCH_ESP32)
+#define PIN_Button   6
+#define DINN 7 // Data In pin
+#define CSS 8  // Chip Select pin
+#define CLKK 9 // Clock pin
+#else
+#define PIN_Button   A0
+#define DINN A3 // Data In pin
+#define CSS A2  // Chip Select pin
+#define CLKK A1 // Clock pin
+#endif
+
+#define Orientation 1 // 8x8 LED Matrix orientation  Top  = 1, Bottom = 2, Left = 3, Right = 4 
+#define PIN_ASSEMBLY    10
+#define BLE_TX 11
+#define BLE_RX 12
+
+#if defined(ARDUINO_ARCH_ESP32)
+  #include "BluetoothSerial.h"
+  String device_name = "Otto BT Esp32";
+  BluetoothSerial bluetooth;
+#else
+  #include "SoftwareSerial.h"
+  String device_name = "Otto BT";
+  SoftwareSerial bluetooth(BLE_TX, BLE_RX);
+#endif
+
+SerialCommand SCmd(bluetooth);
+
 #include <Otto.h>
 Otto Otto;
-
-#define LeftLeg 2 
-#define RightLeg 3
-#define LeftFoot 4 
-#define RightFoot 5 
-#define Buzzer  13 
-#define DIN A3 // Data In pin
-#define CS A2  // Chip Select pin
-#define CLK A1 // Clock pin
-#define Orientation 1 // 8x8 LED Matrix orientation  Top  = 1, Bottom = 2, Left = 3, Right = 4 
-#define PIN_Button   A0
-#define PIN_ASSEMBLY    10
 
 int T = 1000;
 int moveId = 0;
@@ -57,9 +79,17 @@ void ButtonPushed()
 
 void setup() {
   Serial.begin(9600);
-  BTserial.begin(9600);
-  Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
-  Otto.initMATRIX( DIN, CS, CLK, Orientation);
+  
+#if defined(ARDUINO_ARCH_ESP32)
+  bluetooth.begin(device_name);
+  //bluetooth.deleteAllBondedDevices(); // Uncomment this to delete paired devices; Must be called after begin
+#else
+  bluetooth.begin(9600);
+  bluetooth.print("AT+NAME" + device_name);
+#endif
+  
+  Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzerr); //Set the servo pins and Buzzer pin
+  Otto.initMATRIX( DINN, CSS, CLKK, Orientation);
   Otto.matrixIntensity(7);
   pinMode(PIN_ASSEMBLY, INPUT_PULLUP);
   pinMode(PIN_Button, INPUT);
