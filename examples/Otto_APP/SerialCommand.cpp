@@ -124,7 +124,7 @@ void SerialCommand::readSerial()
 				Serial.println("]");
 				#endif
 				// Compare the found command against the list of known commands for a match
-				if (strncmp(token,CommandList[i].command,SERIALCOMMANDBUFFER) == 0) 
+				if (strncmp(token,CommandList[i].command,MAXDELIMETER) == 0) 
 				{
 					#ifdef SERIALCOMMANDDEBUG
 					Serial.print("Matched Command: "); 
@@ -165,7 +165,7 @@ void SerialCommand::addCommand(const char *command, void (*function)())
 		Serial.println(command); 
 		#endif
 		
-		strncpy(CommandList[numCommand].command,command,SERIALCOMMANDBUFFER); 
+		strncpy(CommandList[numCommand].command,command,MAXDELIMETER); 
 		CommandList[numCommand].function = function; 
 		numCommand++; 
 	} else {
