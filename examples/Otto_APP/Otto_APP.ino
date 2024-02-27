@@ -13,7 +13,7 @@
 #define LeftFoot  4 
 #define RightFoot 5 
 
-#include "SerialCommand.h"
+#include <SerialCommand.h>
 
 #if defined(ARDUINO_ARCH_ESP32)
 #define PIN_Button   6
