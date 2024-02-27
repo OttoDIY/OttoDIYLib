@@ -22,7 +22,7 @@ int YL;
 int YR;
 int RL;
 int RR;
-double charRead;
+
 void setup(){
       Otto.init(LeftLeg, RightLeg, LeftFoot, RightFoot, true, Buzzer); //Set the servo pins and Buzzer pin
     Serial.begin(9600);
@@ -46,6 +46,7 @@ void setup(){
 }
 
 void loop(){
+    int charRead = 0;
 
     if((Serial.available()) > (0)){
         charRead = Serial.read();
