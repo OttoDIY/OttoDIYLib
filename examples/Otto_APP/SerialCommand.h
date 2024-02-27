@@ -58,10 +58,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #warning "Warning: Building SerialCommand without SoftwareSerial Support"
 #endif
 
-#ifndef SERIALCOMMAND_HARDWAREONLY 
-#include <SoftwareSerial.h>  
-#endif
-
 #include <string.h>
 
 #define SERIALCOMMANDBUFFER 35
