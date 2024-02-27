@@ -28,12 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "SerialCommand.h"
-
-
 #include <string.h>
-#ifndef SERIALCOMMAND_HARDWAREONLY
-#include <SoftwareSerial.h>
-#endif
 
 // Constructor makes sure some things are set. 
 SerialCommand::SerialCommand()
@@ -57,7 +52,6 @@ SerialCommand::SerialCommand(Stream &_ser)
 	clearBuffer(); 
 }
 #endif
-
 
 //
 // Initialize the command buffer being processed to all null characters
